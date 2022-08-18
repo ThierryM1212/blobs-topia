@@ -1,0 +1,22 @@
+{
+  "name": "blobs-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "blobs-bot.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@coinbarn/ergo-ts": "^0.3.0",
+    "dayjs": "^1.11.4",
+    "ergo-lib-wasm-nodejs": "^0.17.0",
+    "fs": "^0.0.1-security",
+    "json-bigint": "^1.0.0",
+    "node-fetch": "^3.2.6",
+    "node-fetch-web-streams": "^1.0.1",
+    "undici": "^5.6.1"
+  }
+}

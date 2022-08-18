@@ -1,0 +1,3 @@
+{
+    proveDlog(GameFundPK) || proveDlog(testPK)
+}

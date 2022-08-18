@@ -1,0 +1,432 @@
+import JSONBigInt from 'json-bigint';
+import { errorAlert, promptErgAmount, waitingAlert } from "../utils/Alerts";
+import { BLOB_ERG_MIN_VALUE, BLOB_EXCHANGE_FEE, BLOB_PRICE, BLOB_REQUEST_SCRIPT_ADDRESS, BLOB_SCRIPT_ADDRESS, CONFIG_TOKEN_ID, GAME_ADDRESS, GAME_TOKEN_ID, MIN_NANOERG_BOX_VALUE, NANOERG_TO_ERG, OATMEAL_TOKEN_ID, TX_FEE } from "../utils/constants";
+import { boxByTokenId, currentHeight } from "./explorer";
+import { encodeLong, encodeLongArray } from './serializer';
+import { addSimpleOutputBox, createTransaction, getUtxosListValue, parseUtxo, setBoxRegisterByteArray, verifyTransactionIO } from "./wasm";
+import { getTokenUtxos, getUtxos, isValidWalletAddress, walletSignTx } from "./wallet.js";
+let ergolib = import('ergo-lib-wasm-browser');
+
+
+export async function refundBlobRequest(blobRequestBoxJSON) {
+    const creationHeight = await currentHeight();
+    const address = localStorage.getItem('address');
+    var alert = waitingAlert("Preparing the transaction...");
+    const blobRequestIniValueNano = blobRequestBoxJSON.value;
+    const yoroiOK = await isValidWalletAddress(address);
+    if (yoroiOK) {
+        const utxos = [blobRequestBoxJSON];
+        const inputsWASM = (await ergolib).ErgoBoxes.from_boxes_json(utxos);
+        const dataListWASM = new (await ergolib).ErgoBoxAssetsDataList();
+        const boxSelection = new (await ergolib).BoxSelection(inputsWASM, dataListWASM);
+        const outputCandidates = (await ergolib).ErgoBoxCandidates.empty();
+        addSimpleOutputBox(outputCandidates, (blobRequestIniValueNano - TX_FEE) / NANOERG_TO_ERG, address, creationHeight);
+        const currentConfigBox = await boxByTokenId(CONFIG_TOKEN_ID);
+        var correctTx = await createTransaction(boxSelection, outputCandidates, currentConfigBox, address, utxos);
+        console.log("correctTx", correctTx)
+        if (verifyTransactionIO(correctTx)) {
+            await walletSignTx(alert, correctTx, address);
+        }
+    } else {
+        alert = errorAlert("No wallet found")
+    }
+}
+
+export async function addWidthDrawBlob(mode, blobBoxJSON) {
+    console.log("addWidthDraw mode", mode);
+    const creationHeight = await currentHeight();
+    const amountFloat = await promptErgAmount(mode);
+    const amountNano = Math.round(amountFloat * NANOERG_TO_ERG);
+    console.log("addWidthDraw amountFloat", amountFloat);
+    const address = localStorage.getItem('address');
+    var alert = waitingAlert("Preparing the transaction...");
+    var dAppFeeNano = Math.max(Math.round(amountNano * BLOB_EXCHANGE_FEE / 1000), MIN_NANOERG_BOX_VALUE);
+    const blobIniValueNano = parseInt(blobBoxJSON.value);
+    var blobOutValueNano = blobIniValueNano;
+    if (mode === "add") {
+        blobOutValueNano = blobIniValueNano + amountNano;
+    } else {
+        blobOutValueNano = blobIniValueNano - amountNano;
+    }
+    if (blobOutValueNano < (2 * MIN_NANOERG_BOX_VALUE + TX_FEE)) {
+        alert = errorAlert("Not enough ERG in the Blob after operation, min value " + (2 * MIN_NANOERG_BOX_VALUE + TX_FEE) + " nanoERG");
+        return;
+    }
+    console.log("addWidthDraw blobOutValueNano", blobOutValueNano);
+
+    const yoroiOK = await isValidWalletAddress(address);
+    if (yoroiOK) {
+        var utxos = [];
+        if (mode === "add") {
+            console.log("addWidthDraw amount", amountNano + dAppFeeNano + MIN_NANOERG_BOX_VALUE);
+            utxos = await getUtxos(amountNano + dAppFeeNano + MIN_NANOERG_BOX_VALUE);
+        } else {
+            utxos = await getUtxos(MIN_NANOERG_BOX_VALUE + TX_FEE + dAppFeeNano);
+        }
+
+        utxos.unshift(blobBoxJSON);
+        console.log("utxos value: " + getUtxosListValue(utxos))
+        const gameTokenId = (await ergolib).TokenId.from_str(GAME_TOKEN_ID);
+        const blobTokenAmount = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str("2"));
+        const inputsWASM = (await ergolib).ErgoBoxes.from_boxes_json(utxos);
+        const dataListWASM = new (await ergolib).ErgoBoxAssetsDataList();
+        const boxSelection = new (await ergolib).BoxSelection(inputsWASM, dataListWASM);
+
+        const outputCandidates = (await ergolib).ErgoBoxCandidates.empty();
+
+        // Blob Box
+        const blobBoxOutWASM = (await ergolib).ErgoBox.from_json(JSONBigInt.stringify(blobBoxJSON));
+        const blobboxOutValue = (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str(blobOutValueNano.toString()));
+        const blobBoxBuilder = new (await ergolib).ErgoBoxCandidateBuilder(
+            blobboxOutValue,
+            (await ergolib).Contract.pay_to_address((await ergolib).Address.from_base58(BLOB_SCRIPT_ADDRESS)),
+            creationHeight);
+        blobBoxBuilder.set_register_value(4, blobBoxOutWASM.register_value(4));
+        blobBoxBuilder.set_register_value(5, blobBoxOutWASM.register_value(5));
+        blobBoxBuilder.set_register_value(6, blobBoxOutWASM.register_value(6));
+        blobBoxBuilder.set_register_value(7, blobBoxOutWASM.register_value(7));
+        blobBoxBuilder.set_register_value(8, blobBoxOutWASM.register_value(8));
+        blobBoxBuilder.set_register_value(9, blobBoxOutWASM.register_value(9));
+        blobBoxBuilder.add_token(gameTokenId, blobTokenAmount);
+        try {
+            outputCandidates.add(blobBoxBuilder.build());
+        } catch (e) {
+            console.log(`building error: ${e}`);
+            throw e;
+        }
+
+        // dApp fee box
+        addSimpleOutputBox(outputCandidates, dAppFeeNano / NANOERG_TO_ERG, GAME_ADDRESS, creationHeight);
+
+        if (mode === "widthdraw") {
+            addSimpleOutputBox(outputCandidates, amountNano / NANOERG_TO_ERG, address, creationHeight);
+        }
+
+        const currentConfigBox = await boxByTokenId(CONFIG_TOKEN_ID);
+        var correctTx = await createTransaction(boxSelection, outputCandidates, currentConfigBox, address, utxos);
+
+        console.log("correctTx", correctTx)
+        if (verifyTransactionIO(correctTx)) {
+            await walletSignTx(alert, correctTx, address);
+        }
+    }
+    //alert.close()
+
+}
+
+export async function killBlob(blobBoxJSON) {
+    console.log("boxId", blobBoxJSON.boxId);
+    const address = localStorage.getItem('address');
+
+    const alert = waitingAlert("Preparing the transaction...");
+    if (await isValidWalletAddress(address)) {
+        //var utxos = await getAllUtxos();
+        //const blobBox = await boxByBoxId(this.state.boxId);
+        //const blobBoxFixed = parseUtxo(blobBoxJSON);
+        //console.log("blobBoxFixed", blobBoxFixed);
+        const utxos = [blobBoxJSON];
+        const creationHeight = await currentHeight();
+        const gameTokenId = (await ergolib).TokenId.from_str(GAME_TOKEN_ID);
+        const blobTokenAmount = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str("2"));
+        const inputsWASM = (await ergolib).ErgoBoxes.from_boxes_json(utxos);
+        const dataListWASM = new (await ergolib).ErgoBoxAssetsDataList();
+        const boxSelection = new (await ergolib).BoxSelection(inputsWASM, dataListWASM);
+        const outputCandidates = (await ergolib).ErgoBoxCandidates.empty();
+
+        // dApp return box
+        var dappReturnValue = Math.round(blobBoxJSON.value * BLOB_EXCHANGE_FEE / 1000);
+        if (dappReturnValue < MIN_NANOERG_BOX_VALUE) {
+            dappReturnValue = MIN_NANOERG_BOX_VALUE;
+        }
+        //console.log("dappReturnValue", dappReturnValue);
+        const dappReturnValueBox = (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str(dappReturnValue.toString()));;
+        const returnBoxBuilder = new (await ergolib).ErgoBoxCandidateBuilder(
+            dappReturnValueBox,
+            (await ergolib).Contract.pay_to_address((await ergolib).Address.from_base58(GAME_ADDRESS)),
+            creationHeight);
+        returnBoxBuilder.add_token(gameTokenId, blobTokenAmount);
+        await setBoxRegisterByteArray(returnBoxBuilder, 4, blobBoxJSON.boxId);
+        try {
+            outputCandidates.add(returnBoxBuilder.build());
+        } catch (e) {
+            console.log(`building error: ${e}`);
+            throw e;
+        }
+
+        // user return box
+        const userReturnValue = blobBoxJSON.value - dappReturnValue - TX_FEE;
+        addSimpleOutputBox(outputCandidates, parseFloat(userReturnValue / NANOERG_TO_ERG), address, creationHeight);
+        const currentConfigBoxes = await boxByTokenId(CONFIG_TOKEN_ID);
+        var correctTx = await createTransaction(boxSelection, outputCandidates, currentConfigBoxes, GAME_ADDRESS, utxos);
+        console.log("correctTx fixed", correctTx)
+        if (verifyTransactionIO(correctTx)) {
+            await walletSignTx(alert, correctTx, address);
+        }
+    } else {
+        errorAlert("Incorrect address", "The address provided does not match the address connected to Yoroi wallet")
+    }
+    return null;
+}
+
+export async function buyBlob(blobBoxJSON) {
+    console.log("buyBlob");
+    const creationHeight = await currentHeight();
+    const amountNano = parseInt(blobBoxJSON.additionalRegisters.R8.renderedValue);
+    const dAppFeeNano = Math.max(Math.round(amountNano * BLOB_EXCHANGE_FEE / 1000), MIN_NANOERG_BOX_VALUE);
+
+    const address = localStorage.getItem('address');
+    var alert = waitingAlert("Preparing the transaction...");
+    const blobIniValueNano = blobBoxJSON.value;
+
+    const yoroiOK = await isValidWalletAddress(address);
+    if (yoroiOK) {
+        var utxos = await getUtxos(amountNano + TX_FEE + dAppFeeNano);
+        utxos.unshift(parseUtxo(blobBoxJSON));
+        const gameTokenId = (await ergolib).TokenId.from_str(GAME_TOKEN_ID);
+        const blobTokenAmount = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str("2"));
+        const inputsWASM = (await ergolib).ErgoBoxes.from_boxes_json(utxos);
+        const dataListWASM = new (await ergolib).ErgoBoxAssetsDataList();
+        const boxSelection = new (await ergolib).BoxSelection(inputsWASM, dataListWASM);
+        const outputCandidates = (await ergolib).ErgoBoxCandidates.empty();
+
+        // BLOB BOX
+        const blobBoxInWASM = (await ergolib).ErgoBox.from_json(JSONBigInt.stringify(blobBoxJSON));
+        const blobboxOutValue = (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str(blobIniValueNano.toString()));
+        const blobBoxBuilder = new (await ergolib).ErgoBoxCandidateBuilder(
+            blobboxOutValue,
+            (await ergolib).Contract.pay_to_address((await ergolib).Address.from_base58(BLOB_SCRIPT_ADDRESS)),
+            creationHeight);
+        blobBoxBuilder.set_register_value(4, blobBoxInWASM.register_value(4));
+        blobBoxBuilder.set_register_value(5, blobBoxInWASM.register_value(5));
+        const newOwnerSigmaProp = (await ergolib).Constant.from_ecpoint_bytes(
+            (await ergolib).Address.from_base58(address).to_bytes(0x00).subarray(1, 34)
+        );
+        console.log((await ergolib).Address.from_base58(address).to_bytes(0x00));
+        blobBoxBuilder.set_register_value(6, newOwnerSigmaProp);
+        blobBoxBuilder.set_register_value(7, (await encodeLong("0")));
+        blobBoxBuilder.set_register_value(8, (await encodeLong("0")));
+        blobBoxBuilder.set_register_value(9, blobBoxInWASM.register_value(9));
+        blobBoxBuilder.add_token(gameTokenId, blobTokenAmount);
+        try {
+            outputCandidates.add(blobBoxBuilder.build());
+        } catch (e) {
+            console.log(`building error: ${e}`);
+            throw e;
+        }
+
+        // dApp fee box
+        addSimpleOutputBox(outputCandidates, dAppFeeNano / NANOERG_TO_ERG, GAME_ADDRESS, creationHeight);
+
+        // payment to old owner box
+        const preOwnerScript = blobBoxInWASM.register_value(6).encode_to_base16();
+        const preOwnerAddress = (await ergolib).Address.recreate_from_ergo_tree((await ergolib).ErgoTree.from_base16_bytes("00" + preOwnerScript)).to_base58();
+        addSimpleOutputBox(outputCandidates, parseFloat(amountNano / NANOERG_TO_ERG), preOwnerAddress, creationHeight);
+
+        const currentConfigBox = await boxByTokenId(CONFIG_TOKEN_ID);
+        var correctTx = await createTransaction(boxSelection, outputCandidates, currentConfigBox, address, utxos);
+
+        console.log("correctTx", correctTx)
+        if (verifyTransactionIO(correctTx)) {
+            await walletSignTx(alert, correctTx, address);
+        }
+    }
+    //alert.close()
+}
+
+export async function setBlobStatus(mode, blobBoxJSON) {
+    console.log("setBlobStatus mode", mode);
+    const creationHeight = await currentHeight();
+    var amountNano = 0;
+    if (mode !== 'reset') {
+        const amountFloat = await promptErgAmount(mode);
+        amountNano = Math.round(amountFloat * NANOERG_TO_ERG);
+    }
+    const blobIniValueNano = blobBoxJSON.value;
+    const address = localStorage.getItem('address');
+    var alert = waitingAlert("Preparing the transaction...");
+
+    const yoroiOK = await isValidWalletAddress(address);
+    if (yoroiOK) {
+        var utxos = await getUtxos(MIN_NANOERG_BOX_VALUE + TX_FEE);
+        utxos.unshift(parseUtxo(blobBoxJSON));
+        const gameTokenId = (await ergolib).TokenId.from_str(GAME_TOKEN_ID);
+        const blobTokenAmount = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str("2"));
+        const inputsWASM = (await ergolib).ErgoBoxes.from_boxes_json(utxos);
+        const dataListWASM = new (await ergolib).ErgoBoxAssetsDataList();
+        const boxSelection = new (await ergolib).BoxSelection(inputsWASM, dataListWASM);
+        const outputCandidates = (await ergolib).ErgoBoxCandidates.empty();
+
+        // Blob Box
+        var blobStatus = '0', blobStatusValue = '0';
+        if (mode === 'fight') {
+            blobStatus = '1';
+            blobStatusValue = amountNano.toString();
+            const maxFightValueNano = parseInt(blobIniValueNano) - BLOB_ERG_MIN_VALUE;
+            console.log("maxFightValueNano", maxFightValueNano, amountNano);
+            if (amountNano > maxFightValueNano) {
+                errorAlert("Not enough ERG in the blob to figth, maximum figth value: " + (maxFightValueNano / NANOERG_TO_ERG).toFixed(4) + " ERG");
+                return;
+            }
+        } else if (mode === 'sell') {
+            blobStatus = '2';
+            blobStatusValue = amountNano.toString();
+        } else if (mode === 'reset') {
+            blobStatus = '0';
+            blobStatusValue = '0';
+        }
+        const blobBoxInWASM = (await ergolib).ErgoBox.from_json(JSONBigInt.stringify(blobBoxJSON));
+        const blobboxOutValue = (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str(blobIniValueNano.toString()));
+        const blobBoxBuilder = new (await ergolib).ErgoBoxCandidateBuilder(
+            blobboxOutValue,
+            (await ergolib).Contract.pay_to_address((await ergolib).Address.from_base58(BLOB_SCRIPT_ADDRESS)),
+            creationHeight);
+        blobBoxBuilder.set_register_value(4, blobBoxInWASM.register_value(4));
+        blobBoxBuilder.set_register_value(5, blobBoxInWASM.register_value(5));
+        blobBoxBuilder.set_register_value(6, blobBoxInWASM.register_value(6));
+        blobBoxBuilder.set_register_value(7, (await encodeLong(blobStatus)));
+        blobBoxBuilder.set_register_value(8, (await encodeLong(blobStatusValue)));
+        blobBoxBuilder.set_register_value(9, blobBoxInWASM.register_value(9));
+        blobBoxBuilder.add_token(gameTokenId, blobTokenAmount);
+        try {
+            outputCandidates.add(blobBoxBuilder.build());
+        } catch (e) {
+            console.log(`building error: ${e}`);
+            throw e;
+        }
+
+        const currentConfigBox = await boxByTokenId(CONFIG_TOKEN_ID);
+        var correctTx = await createTransaction(boxSelection, outputCandidates, currentConfigBox, address, utxos);
+
+        console.log("correctTx", correctTx)
+        if (verifyTransactionIO(correctTx)) {
+            await walletSignTx(alert, correctTx, address);
+        }
+    }
+}
+
+export async function createBlobRequest(name, color1, color2, eyes_pos, mouth_type, svgPath) {
+    console.log("createBlobRequest")
+    const address = localStorage.getItem('address');
+    const alert = waitingAlert("Preparing the transaction...");
+    const yoroiOK = await isValidWalletAddress(address);
+    if (yoroiOK) {
+        var utxos = await getUtxos(BLOB_PRICE + TX_FEE);
+        const inputsWASM = (await ergolib).ErgoBoxes.from_boxes_json(utxos);
+        const dataListWASM = new (await ergolib).ErgoBoxAssetsDataList();
+        const boxSelection = new (await ergolib).BoxSelection(inputsWASM, dataListWASM);
+        const creationHeight = await currentHeight();
+        const outputCandidates = (await ergolib).ErgoBoxCandidates.empty();
+
+        // Blob Box
+        const blobBoxValue = (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str((BLOB_PRICE).toString()));
+        const blobBoxBuilder = new (await ergolib).ErgoBoxCandidateBuilder(
+            blobBoxValue,
+            (await ergolib).Contract.pay_to_address((await ergolib).Address.from_base58(BLOB_REQUEST_SCRIPT_ADDRESS)), // will be changed
+            creationHeight);
+        const blobDesc = name + ":" + color1.substring(1) + ":" + color2.substring(1) + ":" + eyes_pos + ":" + mouth_type + ":" + svgPath;
+        await setBoxRegisterByteArray(blobBoxBuilder, 4, blobDesc);
+        const ownerSigmaProp = (await ergolib).Constant.from_ecpoint_bytes(
+            (await ergolib).Address.from_base58(address).to_bytes(0x00).subarray(1, 34)
+        );
+        blobBoxBuilder.set_register_value(5, ownerSigmaProp);
+        try {
+            outputCandidates.add(blobBoxBuilder.build());
+        } catch (e) {
+            console.log(`building error: ${e}`);
+            throw e;
+        }
+        var correctTx = await createTransaction(boxSelection, outputCandidates, [], address, utxos);
+        console.log("final transaction", correctTx)
+        if (verifyTransactionIO(correctTx)) {
+            await walletSignTx(alert, correctTx, address);
+        }
+    } else {
+        errorAlert("Incorrect address", "The address provided does not match the address connected to Yoroi wallet")
+    }
+    return null;
+}
+
+export async function feedBlob(blobBoxJSON, amountDefense, amountAttack) {
+
+    const creationHeight = await currentHeight();
+    const address = localStorage.getItem('address');
+    var alert = waitingAlert("Preparing the transaction...");
+    const yoroiOK = await isValidWalletAddress(address);
+    if (yoroiOK) {
+        var utxos = [];
+        var utxos2 = [];
+        try {
+            utxos = await getTokenUtxos(amountAttack + amountDefense, OATMEAL_TOKEN_ID);
+            utxos2 = await getUtxos(TX_FEE);
+        } catch (e) {
+            console.log(e);
+            errorAlert(e.toString());
+            return;
+        }
+        utxos = utxos.concat(utxos2).filter((value, index, self) =>
+            index === self.findIndex((t) => (
+                t.boxId === value.boxId
+            )));
+        utxos.unshift(parseUtxo(blobBoxJSON));
+
+        const inputsWASM = (await ergolib).ErgoBoxes.from_boxes_json(utxos);
+        const dataListWASM = new (await ergolib).ErgoBoxAssetsDataList();
+        const boxSelection = new (await ergolib).BoxSelection(inputsWASM, dataListWASM);
+        const outputCandidates = (await ergolib).ErgoBoxCandidates.empty();
+
+        const gameTokenId = (await ergolib).TokenId.from_str(GAME_TOKEN_ID);
+        const blobTokenAmount = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str("2"));
+
+        const oatmealTokenId = (await ergolib).TokenId.from_str(OATMEAL_TOKEN_ID);
+        const oatmealTokenAmount = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str((amountAttack + amountDefense).toString()));
+
+        // BLOB with stat increased
+        const blobBoxInWASM = (await ergolib).ErgoBox.from_json(JSONBigInt.stringify(blobBoxJSON));
+        const blobBoxBuilder = new (await ergolib).ErgoBoxCandidateBuilder(
+            blobBoxInWASM.value(),
+            (await ergolib).Contract.pay_to_address((await ergolib).Address.from_base58(BLOB_SCRIPT_ADDRESS)),
+            creationHeight);
+        blobBoxBuilder.set_register_value(4, blobBoxInWASM.register_value(4));
+        var infoArray = JSON.parse(blobBoxJSON.additionalRegisters.R5.renderedValue);
+        infoArray[0] = infoArray[0] + amountAttack;
+        infoArray[1] = infoArray[1] + amountDefense;
+        blobBoxBuilder.set_register_value(5, await encodeLongArray(infoArray));
+        blobBoxBuilder.set_register_value(6, blobBoxInWASM.register_value(6));
+        blobBoxBuilder.set_register_value(7, blobBoxInWASM.register_value(7));
+        blobBoxBuilder.set_register_value(8, blobBoxInWASM.register_value(8));
+        blobBoxBuilder.set_register_value(9, blobBoxInWASM.register_value(9));
+        blobBoxBuilder.add_token(gameTokenId, blobTokenAmount);
+        try {
+            outputCandidates.add(blobBoxBuilder.build());
+        } catch (e) {
+            console.log(`building error: ${e}`);
+            throw e;
+        }
+
+        // Oatmeal return box
+        const oatMealReturnBox = new (await ergolib).ErgoBoxCandidateBuilder(
+            (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str((MIN_NANOERG_BOX_VALUE).toString())),
+            (await ergolib).Contract.pay_to_address((await ergolib).Address.from_base58(GAME_ADDRESS)),
+            creationHeight);
+        oatMealReturnBox.add_token(oatmealTokenId, oatmealTokenAmount);
+        try {
+            outputCandidates.add(oatMealReturnBox.build());
+        } catch (e) {
+            console.log(`building error: ${e}`);
+            throw e;
+        }
+
+        const currentConfigBox = await boxByTokenId(CONFIG_TOKEN_ID);
+        var correctTx = await createTransaction(boxSelection, outputCandidates, currentConfigBox, address, utxos);
+        console.log("final transaction", correctTx)
+        if (verifyTransactionIO(correctTx)) {
+            await walletSignTx(alert, correctTx, address);
+        }
+
+
+    } else {
+        errorAlert("Incorrect address", "The address provided does not match the address connected to Yoroi wallet")
+    }
+    return null;
+
+}

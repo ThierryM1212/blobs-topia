@@ -1,0 +1,255 @@
+.App {
+  text-align: center;
+  font-family: 'Fuzzy Bubbles', cursive;
+  background-image: url("images/sky.png") ;
+  background-repeat: repeat;   
+  background-size: contain;
+
+  margin:auto;
+  padding:0;
+   
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  flex-direction: column;
+  color: rgba(255,255,255,.8);
+  min-height: 100vh;
+}
+
+@import '@sweetalert2/theme-dark/dark.css';
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+#navbar {
+  overflow: hidden;
+  background-color: #030f27;
+  top: 0;
+  z-index: 1;
+}
+
+h5 {
+  text-align: left;
+}
+
+.footer {
+  margin-top: auto;
+}
+
+.tdright {
+  text-align: right;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+.divBlobrotate {
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+}
+
+/* HIDE RADIO */
+[type=radio] { 
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* IMAGE STYLES */
+[type=radio] {
+  cursor: pointer;
+}
+
+td {
+  text-align: left;
+  padding: 2px;
+}
+
+td > * {
+  vertical-align : middle;
+}
+
+input[type="text"], textarea {
+  background-color : rgba(255,255,255,.7);
+  border: none;
+}
+
+.ergblob {
+  background: linear-gradient(to bottom right, rgb(46, 13, 124, 0.5), rgb(0, 0, 0, 0.5));
+}
+
+.zoneblob {
+  border: 0px solid rgb(0, 0, 0);
+  border-radius: 10px;
+  background: linear-gradient(to bottom right, rgba(5, 176, 255, 0.5), rgba(231, 20, 231, 0.5));
+  min-width: 12rem;
+  max-width: 14rem;
+  padding: 2px;
+  height: 100%;
+  color: black;
+}
+
+.zonecard {
+  border: 3px;
+  border-width: 3px;
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, .3);
+  color: white;
+}
+
+.zoneabout {
+  border: 3px;
+  border-width: 3px;
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, .5);
+  color: black;
+}
+
+.zonefight {
+  border: 3px;
+  border-width: 3px;
+  border-radius: 10px;
+  color: white;
+  background-size: 100% 100%;
+  background-image: url('images/versus_bg.png');
+  
+}
+
+/* winning percent*/
+.winning-percent {
+  position: relative;
+  text-align: center;
+  color: yellow;
+}
+
+.centered {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.transparent-image {
+  opacity: 0.5;
+}
+
+.color-nav {
+  background-color: rgb(0, 0, 0, 0.5);
+}
+
+/* CHECKED STYLES */
+input[type=radio]:checked + div {
+  border: 3px solid #654ea3;
+  border-radius: 5px;
+}
+
+.btn-ultra-voilet {
+  background: rgba(231, 20, 231, 0.5);  
+  font-weight: bold;
+}
+
+.btn-ultra-blue {
+  background: rgba(5, 176, 255, 0.5);  
+  font-weight: bold;
+  border-radius: 10px;
+}
+
+.btn-ultra-yellow {
+  background: rgba(221, 189, 9, 0.8);  
+  font-weight: bold;
+  border-radius: 10px;
+}
+
+.btn-ultra-green {
+  background: rgba(17, 185, 17, 0.5);  
+  font-weight: bold;
+  border-radius: 10px;
+}
+
+.btn-ultra-red {
+  background: rgba(185, 17, 17, 0.5);  
+  font-weight: bold;
+  border-radius: 10px;
+}
+
+.border-white {
+  border-radius: 10px;
+  border-radius: 10px;
+  border: 3px rgba(255, 255, 255, .5);
+
+}
+
+.rotate{
+  animation-name: spin;
+  animation-duration: 2000ms;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+input[type="checkbox"] {
+  /* Add if not using autoprefixer */
+  -webkit-appearance: none;
+  /* Remove most all native input styles */
+  appearance: none;
+  /* For iOS < 15 */
+  background-color: var(--form-background);
+  /* Not removed via appearance */
+  margin: 0;
+  background-color:rgba(255, 255, 255, .5);
+  font: inherit;
+  color: currentColor;
+  width: 1.15em;
+  height: 1.15em;
+  border: 0.15em solid currentColor;
+  border-radius: 0.15em;
+  transform: translateY(-0.075em);
+
+  display: grid;
+  place-content: center;
+}
+
+input[type="checkbox"]::before {
+  content: "";
+  width: 0.65em;
+  height: 0.65em;
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+  transform: scale(0);
+  transform-origin: bottom left;
+  transition: 120ms transform ease-in-out;
+  box-shadow: inset 1em 1em var(--form-control-color);
+  /* Windows High Contrast Mode */
+  background-color: CanvasText;
+}
+
+input[type="checkbox"]:checked::before {
+  transform: scale(1);
+}
+
+input[type="checkbox"]:focus {
+  outline: max(2px, 0.15em) solid currentColor;
+  outline-offset: max(2px, 0.15em);
+}
+
+input[type="checkbox"]:disabled {
+  --form-control-color: var(--form-control-disabled);
+
+  color: var(--form-control-disabled);
+  cursor: not-allowed;
+}
+

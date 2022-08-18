@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.2 (dc2aedaf03, 2022-05-15)"
+   sodipodi:docname="octogone.svg"
+   inkscape:export-filename="octogone.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="true"
+     inkscape:zoom="2.1089995"
+     inkscape:cx="368.42113"
+     inkscape:cy="574.20591"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="1912"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1">
+    <inkscape:grid
+       type="xygrid"
+       id="grid299" />
+  </sodipodi:namedview>
+  <defs
+     id="defs2" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       id="path303"
+       style="fill:#ffff00;stroke-width:0.264583"
+       inkscape:transform-center-x="1.1332387e-06"
+       inkscape:transform-center-y="-1.7512253e-06"
+       d="M 89.950582 127.08527 L 81.523189 130.57601 L 78.032446 139.0034 L 81.523189 147.43079 L 89.950582 150.92154 L 98.378491 147.43079 L 101.86923 139.0034 L 98.378491 130.57601 L 89.950582 127.08527 z M 90.076156 128.46554 L 97.527897 131.57026 L 100.61453 139.06645 L 97.527897 146.56211 L 90.076156 149.66735 L 82.624414 146.56211 L 79.538298 139.06645 L 82.624414 131.57026 L 90.076156 128.46554 z " />
+  </g>
+</svg>
