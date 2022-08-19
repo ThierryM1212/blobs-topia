@@ -362,7 +362,7 @@ export async function feedBlob(blobBoxJSON, amountDefense, amountAttack) {
         var utxos2 = [];
         try {
             utxos = await getTokenUtxos(amountAttack + amountDefense, OATMEAL_TOKEN_ID);
-            utxos2 = await getUtxos(TX_FEE);
+            utxos2 = await getUtxos(TX_FEE + MIN_NANOERG_BOX_VALUE);
         } catch (e) {
             console.log(e);
             errorAlert(e.toString());

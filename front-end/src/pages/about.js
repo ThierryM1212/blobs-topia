@@ -78,13 +78,12 @@ export default class AboutPage extends React.Component {
                 <div className='w-75 zoneabout d-flex flex-column align-items-start m-2 p-2'>
                     <h5>How to play on mobile ?</h5>
                     <h6>You need to setup your address in the dApp and uses Ergo mobile wallet for signing transaction.</h6>
-                    <h6>With current SAFEW (v0.6.6) version you won't be able to run chained transactions and will need to wait for the transactions to be mined for the next action.</h6>
+                    <h6>With current Ergo wallet (1.10.2213) version you won't be able to run chained transactions and will need to wait for the transactions to be mined for the next action..</h6>
                 </div>
 
                 <div className='w-75 zoneabout d-flex flex-column align-items-start m-2 p-2'>
                     <h5>How the winner is found ?</h5>
                     <h6>Depending the header id of the fight result transaction a winner is chosen by the smart contract.</h6>
-                    <h6>With current Ergo wallet (1.10.2213) version you won't be able to run chained transactions and will need to wait for the transactions to be mined for the next action..</h6>
                 </div>
 
                 <div className='w-75 zoneabout d-flex flex-column align-items-start m-2 p-2'>
@@ -128,7 +127,7 @@ export default class AboutPage extends React.Component {
                     <div className='d-flex flex-row align-items-center justify-content-center'>
                         <h5>What the </h5><div className='h-25'><WinPercent win_rate={0.532} /></div><h5> displayed in the fight ?</h5>
                     </div>
-                    <h6>This is an estimation of the winning chance of each blob, by simulating 1000000 in a row.</h6>
+                    <h6>This is an estimation of the winning chance of each blob, by simulating 1000000 fights in a row.</h6>
                 </div>
 
                 <div className='w-75 zoneabout d-flex flex-column align-items-start m-2 p-2'>
@@ -139,7 +138,7 @@ export default class AboutPage extends React.Component {
 
                 <div className='w-75 zoneabout d-flex flex-column align-items-start m-2 p-2'>
                     <h5>What is the rating of my blob ? <Rating initialValue={4} readonly={true} size={20} /></h5>
-                    <h6>The rating is computed from you average power: (Attack power + Defense power) / 2</h6>
+                    <h6>The rating is computed from the average power: (Attack power + Defense power) / 2</h6>
                     <h6>Depending on the result you will get a rating from 0 to 5 stars the thresholds are:</h6>
                     <h6>From 0 to {RATING_RANGES[0]} : 0 stars</h6>
                     {
@@ -151,7 +150,7 @@ export default class AboutPage extends React.Component {
 
                 <div className='w-75 zoneabout d-flex flex-column align-items-start m-2 p-2'>
                     <h5>Is the game fair ?</h5>
-                    <h6>By playing games and feeding your blob with oatmeal you are able to increase its statistics and its power.</h6>
+                    <h6>By playing games and feeding your blob with oatmeal you are able to increase its statistics and power.</h6>
                     <h6>This gives a better winning chance to the strong blobs.</h6>
                     <h6>However, the difference in power of two blobs is caped around 60%/40% winning ratio to avoid abuses.</h6>
                 </div>
