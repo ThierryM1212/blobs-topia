@@ -70,7 +70,7 @@ export default class FightsPage extends React.Component {
                 var blob2 = tx.inputs[1];
                 var gameBox = tx.inputs[2];
                 if (blob1.additionalRegisters.R7.renderedValue === '3') {
-                    console.log("gamebox", gameBox)
+                    //console.log("gamebox", gameBox)
                     if (blob1 && blob2 && gameBox) {
                         blobFights.push({
                             blob1: blob1,

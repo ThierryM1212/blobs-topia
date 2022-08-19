@@ -36,6 +36,8 @@ export default class OatmealShopPage extends React.Component {
             <Fragment >
                 <div className="w-75 d-flex flex-column align-items-center m-2 p-2">
                     <h4>Buy oatmeal</h4>
+                    <h6>Use Oatmeal to feed your blobs and increase their power !</h6>
+                    <h6>1 Oatmeal token for 1 attack point or 1 defense point</h6>
                     <div className="w-100 zoneabout d-flex flex-column align-items-start m-2 p-2">
                         <table>
                             <tbody>

@@ -64,6 +64,7 @@ export default class BlobsShopPage extends React.Component {
                                 key={item.boxId}
                                 blobBoxJSON={item}
                                 updateList={this.fetchBlobs}
+                                showOwner={true}
                             />
                         ))}
                     </div>

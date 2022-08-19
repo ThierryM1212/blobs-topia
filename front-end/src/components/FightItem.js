@@ -66,6 +66,7 @@ export default class FightItem extends React.Component {
                     blobBoxJSON={this.state.blob1}
                     disableActions={true}
                     showStatus={false}
+                    showOwner={true}
                 />
                 <div>
                     <WinPercent win_rate={p1WinChance} />
@@ -120,6 +121,7 @@ export default class FightItem extends React.Component {
                     blobBoxJSON={this.state.blob2}
                     disableActions={true}
                     showStatus={false}
+                    showOwner={true}
                 />
             </div>
         )

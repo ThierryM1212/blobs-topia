@@ -97,8 +97,9 @@ export default class BlobFightPicker extends React.Component {
                         {
                             this.state.blobList.map((blob, index) =>
                                 <div className="d-flex flex-column align-items-center" key={blob.boxId}>
-                                    <BlobItem blobBoxJSON={blob} disableActions={true} />
-                                    <div onClick={() => this.selectUnselectBlob(blob.boxId)}><Checkbox checked={this.state.selectedBlob[index] === blob.boxId} /></div>
+                                    <BlobItem blobBoxJSON={blob} disableActions={true} showOwner={true} />
+                                    <div onClick={() => this.selectUnselectBlob(blob.boxId)}>
+                                        <Checkbox checked={this.state.selectedBlob[index] === blob.boxId} /></div>
                                 </div>
                             )
                         }

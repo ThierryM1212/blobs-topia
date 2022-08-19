@@ -65,6 +65,7 @@ export default class HallOfFamePage extends React.Component {
                                 updateList={this.fetchBlobs}
                                 disableActions={true}
                                 showStatus={false}
+                                showOwner={true}
                             />
                         </div>
                     ))}
@@ -83,6 +84,7 @@ export default class HallOfFamePage extends React.Component {
                             updateList={this.fetchBlobs}
                             disableActions={true}
                             showStatus={false}
+                            showOwner={true}
                         />
                         </div>
                     ))}
@@ -101,6 +103,7 @@ export default class HallOfFamePage extends React.Component {
                             updateList={this.fetchBlobs}
                             disableActions={true}
                             showStatus={false}
+                            showOwner={true}
                         />
                         </div>
                     ))}

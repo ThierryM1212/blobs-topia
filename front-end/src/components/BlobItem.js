@@ -34,6 +34,7 @@ export default class BlobItem extends React.Component {
             rating: 0,
             disableActions: props.disableActions ?? false,
             showStatus: props.showStatus ?? true,
+            showOwner: props.showOwner ?? false,
         };
         this.toggleActions = this.toggleActions.bind(this);
 
@@ -179,22 +180,19 @@ export default class BlobItem extends React.Component {
                             <div>{this.state.blobId}</div>
                         </div>
                         {this.state.showStatus ?
-                            <Fragment>
-                                <BlobState state={this.state.state[0]} stateValue={this.state.state[1]} />
-                                {
-                                    this.state.state[0] === '2' ?
-                                        <div className="m-2 d-flex flex-row justify-content-between w-100">
-
-                                            <div >{formatLongString(this.state.ownerAddress, 5)}</div>
-                                            <img className="transparent-image" src={CopyIcon} alt="copy" onClick={() => {
-                                                navigator.clipboard.writeText(this.state.ownerAddress);
-                                                copySuccess();
-                                            }} />
-                                        </div>
-                                        : null
-                                }
-                            </Fragment>
+                            <BlobState state={this.state.state[0]} stateValue={this.state.state[1]} />
                             : null
+                        }
+                        {
+                            this.state.showOwner ?
+                                <div className="m-2 d-flex flex-row justify-content-between w-100">
+                                    <div >{formatLongString(this.state.ownerAddress, 5)}</div>
+                                    <img className="transparent-image" src={CopyIcon} alt="copy" onClick={() => {
+                                        navigator.clipboard.writeText(this.state.ownerAddress);
+                                        copySuccess();
+                                    }} />
+                                </div>
+                                : null
                         }
 
 
