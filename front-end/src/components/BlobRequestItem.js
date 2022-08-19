@@ -1,10 +1,11 @@
 import React from 'react';
-import { refundBlobRequest } from '../ergo-related/blob.js';
+import { refundRequest } from '../ergo-related/blob.js';
 import { processBlobRequest } from '../ergo-related/bot_wasm.js';
 import { boxByTokenId, getUnspentBoxesForAddressUpdated } from '../ergo-related/explorer.js';
 import { decodeString } from "../ergo-related/serializer.js";
 import { displayTransaction, errorAlert, waitingAlert } from '../utils/Alerts.js';
-import { CONFIG_TOKEN_ID, NANOERG_TO_ERG, RESERVE_SCRIPT_ADDRESS } from "../utils/constants.js";
+import { CONFIG_TOKEN_ID, RESERVE_SCRIPT_ADDRESS } from "../utils/constants.js";
+import { formatERGAmount } from '../utils/utils.js';
 import ErgBlob from "./ErgBlob.js";
 
 export default class BlobRequestItem extends React.Component {
@@ -49,7 +50,7 @@ export default class BlobRequestItem extends React.Component {
 
     async refund() {
         console.log("refundBlobRequest", this.state.full.boxId);
-        await refundBlobRequest(this.state.full);
+        await refundRequest(this.state.full);
         await this.state.updateList();
     }
 
@@ -79,7 +80,7 @@ export default class BlobRequestItem extends React.Component {
                         mouth_type={this.state.mouth_type}
                         name={this.state.name}
                     />
-                    Blob mint price: {(parseInt(this.state.full.value) / NANOERG_TO_ERG).toFixed(4)} ERG
+                    Blob mint price: {formatERGAmount(this.state.full.value)} ERG
                 </div>
                 <div className="d-flex flex-row justify-content-between" >
                     <button className="btn btn-ultra-yellow m-1" onClick={() => this.process()}>Process</button>

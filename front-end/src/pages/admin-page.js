@@ -1,5 +1,5 @@
 import React, { Fragment } from 'react';
-import { RESERVE_SCRIPT_ADDRESS, GAME_ADDRESS, GAME_TOKEN_ID, OATMEAL_RESERVE_SCRIPT_ADDRESS, OATMEAL_TOKEN_ID} from '../utils/constants';
+import { RESERVE_SCRIPT_ADDRESS, GAME_ADDRESS, GAME_TOKEN_ID, OATMEAL_RESERVE_SCRIPT_ADDRESS, OATMEAL_TOKEN_ID, OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS} from '../utils/constants';
 import {  getUnspentBoxesByAddress } from '../ergo-related/explorer';
 import ReserveItem from '../components/ReserveItem';
 import ConfigItem from '../components/ConfigItem';
@@ -17,8 +17,10 @@ export default class Admin extends React.Component {
             reserveTokenAmount: '100',
             reserveIniIdentifier: '1',
             oatmealReserveTokenAmount: '1000',
+            oatmealReserveSellTokenAmount: '100000',
             reserveList: [],
             oatmealReserveList: [],
+            oatmealReserveSellList: [],
             configList: [],
         };
         this.form = React.createRef();
@@ -35,6 +37,10 @@ export default class Admin extends React.Component {
 
     handleChangeReserveTokenAmount(event) {
         this.setState({ reserveTokenAmount: event.target.value });
+    }
+
+    handleChangeOatmealReserveSellTokenAmount(event) {
+        this.setState({ oatmealReserveSellTokenAmount: event.target.value });
     }
 
     handleChangeIniIdentifier(event) {
@@ -63,10 +69,12 @@ export default class Admin extends React.Component {
     async fetchReserves() {
         const reserveList = await getUnspentBoxesByAddress(RESERVE_SCRIPT_ADDRESS);
         const oatmealReserveList = await getUnspentBoxesByAddress(OATMEAL_RESERVE_SCRIPT_ADDRESS);
+        const oatmealReserveSellList = await getUnspentBoxesByAddress(OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS);
         console.log("reserveList", reserveList, oatmealReserveList);
         this.setState({
             reserveList: reserveList,
             oatmealReserveList: oatmealReserveList,
+            oatmealReserveSellList: oatmealReserveSellList,
         })
 
     }
@@ -80,7 +88,11 @@ export default class Admin extends React.Component {
     }
 
     async mintOReserve(oatmealReserveTokenAmount) {
-        return await mintOatmealReserve(oatmealReserveTokenAmount);
+        return await mintOatmealReserve(OATMEAL_RESERVE_SCRIPT_ADDRESS, oatmealReserveTokenAmount);
+    }
+
+    async mintOSellReserve(oatmealReserveTokenAmount) {
+        return await mintOatmealReserve(OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS, oatmealReserveTokenAmount);
     }
 
     render() {
@@ -155,7 +167,7 @@ export default class Admin extends React.Component {
                     <br />
 
                     <div className="w-50 ">
-                        <h4>Available token reserves</h4>
+                        <h4>Available game token reserves</h4>
                         <ul >
                             {this.state.reserveList.map(item => (
                                 <li key={item.boxId} className="card zonecard m-2">
@@ -173,8 +185,7 @@ export default class Admin extends React.Component {
                     </div>
 
                     <div className="zonecard w-50">
-                        <h4>Create new oatmeal reserve</h4>
-
+                        <h4>Create new game oatmeal reserve</h4>
                         <table>
                             <tbody>
                                 <tr>
@@ -205,9 +216,55 @@ export default class Admin extends React.Component {
                     </div>
 
                     <div className="w-50 ">
-                        <h4>Available oatmeal reserves</h4>
+                        <h4>Available game oatmeal reserves</h4>
                         <ul >
                             {this.state.oatmealReserveList.map(item => (
+                                <li key={item.boxId} className="card zonecard m-2">
+                                    <OatmealReserveItem
+                                        boxId={item.boxId}
+                                        tokenAmount={getTokenAmount(item, OATMEAL_TOKEN_ID)}
+                                    />
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    <div className="zonecard w-50">
+                        <h4>Create new sell oatmeal reserve</h4>
+
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <label htmlFor="reservetokenamount">Token amount</label>
+                                    </td>
+                                    <td>
+                                        <input className="form-control"
+                                            type="text"
+                                            id="reservetokenamount"
+                                            pattern="[0-9]+"
+                                            required
+                                            value={this.state.oatmealReserveSellTokenAmount}
+                                            onChange={this.handleChangeOatmealReserveSellTokenAmount}
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                    </td>
+                                    <td className="tdright">
+                                        <button className="btn btn-ultra-voilet" onClick={() => this.mintOSellReserve(this.state.oatmealReserveSellTokenAmount)} >Mint oatmeal reserve</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+
+                        </table>
+                    </div>
+
+                    <div className="w-50 ">
+                        <h4>Available sell oatmeal reserves</h4>
+                        <ul >
+                            {this.state.oatmealReserveSellList.map(item => (
                                 <li key={item.boxId} className="card zonecard m-2">
                                     <OatmealReserveItem
                                         boxId={item.boxId}

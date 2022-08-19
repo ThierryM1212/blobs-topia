@@ -1,7 +1,8 @@
 let ergolib = import('ergo-lib-wasm-nodejs');
 import JSONBigInt from 'json-bigint';
 import { NANOERG_TO_ERG, TX_FEE } from './constants.js';
-import { currentHeight, getExplorerBlockHeaders, getExplorerBlockHeadersFull, getLastHeaders } from './explorer.js';
+import { currentHeight, getExplorerBlockHeaders, getExplorerBlockHeadersFull } from './explorer.js';
+
 
 export async function getErgoStateContext() {
     const explorerContext = (await getExplorerBlockHeaders());
@@ -202,4 +203,11 @@ function isDict(v) {
 
 export async function encodeLongArray(longArray) {
     return (await ergolib).Constant.from_i64_str_array(longArray);
+}
+
+export async function ergoTreeToAddress(ergoTree) {
+    //console.log("ergoTreeToAddress",ergoTree);
+    const ergoT = (await ergolib).ErgoTree.from_base16_bytes(ergoTree);
+    const address = (await ergolib).Address.recreate_from_ergo_tree(ergoT);
+    return address.to_base58();
 }

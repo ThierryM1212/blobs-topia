@@ -1,32 +1,35 @@
 import React, { Fragment } from 'react';
-import { BLOB_REQUEST_SCRIPT_ADDRESS } from '../utils/constants';
+import { BLOB_REQUEST_SCRIPT_ADDRESS, OATMEAL_BUY_REQUEST_SCRIPT_ADDRESS } from '../utils/constants';
 import { getUnspentBoxesForAddressUpdated } from '../ergo-related/explorer';
 import BlobRequestItem from '../components/BlobRequestItem';
+import OatmealBuyRequestList from '../components/OatmealBuyRequestList';
+import { waitingAlert } from '../utils/Alerts';
+
 
 export default class RequestBotPage extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             blobRequestList: [],
+            reRenderKey: 0,
         };
         this.fetchBlobRequests = this.fetchBlobRequests.bind(this);
     }
 
     async componentDidMount() {
+        var alert = waitingAlert("Loading the blob requests...");
         await this.fetchBlobRequests();
+        alert.close();
     }
 
     async fetchBlobRequests() {
-
         const blobRequestBoxes = await getUnspentBoxesForAddressUpdated(BLOB_REQUEST_SCRIPT_ADDRESS);
         this.setState({
             blobRequestList: blobRequestBoxes,
         })
     }
 
-
     render() {
-        //console.log("render blob list", this.state.blobList);
         return (
             <Fragment >
                 <br />
@@ -55,6 +58,7 @@ export default class RequestBotPage extends React.Component {
                             No blob requests pending
                         </h4>
                 }
+                <OatmealBuyRequestList reRenderKey={this.state.reRenderKey}/>
             </Fragment>
         )
     }

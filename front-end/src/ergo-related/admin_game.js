@@ -212,7 +212,7 @@ export async function mintGameTokenReserve(reserveName, reserveTokenAmount, rese
     return null;
 }
 
-export async function mintOatmealReserve(oatmealReserveTokenAmount) {
+export async function mintOatmealReserve(reserveAddress, oatmealReserveTokenAmount) {
     const address = localStorage.getItem('address');
     const alert = waitingAlert("Preparing the transaction...");
     if (await isValidWalletAddress(address)) {
@@ -235,7 +235,7 @@ export async function mintOatmealReserve(oatmealReserveTokenAmount) {
         const boxValue = (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str(reserveValue));
         const reserveBoxBuilder = new (await ergolib).ErgoBoxCandidateBuilder(
             boxValue,
-            (await ergolib).Contract.pay_to_address((await ergolib).Address.from_base58(OATMEAL_RESERVE_SCRIPT_ADDRESS)),
+            (await ergolib).Contract.pay_to_address((await ergolib).Address.from_base58(reserveAddress)),
             creationHeight);
         reserveBoxBuilder.add_token(oatmealTokenId, reserveTokenAmount);
         try {

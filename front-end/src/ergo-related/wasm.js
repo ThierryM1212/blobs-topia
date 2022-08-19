@@ -338,14 +338,6 @@ function isDict(v) {
     return typeof v === 'object' && v !== null && !(v instanceof Array) && !(v instanceof Date);
 }
 
-async function getRequest(url) {
-    const res = await get(DEFAULT_NODE_ADDRESS + url, '')
-    return res;
-}
-export async function getLastHeaders() {
-    return await getRequest('blocks/lastHeaders/10');
-}
-
 export async function getErgoStateContext() {
     const res =  await getExplorerBlockHeaders();
     const block_headers = (await ergolib).BlockHeaders.from_json(res);

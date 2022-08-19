@@ -6,21 +6,23 @@
     // config box
     val configBox = CONTEXT.dataInputs(0)
     val validConfigBox = configBox.tokens(0)._1 == ConfigNFTId
+    val txFee = configBox.R6[Coll[Long]].get(1)
     val oatmealPrice = configBox.R6[Coll[Long]].get(5)
     
     val validBuy =  if (OUTPUTS.size > 3) {
-                        val tokenSellAmount = requestAmountNano / oatmealPrice
+                        val tokenSellAmount = (requestAmountNano - txFee - 1000000L) / oatmealPrice
                         // dApp pay box
                         OUTPUTS(1).propositionBytes == proveDlog(GameFundPK).propBytes               &&
                         OUTPUTS(1).value >= tokenSellAmount * oatmealPrice                           &&
                         // Token delivery box
+                        OUTPUTS(2).propositionBytes == ownerPK.propBytes                             &&
                         OUTPUTS(2).tokens(0)._1 == OatmealTokenNFTId                                 &&
                         OUTPUTS(2).tokens(0)._2 == tokenSellAmount
                     } else {
                         false
                     }
     
-    sigmaProp(ownerPK) ||
+    ownerPK ||
       sigmaProp( 
         validConfigBox     &&
         validBuy

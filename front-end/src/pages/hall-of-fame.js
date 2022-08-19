@@ -3,6 +3,7 @@ import BlobItem from '../components/BlobItem';
 import { getBlobPowers, getBlobVictories } from '../utils/utils';
 import { BLOB_SCRIPT_ADDRESS } from '../utils/constants';
 import { getUnspentBoxesForAddressUpdated } from '../ergo-related/explorer';
+import { waitingAlert } from '../utils/Alerts';
 
 
 export default class HallOfFamePage extends React.Component {
@@ -17,7 +18,9 @@ export default class HallOfFamePage extends React.Component {
     }
 
     async componentDidMount() {
+        var alert = waitingAlert("Loading the blob list...");
         await this.fetchBlobs();
+        alert.close();
     }
 
     async fetchBlobs() {

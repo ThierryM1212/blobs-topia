@@ -1,20 +1,20 @@
 import JSONBigInt from 'json-bigint';
 import { errorAlert, promptErgAmount, waitingAlert } from "../utils/Alerts";
-import { BLOB_ERG_MIN_VALUE, BLOB_EXCHANGE_FEE, BLOB_PRICE, BLOB_REQUEST_SCRIPT_ADDRESS, BLOB_SCRIPT_ADDRESS, CONFIG_TOKEN_ID, GAME_ADDRESS, GAME_TOKEN_ID, MIN_NANOERG_BOX_VALUE, NANOERG_TO_ERG, OATMEAL_TOKEN_ID, TX_FEE } from "../utils/constants";
+import { BLOB_ERG_MIN_VALUE, BLOB_EXCHANGE_FEE, BLOB_PRICE, BLOB_REQUEST_SCRIPT_ADDRESS, BLOB_SCRIPT_ADDRESS, CONFIG_TOKEN_ID, GAME_ADDRESS, GAME_TOKEN_ID, MIN_NANOERG_BOX_VALUE, NANOERG_TO_ERG, OATMEAL_BUY_REQUEST_SCRIPT_ADDRESS, OATMEAL_TOKEN_ID, TX_FEE } from "../utils/constants";
 import { boxByTokenId, currentHeight } from "./explorer";
 import { encodeLong, encodeLongArray } from './serializer';
 import { addSimpleOutputBox, createTransaction, getUtxosListValue, parseUtxo, setBoxRegisterByteArray, verifyTransactionIO } from "./wasm";
-import { getTokenUtxos, getUtxos, isValidWalletAddress, walletSignTx } from "./wallet.js";
+import { getBalance, getTokenUtxos, getUtxos, isValidWalletAddress, walletSignTx } from "./wallet.js";
 let ergolib = import('ergo-lib-wasm-browser');
 
 
-export async function refundBlobRequest(blobRequestBoxJSON) {
+export async function refundRequest(blobRequestBoxJSON) {
     const creationHeight = await currentHeight();
     const address = localStorage.getItem('address');
-    var alert = waitingAlert("Preparing the transaction...");
+    var alert = waitingAlert("Preparing the refund transaction...");
     const blobRequestIniValueNano = blobRequestBoxJSON.value;
-    const yoroiOK = await isValidWalletAddress(address);
-    if (yoroiOK) {
+    const walletOK = await isValidWalletAddress(address);
+    if (walletOK) {
         const utxos = [blobRequestBoxJSON];
         const inputsWASM = (await ergolib).ErgoBoxes.from_boxes_json(utxos);
         const dataListWASM = new (await ergolib).ErgoBoxAssetsDataList();
@@ -54,8 +54,8 @@ export async function addWidthDrawBlob(mode, blobBoxJSON) {
     }
     console.log("addWidthDraw blobOutValueNano", blobOutValueNano);
 
-    const yoroiOK = await isValidWalletAddress(address);
-    if (yoroiOK) {
+    const walletOK = await isValidWalletAddress(address);
+    if (walletOK) {
         var utxos = [];
         if (mode === "add") {
             console.log("addWidthDraw amount", amountNano + dAppFeeNano + MIN_NANOERG_BOX_VALUE);
@@ -178,8 +178,8 @@ export async function buyBlob(blobBoxJSON) {
     var alert = waitingAlert("Preparing the transaction...");
     const blobIniValueNano = blobBoxJSON.value;
 
-    const yoroiOK = await isValidWalletAddress(address);
-    if (yoroiOK) {
+    const walletOK = await isValidWalletAddress(address);
+    if (walletOK) {
         var utxos = await getUtxos(amountNano + TX_FEE + dAppFeeNano);
         utxos.unshift(parseUtxo(blobBoxJSON));
         const gameTokenId = (await ergolib).TokenId.from_str(GAME_TOKEN_ID);
@@ -245,8 +245,8 @@ export async function setBlobStatus(mode, blobBoxJSON) {
     const address = localStorage.getItem('address');
     var alert = waitingAlert("Preparing the transaction...");
 
-    const yoroiOK = await isValidWalletAddress(address);
-    if (yoroiOK) {
+    const walletOK = await isValidWalletAddress(address);
+    if (walletOK) {
         var utxos = await getUtxos(MIN_NANOERG_BOX_VALUE + TX_FEE);
         utxos.unshift(parseUtxo(blobBoxJSON));
         const gameTokenId = (await ergolib).TokenId.from_str(GAME_TOKEN_ID);
@@ -308,8 +308,8 @@ export async function createBlobRequest(name, color1, color2, eyes_pos, mouth_ty
     console.log("createBlobRequest")
     const address = localStorage.getItem('address');
     const alert = waitingAlert("Preparing the transaction...");
-    const yoroiOK = await isValidWalletAddress(address);
-    if (yoroiOK) {
+    const walletOK = await isValidWalletAddress(address);
+    if (walletOK) {
         var utxos = await getUtxos(BLOB_PRICE + TX_FEE);
         const inputsWASM = (await ergolib).ErgoBoxes.from_boxes_json(utxos);
         const dataListWASM = new (await ergolib).ErgoBoxAssetsDataList();
@@ -347,12 +347,17 @@ export async function createBlobRequest(name, color1, color2, eyes_pos, mouth_ty
 }
 
 export async function feedBlob(blobBoxJSON, amountDefense, amountAttack) {
+    const tokenBalance = await getBalance(OATMEAL_TOKEN_ID);
+    if (tokenBalance < amountDefense + amountAttack) {
+        errorAlert("Not enough Oatmeal tokens, only "+tokenBalance.toString()+" available")
+        return;
+    }
 
     const creationHeight = await currentHeight();
     const address = localStorage.getItem('address');
     var alert = waitingAlert("Preparing the transaction...");
-    const yoroiOK = await isValidWalletAddress(address);
-    if (yoroiOK) {
+    const walletOK = await isValidWalletAddress(address);
+    if (walletOK) {
         var utxos = [];
         var utxos2 = [];
         try {
@@ -429,4 +434,44 @@ export async function feedBlob(blobBoxJSON, amountDefense, amountAttack) {
     }
     return null;
 
+}
+
+export async function createOatmealBuyRequest(ergAmount) {
+    console.log("createBlobRequest")
+    const address = localStorage.getItem('address');
+    const alert = waitingAlert("Preparing the transaction...");
+    const walletOK = await isValidWalletAddress(address);
+    if (walletOK) {
+        var utxos = await getUtxos(ergAmount);
+        const inputsWASM = (await ergolib).ErgoBoxes.from_boxes_json(utxos);
+        const dataListWASM = new (await ergolib).ErgoBoxAssetsDataList();
+        const boxSelection = new (await ergolib).BoxSelection(inputsWASM, dataListWASM);
+        const creationHeight = await currentHeight();
+        const outputCandidates = (await ergolib).ErgoBoxCandidates.empty();
+
+        // Blob Box
+        const oatmealBuyBoxValue = (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str((ergAmount - TX_FEE).toString()));
+        const oatmealBuyBoxBuilder = new (await ergolib).ErgoBoxCandidateBuilder(
+            oatmealBuyBoxValue,
+            (await ergolib).Contract.pay_to_address((await ergolib).Address.from_base58(OATMEAL_BUY_REQUEST_SCRIPT_ADDRESS)),
+            creationHeight);
+        const ownerSigmaProp = (await ergolib).Constant.from_ecpoint_bytes(
+            (await ergolib).Address.from_base58(address).to_bytes(0x00).subarray(1, 34)
+        );
+        oatmealBuyBoxBuilder.set_register_value(4, ownerSigmaProp);
+        try {
+            outputCandidates.add(oatmealBuyBoxBuilder.build());
+        } catch (e) {
+            console.log(`building error: ${e}`);
+            throw e;
+        }
+        var correctTx = await createTransaction(boxSelection, outputCandidates, [], address, utxos);
+        console.log("final transaction", correctTx)
+        if (verifyTransactionIO(correctTx)) {
+            await walletSignTx(alert, correctTx, address);
+        }
+    } else {
+        errorAlert("Incorrect address", "The address provided does not match the address connected to Yoroi wallet")
+    }
+    return null;
 }

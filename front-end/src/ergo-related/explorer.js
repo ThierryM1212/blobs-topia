@@ -133,14 +133,13 @@ export async function getUnconfirmedTxsFor(addr) {
 export async function getSpentAndUnspentBoxesFromMempool(address) {
     try {
         var unconfirmedTxs = await getUnconfirmedTxsFor(address);
-        console.log("getSpentAndUnspentBoxesFromMempool", unconfirmedTxs);
         var spentBoxes = [];
         var newBoxes = [];
         if (unconfirmedTxs && unconfirmedTxs.length > 0) {
             spentBoxes = unconfirmedTxs.map(tx => tx.inputs).flat();
             newBoxes = unconfirmedTxs.map(tx => tx.outputs).flat().filter(box => address === box.address);
         }
-        console.log("getSpentAndUnspentBoxesFromMempool", spentBoxes, newBoxes)
+        //console.log("getSpentAndUnspentBoxesFromMempool", address, spentBoxes, newBoxes)
         return [spentBoxes, newBoxes];
     } catch (e) {
         console.log(e);

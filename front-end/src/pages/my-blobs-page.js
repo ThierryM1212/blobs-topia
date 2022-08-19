@@ -4,7 +4,7 @@ import { getSpentAndUnspentBoxesFromMempool, getUnspentBoxesForAddressUpdated, s
 import BlobItem from '../components/BlobItem';
 import { toHexString } from '../ergo-related/serializer';
 import BlobRequestItem from '../components/BlobRequestItem';
-import { errorAlert } from '../utils/Alerts';
+import { errorAlert, waitingAlert } from '../utils/Alerts';
 let ergolib = import('ergo-lib-wasm-browser');
 
 
@@ -29,8 +29,10 @@ export default class MyBlobsPage extends React.Component {
         if (address === '') {
             errorAlert('Setup an ERG address to interact with the dApp')
         } else {
+            var alert = waitingAlert("Loading the blob list...");
             await this.fetchBlobs();
-            this.fetchBlobRequests();   
+            alert.close();
+            this.fetchBlobRequests();
         }
     }
 
@@ -67,12 +69,13 @@ export default class MyBlobsPage extends React.Component {
         ).sigma_serialize_bytes());
         const blobBoxesTmp = await searchBlobUnspentBoxes('R6', addressSigmaPropHex.slice(4));
         //console.log("fetchBlobs blobBoxesTmp", blobBoxesTmp)
-        var [spentBoxes, newBoxes] = await getSpentAndUnspentBoxesFromMempool(localStorage.getItem('address'));
-        var spentBoxIds = spentBoxes.map(box => box.boxId);
+        var [spentBoxes1, newBoxes1] = await getSpentAndUnspentBoxesFromMempool(localStorage.getItem('address'));
+        var spentBoxIds = spentBoxes1.map(box => box.boxId);
         var blobBoxes = blobBoxesTmp.filter(box => !spentBoxIds.includes(box.boxId));
-        [spentBoxes, newBoxes] = await getSpentAndUnspentBoxesFromMempool(BLOB_SCRIPT_ADDRESS);
-        spentBoxIds = spentBoxes.map(box => box.boxId);
-        blobBoxes = blobBoxesTmp.concat(newBoxes).filter(box => !spentBoxIds.includes(box.boxId));
+        var [spentBoxes2, newBoxes2] = await getSpentAndUnspentBoxesFromMempool(BLOB_SCRIPT_ADDRESS);
+        spentBoxIds = spentBoxes2.map(box => box.boxId).concat(spentBoxIds);
+        blobBoxes = blobBoxesTmp.concat(newBoxes2).filter(box => !spentBoxIds.includes(box.boxId));
+        //console.log("blobBoxes", blobBoxes)
         
         var blobList = [];
         for (const box of blobBoxes) {

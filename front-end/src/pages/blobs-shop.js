@@ -3,6 +3,7 @@ import { BLOB_SCRIPT_ADDRESS, OATMEAL_PRICE } from '../utils/constants';
 import { getSpentAndUnspentBoxesFromMempool, searchBlobUnspentBoxes } from '../ergo-related/explorer';
 import BlobItem from '../components/BlobItem';
 import { formatERGAmount } from '../utils/utils';
+import { waitingAlert } from '../utils/Alerts';
 
 
 export default class BlobsShopPage extends React.Component {
@@ -20,7 +21,9 @@ export default class BlobsShopPage extends React.Component {
     }
 
     async componentDidMount() {
+        var alert = waitingAlert("Loading the blob list...");
         await this.fetchBlobs();
+        alert.close();
     }
 
     async fetchBlobs() {
@@ -49,11 +52,6 @@ export default class BlobsShopPage extends React.Component {
         return (
             <Fragment >
                 <div className="w-100 d-flex flex-column align-items-center m-2 p-2">
-                    <div className="w-75 d-flex flex-column align-items-center">
-                        <h4>Buy oatmeal</h4>
-                        <h6>Oatmeal price: {formatERGAmount(OATMEAL_PRICE)} per Oatmeal token</h6>
-                    </div>
-                    <br />
                     {
                         this.state.blobList.length > 0 ?
                             <h4>Blobs for sale</h4>

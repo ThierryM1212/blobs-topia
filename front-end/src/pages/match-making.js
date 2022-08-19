@@ -2,6 +2,7 @@ import React, { Fragment } from 'react';
 import { BLOB_SCRIPT_ADDRESS } from '../utils/constants';
 import BlobFightPicker from '../components/BlobFightPicker';
 import { getSpentAndUnspentBoxesFromMempool, searchBlobUnspentBoxes } from '../ergo-related/explorer';
+import { waitingAlert } from '../utils/Alerts';
 
 
 export default class MatchMakingPage extends React.Component {
@@ -13,7 +14,9 @@ export default class MatchMakingPage extends React.Component {
     }
 
     async componentDidMount() {
+        var alert = waitingAlert("Loading the blob list...");
         await this.fetchBlobs();
+        alert.close();
     }
 
     async fetchBlobs() {

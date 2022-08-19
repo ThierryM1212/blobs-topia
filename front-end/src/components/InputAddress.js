@@ -43,7 +43,7 @@ export default class InputAddress extends React.Component {
         if (typeof ergo === 'undefined') {
             ergopay = true;
         }
-        console.log("InputAddress componentDidMount", nanoERGAmount, oatmealAmount)
+        //console.log("InputAddress componentDidMount", nanoERGAmount, oatmealAmount)
         this.setState({
             ergAmount: nanoERGAmount,
             oatmealAmount: oatmealAmount,

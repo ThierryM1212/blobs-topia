@@ -1,8 +1,8 @@
 import { getCurrentConfigBox } from './src/blobs_action.js';
-import { BLOB_REQUEST_SCRIPT_ADDRESS, BLOB_SCRIPT_ADDRESS, CONFIG_SCRIPT_ADDRESS, GAME_SCRIPT_ADDRESS, OATMEAL_RESERVE_SCRIPT, OATMEAL_RESERVE_SCRIPT_ADDRESS, RESERVE_SCRIPT, RESERVE_SCRIPT_ADDRESS, TX_FEE } from "./src/constants.js";
-import { getMempoolUnspentBoxesByAddresses, getUnspentBoxesByAddress, sendTx } from "./src/explorer.js";
+import { BLOB_REQUEST_SCRIPT_ADDRESS, BLOB_SCRIPT_ADDRESS, CONFIG_SCRIPT_ADDRESS, GAME_SCRIPT_ADDRESS, OATMEAL_BUY_REQUEST_SCRIPT_ADDRESS, OATMEAL_RESERVE_SCRIPT, OATMEAL_RESERVE_SCRIPT_ADDRESS, OATMEAL_SELL_RESERVE_SCRIPT, OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS, RESERVE_SCRIPT, RESERVE_SCRIPT_ADDRESS, TX_FEE } from "./src/constants.js";
+import { getMempoolUnspentBoxesByAddresses, getUnspentBoxesByAddress } from "./src/explorer.js";
 import dayjs from 'dayjs';
-import { engageFight, processBlobRequest, processFightResult } from './src/bot_wasm.js';
+import { engageFight, processBlobRequest, processFightResult, processOatmealRequest } from './src/bot_wasm.js';
 
 
 var mempoolBoxes = {};
@@ -17,7 +17,8 @@ async function fetchMempoolUnspentBoxes() {
                 BLOB_SCRIPT_ADDRESS,
                 CONFIG_SCRIPT_ADDRESS,
                 OATMEAL_RESERVE_SCRIPT_ADDRESS,
-                GAME_SCRIPT_ADDRESS
+                GAME_SCRIPT_ADDRESS,
+                OATMEAL_BUY_REQUEST_SCRIPT_ADDRESS,
             ]);
         mempoolBoxes = newMempoolBoxes;
     } catch (e) {
@@ -45,8 +46,8 @@ async function processBlobRequests() {
             console.log("processBlobRequests: No config box found")
             return;
         }
-
-        if (mempoolBoxes[RESERVE_SCRIPT_ADDRESS].boxId) {
+        //console.log("processBlobRequests: mempoolBoxes[RESERVE_SCRIPT_ADDRESS]", mempoolBoxes[RESERVE_SCRIPT_ADDRESS])
+        if (mempoolBoxes[RESERVE_SCRIPT_ADDRESS] && mempoolBoxes[RESERVE_SCRIPT_ADDRESS].boxId) {
             currentReserveBox = mempoolBoxes[RESERVE_SCRIPT_ADDRESS];
         } else {
             const allReserveBoxes = await getUnspentBoxesByAddress(RESERVE_SCRIPT_ADDRESS);
@@ -224,12 +225,75 @@ async function processFightsResult() {
     }
 }
 
+async function processOatmealBuyRequests() {
+    try {
+        var currentReserveBox = {};
+        var processedOatmealBuyRequest = [];
+        const unspentOatmealBuyRequest = await getUnspentBoxesByAddress(OATMEAL_BUY_REQUEST_SCRIPT_ADDRESS);
+        const mempoolOatmealBuyRequest = mempoolBoxes[OATMEAL_BUY_REQUEST_SCRIPT_ADDRESS];
+        const allOatmealBuyRequest = unspentOatmealBuyRequest.concat(mempoolOatmealBuyRequest);
+        if (allOatmealBuyRequest.length === 0) {
+            console.log("processOatmealBuyRequests: No Oatmeal buy request found")
+            return;
+        }
+
+        const currentConfigBox = await getCurrentConfigBox(mempoolBoxes);
+        if (!currentConfigBox.boxId) {
+            console.log("processOatmealBuyRequests: No config box found")
+            return;
+        }
+
+        if (mempoolBoxes[OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS] && mempoolBoxes[OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS].boxId) {
+            currentReserveBox = mempoolBoxes[OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS];
+        } else {
+            const allReserveBoxes = await getUnspentBoxesByAddress(OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS);
+            if (allReserveBoxes.length === 0) {
+                console.log("processOatmealBuyRequests: No Reserve box found")
+                return;
+            }
+            currentReserveBox = allReserveBoxes[0];
+        }
+
+        for (const box of allOatmealBuyRequest) {
+            if (!processedOatmealBuyRequest.includes(box.boxId)) {
+                const [txId, signedTx] = await processOatmealRequest(box, currentReserveBox, currentConfigBox);
+                if (txId) {
+                    processedOatmealBuyRequest.push(box.boxId);
+                    currentReserveBox = signedTx.outputs.find(box => box.ergoTree === OATMEAL_SELL_RESERVE_SCRIPT);
+
+                    var txFoundMempool = false, i = 0;
+                    while (!txFoundMempool && i < 30) {
+                        sleep(2000);
+                        try {
+                            i++;
+                            const newUnspentBoxes = await getMempoolUnspentBoxesByAddresses([OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS]);
+                            //console.log("processBlobRequests newUnspentBoxes", newUnspentBoxes)
+                            const newUnspentReserves = newUnspentBoxes[OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS].find(box => box.boxId === currentReserveBox.boxId);
+                            if (newUnspentReserves && newUnspentReserves.length > 0) {
+                                txFoundMempool = true;
+                                currentReserveBox = newUnspentReserves[0];
+                            }
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    }
+                    console.log("processOatmealBuyRequests New reserve box: " + currentReserveBox.boxId);
+                }
+            } else {
+                console.log("Oatmeal request " + box.boxId + " already processed")
+            }
+        }
+    } catch (e) {
+        console.log("processOatmealBuyRequests global: " + e.toString())
+    }
+}
+
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 
-
 setInterval(processBlobRequests, 24000);
 setInterval(processFigth, 30000);
 setInterval(processFightsResult, 20000);
+setInterval(processOatmealBuyRequests, 26000);

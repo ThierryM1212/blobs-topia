@@ -13,7 +13,7 @@ export default function Footer() {
                     <img src={githubLogo} width="20" height="20" className="d-inline-block align-top" alt="github" />
                 </a>
                 &nbsp;
-                <a href="https://t.me/BlobsTopia" target="_blank" rel="noreferrer">
+                <a href="https://t.me/+6-nvtIXx3_05YWI8" target="_blank" rel="noreferrer">
                     <img src={telegramLogo} width="20" height="20" className="d-inline-block align-top" alt="telegram" />
                 </a>
                 &nbsp;

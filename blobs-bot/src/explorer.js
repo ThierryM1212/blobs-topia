@@ -1,7 +1,7 @@
 import { fetch } from 'undici';
 import { TextDecoderStream } from 'node:stream/web';
 import JSONBigInt from 'json-bigint';
-import { DEFAULT_EXPLORER_API_ADDRESS, DEFAULT_NODE_ADDRESS } from './constants.js';
+import { DEFAULT_EXPLORER_API_ADDRESS } from './constants.js';
 
 async function get(url, apiKey = '') {
     try {
@@ -42,19 +42,6 @@ async function getRequestV1(url) {
 async function getRequestV0(url) {
     const res = await get(DEFAULT_EXPLORER_API_ADDRESS + 'api/v0' + url, '')
     return res.items;
-}
-async function getRequest(url) {
-    const res = await get(DEFAULT_NODE_ADDRESS + url, '')
-    return res;
-}
-async function postRequest(url, body = {}, apiKey = '') {
-    try {
-        const res = await postTx(DEFAULT_NODE_ADDRESS + url, body)
-        return res;
-    } catch(err) {
-        console.log("postRequest", err);
-        return err.toString();
-    }
 }
 
 export async function postTxMempool(tx) {
@@ -109,9 +96,6 @@ export async function getUnspentBoxesByAddress(address) {
 }
 export async function boxByTokenId(tokenId) {
     return await getRequestV1(`/boxes/unspent/byTokenId/${tokenId}`);
-}
-export async function getLastHeaders() {
-    return await getRequest('blocks/lastHeaders/10');
 }
 export async function getExplorerBlockHeaders() {
     return (await getRequestV1(`/blocks/headers`)).slice(0, 10);

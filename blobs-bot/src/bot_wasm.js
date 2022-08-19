@@ -1,7 +1,7 @@
 import JSONBigInt from 'json-bigint';
-import { BLOB_MINT_FEE, BLOB_SCRIPT_ADDRESS, GAME_ADDRESS, GAME_SCRIPT_ADDRESS, GAME_TOKEN_ID, MIN_NANOERG_BOX_VALUE, NUM_OATMEAL_TOKEN_LOSER, NUM_OATMEAL_TOKEN_WINNER, OATMEAL_RESERVE_SCRIPT_ADDRESS, OATMEAL_TOKEN_ID, RESERVE_SCRIPT_ADDRESS, TX_FEE } from './constants.js';
+import { BLOB_MINT_FEE, BLOB_SCRIPT_ADDRESS, GAME_ADDRESS, GAME_SCRIPT_ADDRESS, GAME_TOKEN_ID, MIN_NANOERG_BOX_VALUE, NUM_OATMEAL_TOKEN_LOSER, NUM_OATMEAL_TOKEN_WINNER, OATMEAL_PRICE, OATMEAL_RESERVE_SCRIPT_ADDRESS, OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS, OATMEAL_TOKEN_ID, RESERVE_SCRIPT_ADDRESS, TX_FEE } from './constants.js';
 import { currentHeight, sendTx } from './explorer.js';
-import { createTransaction, encodeLong, encodeLongArray, signTransaction, signTransactionMultiContext } from './wasm.js';
+import { createTransaction, encodeLong, encodeLongArray, ergoTreeToAddress, signTransaction, signTransactionMultiContext } from './wasm.js';
 let ergolib = import('ergo-lib-wasm-nodejs');
 
 
@@ -329,4 +329,76 @@ export async function processFightResult(blob1, blob2, gameBox, currentConfigBox
             console.log(e)
         }
     }
+}
+
+export async function processOatmealRequest(oatmealRequestJSON, currentReserveBox, currentConfigBox) {
+    const wallet = (await ergolib).Wallet.from_mnemonic("", "");
+    const creationHeight = await currentHeight();
+    const reserveIniWASM = (await ergolib).ErgoBox.from_json(JSONBigInt.stringify(currentReserveBox));
+    const availableAmountNano = oatmealRequestJSON.value - TX_FEE -  MIN_NANOERG_BOX_VALUE;
+    const tokenAmount = Math.floor(availableAmountNano / OATMEAL_PRICE);
+    const change = oatmealRequestJSON.value - TX_FEE - tokenAmount * OATMEAL_PRICE;
+//console.log("change", tokenAmount, availableAmountNano, oatmealRequestJSON.value ,change)
+
+    const reserveIniTokenAmount = reserveIniWASM.tokens().get(0).amount().as_i64().as_num();
+    const newReserveTokenAmount = reserveIniTokenAmount - tokenAmount;
+    const oatmealTokenId = (await ergolib).TokenId.from_str(OATMEAL_TOKEN_ID);
+    const inputs = [oatmealRequestJSON, currentReserveBox];
+    const inputsWASM = (await ergolib).ErgoBoxes.from_boxes_json(inputs);
+    const dataListWASM = new (await ergolib).ErgoBoxAssetsDataList();
+    const boxSelection = new (await ergolib).BoxSelection(inputsWASM, dataListWASM);
+    const boxWASM = (await ergolib).ErgoBox.from_json(JSONBigInt.stringify(oatmealRequestJSON));
+
+    const outputCandidates = (await ergolib).ErgoBoxCandidates.empty();
+    // NEW RESERVE BOX
+    const newReserveTokenAmountWASM = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str(newReserveTokenAmount.toString()));
+    const reserveValue = (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str(MIN_NANOERG_BOX_VALUE.toString()));
+    const reserveBoxBuilder = new (await ergolib).ErgoBoxCandidateBuilder(
+        reserveValue,
+        (await ergolib).Contract.pay_to_address((await ergolib).Address.from_base58(OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS)),
+        creationHeight);
+    reserveBoxBuilder.add_token(oatmealTokenId, newReserveTokenAmountWASM);
+    try {
+        outputCandidates.add(reserveBoxBuilder.build());
+    } catch (e) {
+        console.log(`processOatmealRequest building error: ${e}`);
+        throw e;
+    }
+
+    // Pay box
+    const payBoxValue = (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str((tokenAmount * OATMEAL_PRICE).toString()));
+    const payBoxBuilder = new (await ergolib).ErgoBoxCandidateBuilder(
+        payBoxValue,
+        (await ergolib).Contract.pay_to_address((await ergolib).Address.from_base58(GAME_ADDRESS)),
+        creationHeight);
+    try {
+        outputCandidates.add(payBoxBuilder.build());
+    } catch (e) {
+        console.log(`processOatmealRequest building error: ${e}`);
+        throw e;
+    }
+
+    // Delivery box
+    const deliveryBoxValue = (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str(change.toString()));
+    const oatmealTokenAmount = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str(tokenAmount.toString()));
+    const ownerAddress = await ergoTreeToAddress("00" + oatmealRequestJSON.additionalRegisters.R4.serializedValue);
+    //console.log("ownerAddress", ownerAddress);
+    const deliveryBoxBuilder = new (await ergolib).ErgoBoxCandidateBuilder(
+        deliveryBoxValue,
+        (await ergolib).Contract.pay_to_address((await ergolib).Address.from_base58(ownerAddress)),
+        creationHeight);
+    deliveryBoxBuilder.add_token(oatmealTokenId, oatmealTokenAmount);
+    try {
+        outputCandidates.add(deliveryBoxBuilder.build());
+    } catch (e) {
+        console.log(`processOatmealRequest building error: ${e}`);
+        throw e;
+    }
+    
+    const tx = await createTransaction(boxSelection, outputCandidates, [currentConfigBox], ownerAddress, inputs);
+    const signedTx = JSONBigInt.parse(await signTransaction(tx, inputs, [currentConfigBox], wallet));
+    const txId = await sendTx(signedTx);
+    console.log("processOatmealRequest txId", txId);
+    return [txId, signedTx];
+
 }

@@ -78,15 +78,15 @@ export async function isValidWalletAddress(address) {
 }
 
 export async function getBalance(tokenId = 'ERG') {
-    console.log('getBalance', tokenId);
-    const walletConnected = await connectWallet();
-    console.log('getBalance2', walletConnected, hasConnectorInjected());
-    if (walletConnected && hasConnectorInjected()) {
-        console.log('getBalance3', walletConnected);
-        const amount = await ergo.get_balance(tokenId);
-        return amount;
-    } else {
-        console.log('getBalance4', walletConnected);
+    //console.log('getBalance', tokenId);
+    //const walletConnected = await connectWallet();
+    //console.log('getBalance2', walletConnected, hasConnectorInjected());
+    //if (walletConnected && hasConnectorInjected()) {
+    //    console.log('getBalance3', walletConnected);
+    //    const amount = await ergo.get_balance(tokenId);
+    //    return amount;
+    //} else {
+        //console.log('getBalance4', walletConnected);
         const address = localStorage.getItem('address') ?? '';
         if (address !== '') {
             const balance = await getBalanceForAddress(address);
@@ -110,7 +110,7 @@ export async function getBalance(tokenId = 'ERG') {
             }
         }
         return 0;
-    }
+    //}
 }
 
 function sleep(ms) {

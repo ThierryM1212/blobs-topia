@@ -2,6 +2,7 @@ import React, { Fragment } from 'react';
 import { BLOB_SCRIPT_ADDRESS, GAME_SCRIPT_ADDRESS } from '../utils/constants';
 import { getTransactionsByAddress, getUnspentBoxesForAddressUpdated } from '../ergo-related/explorer';
 import FightItem from '../components/FightItem';
+import { waitingAlert } from '../utils/Alerts';
 
 
 export default class FightsPage extends React.Component {
@@ -17,7 +18,9 @@ export default class FightsPage extends React.Component {
     }
 
     async componentDidMount() {
+        var alert = waitingAlert("Loading the current fights...");
         await this.fetchCurrentFights();
+        alert.close();
         this.fetchOldFights();
     }
 
