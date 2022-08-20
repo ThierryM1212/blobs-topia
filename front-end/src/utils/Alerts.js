@@ -71,7 +71,7 @@ export function promptErgAmount(mode) {
     return new Promise(function (resolve, reject) {
         Swal.fire({
             title: "ERG amount to " + mode,
-            html: `<div><input type="text" id="ergAmount" class="swal2-input" placeholder="ERG amount"></div>`,
+            html: `<div><input type="text" id="ergAmount" class="swal2-input" placeholder="ERG amount" autocomplete="off"></div>`,
             confirmButtonText: mode,
             focusConfirm: false,
             showCancelButton: true,
@@ -96,8 +96,9 @@ export function promptFeedAmount() {
     return new Promise(function (resolve, reject) {
         Swal.fire({
             title: "Feed",
-            html: `<div><input type="text" id="defAmount" class="swal2-input" placeholder="Defense point"></div>
-            <div><input type="text" id="attAmount" class="swal2-input" placeholder="Attack point"></div>`,
+            html: `<div><p>Select the number of Oatmeal tokens you want to use to feed your blob. 1 Oatmeal per attack or defense point added.</p></div>
+            <div><input type="text" id="defAmount" class="swal2-input" placeholder="Defense point" autocomplete="off"></div>
+            <div><input type="text" id="attAmount" class="swal2-input" placeholder="Attack point" autocomplete="off"></div>`,
             confirmButtonText: "Feed",
             focusConfirm: false,
             showCancelButton: true,

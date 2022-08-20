@@ -9,7 +9,7 @@ export default function InputName(props) {
                 <label htmlFor="ref" >Name</label>
             </td>
             <td>
-                <input className="form-control" id="ref" pattern="[ -~]{0,15}" onChange={props.onChange} value={props.name} />
+                <input className="form-control" id="ref" pattern="[ -~]{0,15}" onChange={props.onChange} value={props.name} autocomplete="off" />
             </td>
         </tr>
     )
