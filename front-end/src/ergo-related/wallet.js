@@ -1,5 +1,6 @@
 import JSONBigInt from 'json-bigint';
 import { closeAlert, displayErgoPayTransaction, errorAlert } from '../utils/Alerts';
+import { promiseTimeout } from '../utils/utils';
 import { getBalanceForAddress, getUnconfirmedTxsFor, getUnspentBoxesForAddressUpdated } from './explorer';
 import { getTxReducedB64Safe } from './wasm';
 let ergolib = import('ergo-lib-wasm-browser');
@@ -27,7 +28,7 @@ export async function isWalletConnected() {
         try {
             const res = await window.ergo_check_read_access();
             console.log("isWalletConnected", res)
-            return Promise.resolve(true);
+            return Promise.resolve(res);
         } catch (e) {
             console.error("isWalletConnected error", e);
             //errorAlert("dApp connector not found 1", "Install Nautilus or SAFEW wallet in your browser");
@@ -42,8 +43,8 @@ export async function isWalletConnected() {
 export async function connectWallet() {
     if (hasExtensionConnector()) {
         try {
-            const alreadyConnected = await isWalletConnected();
-            console.log("connectWallet alreadyConnected", alreadyConnected);
+            //const alreadyConnected = await isWalletConnected();
+            //console.log("connectWallet alreadyConnected", alreadyConnected);
             //if (!alreadyConnected) {
                 const res = await window.ergo_request_read_access();
                 await sleep(200)
@@ -301,7 +302,8 @@ async function signTx(txToBeSigned) {
 async function submitTx(txToBeSubmitted) {
     try {
         console.log("submitTx");
-        return await ergo.submit_tx(txToBeSubmitted);
+        const res = await promiseTimeout(30000, ergo.submit_tx(txToBeSubmitted));
+        return res;
     } catch (e) {
         console.log(e);
         return null;
