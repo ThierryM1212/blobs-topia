@@ -154,6 +154,18 @@ input[type=radio]:checked + div {
   border-radius: 5px;
 }
 
+.btn:focus:active {
+  outline-color: transparent;
+  outline-style:solid;
+  box-shadow: 0 0 0 4px #654ea3;
+  transition: 0.5s;
+}
+
+.btn:hover:enabled {
+  box-shadow: 0 0 0 2px #654ea3;
+  transition: 0.7s;
+}
+
 .btn-ultra-voilet {
   background: rgba(231, 20, 231, 0.5);  
   font-weight: bold;
