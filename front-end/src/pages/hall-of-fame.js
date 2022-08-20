@@ -1,6 +1,6 @@
 import React from 'react';
 import BlobItem from '../components/BlobItem';
-import { getBlobPowers, getBlobVictories } from '../utils/utils';
+import { filterBlobList, getBlobPowers, getBlobVictories } from '../utils/utils';
 import { BLOB_SCRIPT_ADDRESS } from '../utils/constants';
 import { getUnspentBoxesForAddressUpdated } from '../ergo-related/explorer';
 import { waitingAlert } from '../utils/Alerts';
@@ -38,9 +38,9 @@ export default class HallOfFamePage extends React.Component {
 
         //console.log("blobList sorted trimmed", blobListByVictories);
         this.setState({
-            blobListByVictories: blobListByVictories,
-            blobListByAttPower: blobListByAttPower,
-            blobListByDefPower: blobListByDefPower,
+            blobListByVictories: filterBlobList(blobListByVictories),
+            blobListByAttPower: filterBlobList(blobListByAttPower),
+            blobListByDefPower: filterBlobList(blobListByDefPower),
         })
     }
 
@@ -57,10 +57,9 @@ export default class HallOfFamePage extends React.Component {
                 </h4>
                 <div className="d-flex flex-wrap">
                     {this.state.blobListByVictories.map((item, index) => (
-                        <div className='d-flex flex-column align-items-center'>
+                        <div className='d-flex flex-column align-items-center' key={item.boxId}>
                             <h2>#{index + 1}</h2>
                             <BlobItem
-                                key={item.boxId}
                                 blobBoxJSON={item}
                                 updateList={this.fetchBlobs}
                                 disableActions={true}
@@ -76,10 +75,9 @@ export default class HallOfFamePage extends React.Component {
                 </h4>
                 <div className="d-flex flex-wrap">
                     {this.state.blobListByAttPower.map((item, index) => (
-                        <div className='d-flex flex-column align-items-center'>
+                        <div className='d-flex flex-column align-items-center' key={item.boxId}>
                         <h2>#{index + 1}</h2>
                         <BlobItem
-                            key={item.boxId}
                             blobBoxJSON={item}
                             updateList={this.fetchBlobs}
                             disableActions={true}
@@ -95,10 +93,9 @@ export default class HallOfFamePage extends React.Component {
                 </h4>
                 <div className="d-flex flex-wrap">
                     {this.state.blobListByDefPower.map((item, index) => (
-                        <div className='d-flex flex-column align-items-center'>
+                        <div className='d-flex flex-column align-items-center' key={item.boxId}>
                         <h2>#{index + 1}</h2>
                         <BlobItem
-                            key={item.boxId}
                             blobBoxJSON={item}
                             updateList={this.fetchBlobs}
                             disableActions={true}

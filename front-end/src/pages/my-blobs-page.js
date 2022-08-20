@@ -5,6 +5,7 @@ import BlobItem from '../components/BlobItem';
 import { toHexString } from '../ergo-related/serializer';
 import BlobRequestItem from '../components/BlobRequestItem';
 import { errorAlert, waitingAlert } from '../utils/Alerts';
+import { filterBlobList } from '../utils/utils';
 let ergolib = import('ergo-lib-wasm-browser');
 
 
@@ -77,19 +78,8 @@ export default class MyBlobsPage extends React.Component {
         blobBoxes = blobBoxesTmp.concat(newBoxes2).filter(box => !spentBoxIds.includes(box.boxId));
         //console.log("blobBoxes", blobBoxes)
         
-        var blobList = [];
-        for (const box of blobBoxes) {
-            try {
-                if (box.additionalRegisters.R6) {
-                    const blobSigmaProp = Buffer.from(box.additionalRegisters.R6.serializedValue, 'hex')
-                    if (toHexString(blobSigmaProp) === addressSigmaPropHex) {
-                        blobList.push(box);
-                    }
-                }
-            } catch (e) {
-                console.log("fetchBlobs", e)
-            }
-        }
+        var blobList = filterBlobList(blobBoxes);
+
         this.setState({
             blobList: blobList
         })

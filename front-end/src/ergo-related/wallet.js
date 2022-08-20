@@ -43,15 +43,15 @@ export async function isWalletConnected() {
 export async function connectWallet() {
     if (hasExtensionConnector()) {
         try {
-            //const alreadyConnected = await isWalletConnected();
-            //console.log("connectWallet alreadyConnected", alreadyConnected);
-            //if (!alreadyConnected) {
-                const res = await window.ergo_request_read_access();
-                await sleep(200)
-                return res
-            //} else {
-            //    return true;
-            //}
+            const alreadyConnected = await isWalletConnected();
+            console.log("connectWallet alreadyConnected", alreadyConnected);
+            if (!alreadyConnected) {
+              const res = await window.ergo_request_read_access();
+              await sleep(100)
+              return res
+            } else {
+                return true;
+            }
         } catch (e) {
             console.error(e);
             errorAlert("dApp connector not found 2", "Install Nautilus or SAFEW wallet in your browser");

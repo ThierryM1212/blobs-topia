@@ -67,6 +67,21 @@ export function computeP1WinningChance(blob1, blob2) {
     return p1Win / numberOfRound;
 }
 
+export function filterBlobList(blobList) {
+    var blobsById = {};
+    for (const blob of blobList) {
+        const blobId = blob.additionalRegisters.R9.renderedValue;
+        if (!blobsById[blobId]) {
+            blobsById[blobId] = blob;
+        } else {
+            if (blob.globalIndex > blobsById[blobId].globalIndex) {
+                blobsById[blobId] = blob;
+            }
+        }       
+    }
+    return Object.values(blobsById);
+}
+
 
 //export function isP1Win(blob1,blob2,blockId) {
 //    const maxPowerDiff = 6000;

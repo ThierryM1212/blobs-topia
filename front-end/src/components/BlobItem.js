@@ -64,8 +64,8 @@ export default class BlobItem extends React.Component {
                 break;
             }
         }
-        console.log("rating", rating);
-        console.log("ownerAddress", ownerAddress);
+        //console.log("rating", rating);
+        //console.log("ownerAddress", ownerAddress);
 
         this.setState({
             boxId: box.boxId,
