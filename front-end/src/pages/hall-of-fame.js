@@ -25,22 +25,23 @@ export default class HallOfFamePage extends React.Component {
 
     async fetchBlobs() {
         const blobBoxes = await getUnspentBoxesForAddressUpdated(BLOB_SCRIPT_ADDRESS);
+        const filteredBlobBoxes = filterBlobList(blobBoxes);
         //console.log("fetchBlobs blobBoxes", blobBoxes)
-        const blobListByVictories = blobBoxes.sort(function (a, b) {
+        const blobListByVictories = filteredBlobBoxes.sort(function (a, b) {
             return getBlobVictories(b.additionalRegisters.R5.renderedValue) - getBlobVictories(a.additionalRegisters.R5.renderedValue);
         }).slice(0, 10);
-        const blobListByAttPower = blobBoxes.sort(function (a, b) {
+        const blobListByAttPower = filteredBlobBoxes.sort(function (a, b) {
             return getBlobPowers(b.additionalRegisters.R5.renderedValue)[0] - getBlobPowers(a.additionalRegisters.R5.renderedValue)[0]
         }).slice(0, 10);
-        const blobListByDefPower = blobBoxes.sort(function (a, b) {
+        const blobListByDefPower = filteredBlobBoxes.sort(function (a, b) {
             return getBlobPowers(b.additionalRegisters.R5.renderedValue)[1] - getBlobPowers(a.additionalRegisters.R5.renderedValue)[1]
         }).slice(0, 10);
 
         //console.log("blobList sorted trimmed", blobListByVictories);
         this.setState({
-            blobListByVictories: filterBlobList(blobListByVictories),
-            blobListByAttPower: filterBlobList(blobListByAttPower),
-            blobListByDefPower: filterBlobList(blobListByDefPower),
+            blobListByVictories: blobListByVictories,
+            blobListByAttPower: blobListByAttPower,
+            blobListByDefPower: blobListByDefPower,
         })
     }
 
