@@ -1,6 +1,8 @@
 import React from 'react';
-import { getBalanceForAddress } from '../ergo-related/explorer';
-import { BLOB_SCRIPT_ADDRESS } from '../utils/constants';
+import { getBalanceForAddress, getBoxesByAddress, getUnspentBoxesByAddress } from '../ergo-related/explorer';
+import { getUtxosListValue } from '../ergo-related/wasm';
+import { BLOB_SCRIPT_ADDRESS, GAME_SCRIPT_ADDRESS } from '../utils/constants';
+import { formatERGAmount } from '../utils/utils';
 
 
 export default class AppStatistics extends React.Component {
@@ -8,27 +10,40 @@ export default class AppStatistics extends React.Component {
         super(props);
         this.state = {
             ergAmount: 0,
-            oatmealAmount: 0,
-            ergopay: false,
+            numberOfBlobs: 0,
+            numberofFights: 0,
+            fightAmount: 0,
         };
     }
 
 
     async componentDidMount() {
-        const totalERGInBlobs = await getBalanceForAddress(BLOB_SCRIPT_ADDRESS);
-        const numberOfBlobs = 0;
-
+        const blobList = await getUnspentBoxesByAddress(BLOB_SCRIPT_ADDRESS);
+        const fightList = await getBoxesByAddress(GAME_SCRIPT_ADDRESS);
         this.setState({
-            ergAmount: nanoERGAmount,
-            oatmealAmount: oatmealAmount,
-            ergopay: ergopay,
+            ergAmount: getUtxosListValue(blobList),
+            numberOfBlobs: blobList.length,
+            numberofFights: fightList.length,
+            fightAmount: getUtxosListValue(fightList),
         });
     }
 
     render() {
         return (
-            <div className="d-flex flex-column m-1 p-1">
-                
+            <div className="d-flex flex-column zonecard m-1 p-1">
+                <h4>Game statistics</h4>
+                <div className="w-100 d-flex flex-row justify-content-between m-1 p-1">
+                    <h5>Number of living blobs: </h5> <strong>{this.state.numberOfBlobs}</strong>
+                </div>
+                <div className="w-100 d-flex flex-row justify-content-between m-1 p-1">
+                    <h5>Amount of ERG in the blobs: </h5> <strong>{formatERGAmount(this.state.ergAmount)} ERG</strong>
+                </div>
+                <div className="w-100 d-flex flex-row justify-content-between m-1 p-1">
+                    <h5>Number of fights processed: </h5> <strong>{this.state.numberofFights}</strong>
+                </div>
+                <div className="w-100 d-flex flex-row justify-content-between m-1 p-1">
+                    <h5>Erg amount played: </h5> <strong>{formatERGAmount(this.state.fightAmount)} ERG</strong>
+                </div>
             </div>
         )
     }

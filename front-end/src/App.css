@@ -109,6 +109,11 @@ input[type="text"], textarea {
   border-radius: 10px;
   background-color: rgba(255, 255, 255, .5);
   color: black;
+  text-align: left;
+  line-height: 1em;
+}
+.aboutlink {
+  color: deepskyblue;
 }
 
 .zonefight {

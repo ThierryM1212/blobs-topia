@@ -1,4 +1,5 @@
 import React, { Fragment } from 'react';
+import AppStatistics from '../components/AppStatistics';
 import MainImage from "../images/illustration_blob_reduced.png";
 import telegramLogo from "../images/telegram_logo.png";
 
@@ -22,6 +23,7 @@ export default class Home extends React.Component {
                     <div className='d-flex flex-column w-75 m-2 p-2 align-items-center'>
                         <h3>Create a blob and join the fight !</h3>
                     </div>
+                    <AppStatistics />
                 </div>
             </Fragment>
         )
