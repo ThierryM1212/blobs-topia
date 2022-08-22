@@ -49,8 +49,8 @@
     val blob2Funds = INPUTS(1).value
     val gameAmount = ( SELF.value + txFee ) / 2
     val validValues = anyOf(Coll(
-                        p1win && OUTPUTS(0).value == blob1Funds + 2 * gameAmount - 2 * txFee - 2000000L && OUTPUTS(1).value == blob2Funds,
-                        !p1win && OUTPUTS(0).value == blob1Funds && OUTPUTS(1).value == blob2Funds + 2 * gameAmount - 2 * txFee - 2000000L
+                        p1win && OUTPUTS(0).value == blob1Funds + 2 * gameAmount - 2 * txFee - 2 * BoxMinValue && OUTPUTS(1).value == blob2Funds,
+                        !p1win && OUTPUTS(0).value == blob1Funds && OUTPUTS(1).value == blob2Funds + 2 * gameAmount - 2 * txFee - 2 * BoxMinValue
                       ))
                       
     // Check Oatmeal token distribution

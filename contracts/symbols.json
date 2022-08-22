@@ -19,6 +19,11 @@
       "name":"OatmealTokenNFTId",
       "type":"CollByte",
       "value":"25ea05523dc54837ea5e255a82359da4f1969bda95cabaed5b064f14752d1901"
+    },
+    {
+      "name":"BoxMinValue",
+      "type":"Long",
+      "value":"1000000"
     }
   ]
 }

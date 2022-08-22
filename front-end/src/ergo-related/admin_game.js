@@ -1,10 +1,13 @@
 import { errorAlert, waitingAlert } from '../utils/Alerts';
-import { BLOB_EXCHANGE_FEE, BLOB_MINT_FEE, BLOB_PRICE, BLOB_SCRIPT_HASH, CONFIG_SCRIPT_ADDRESS, CONFIG_TOKEN_ID, GAME_ADDRESS, GAME_SCRIPT_HASH, GAME_TOKEN_ID, INI_BLOB_ATT_LEVEL, INI_BLOB_DEF_LEVEL, INI_BLOB_GAME, INI_BLOB_VICTORY, MAX_POWER_DIFF, MIN_NANOERG_BOX_VALUE, NANOERG_TO_ERG, NUM_OATMEAL_TOKEN_LOSER, NUM_OATMEAL_TOKEN_WINNER, OATMEAL_PRICE, OATMEAL_RESERVE_SCRIPT_ADDRESS, OATMEAL_RESERVE_SCRIPT_HASH, OATMEAL_TOKEN_ID, RESERVE_SCRIPT_ADDRESS, TX_FEE } from '../utils/constants';
+import { BLOB_EXCHANGE_FEE, BLOB_MINT_FEE, BLOB_PRICE, CONFIG_TOKEN_ID, GAME_ADDRESS, GAME_TOKEN_ID, INI_BLOB_ATT_LEVEL, INI_BLOB_DEF_LEVEL, INI_BLOB_GAME, INI_BLOB_VICTORY, MAX_POWER_DIFF, MIN_NANOERG_BOX_VALUE, NANOERG_TO_ERG, NUM_OATMEAL_TOKEN_LOSER, NUM_OATMEAL_TOKEN_WINNER, OATMEAL_PRICE, OATMEAL_TOKEN_ID, TX_FEE } from '../utils/constants';
+import { BLOB_SCRIPT_HASH, CONFIG_SCRIPT_ADDRESS, GAME_SCRIPT_HASH, OATMEAL_RESERVE_SCRIPT_HASH, RESERVE_SCRIPT_ADDRESS } from "../utils/script_constants";
 import { boxById, boxByTokenId, currentHeight } from './explorer';
 import { encodeHexConst, encodeLong, encodeLongArray } from './serializer';
 import { createTransaction, getBoxSelection, parseUtxo, setBoxRegisterByteArray, verifyTransactionIO } from './wasm';
 import { getAllUtxos, getTokenUtxos, getUtxos, isValidWalletAddress, walletSignTx } from './wallet.js';
 let ergolib = import('ergo-lib-wasm-browser');
+
+
 
 export async function burnGameTokenReserve(boxId) {
     const address = localStorage.getItem('address');

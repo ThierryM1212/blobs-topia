@@ -1,9 +1,11 @@
 import JSONBigInt from 'json-bigint';
-import { BLOB_MINT_FEE, BLOB_SCRIPT_ADDRESS, GAME_ADDRESS, GAME_SCRIPT_ADDRESS, GAME_TOKEN_ID, MIN_NANOERG_BOX_VALUE, NUM_OATMEAL_TOKEN_LOSER, NUM_OATMEAL_TOKEN_WINNER, OATMEAL_PRICE, OATMEAL_RESERVE_SCRIPT_ADDRESS, OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS, OATMEAL_TOKEN_ID, RESERVE_SCRIPT_ADDRESS, TX_FEE } from '../utils/constants.js';
+import { BLOB_MINT_FEE, GAME_ADDRESS, GAME_TOKEN_ID, MIN_NANOERG_BOX_VALUE, NUM_OATMEAL_TOKEN_LOSER, NUM_OATMEAL_TOKEN_WINNER, OATMEAL_PRICE, OATMEAL_TOKEN_ID, TX_FEE } from '../utils/constants.js';
+import { BLOB_SCRIPT_ADDRESS, GAME_SCRIPT_ADDRESS, OATMEAL_RESERVE_SCRIPT_ADDRESS, OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS, RESERVE_SCRIPT_ADDRESS } from "../utils/script_constants";
 import { currentHeight, sendTx } from './explorer.js';
 import { encodeLong, encodeLongArray, ergoTreeToAddress } from './serializer.js';
 import { createTransaction, signTransaction, signTransactionMultiContext } from './wasm.js';
 let ergolib = import('ergo-lib-wasm-browser');
+
 
 
 export async function processBlobRequest(blobRequestJSON, currentReserveBox, currentConfigBox) {

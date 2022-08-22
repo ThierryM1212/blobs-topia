@@ -1,9 +1,10 @@
 import React, { Fragment } from 'react';
-import { BLOB_REQUEST_SCRIPT_ADDRESS, OATMEAL_BUY_REQUEST_SCRIPT_ADDRESS } from '../utils/constants';
+import { BLOB_REQUEST_SCRIPT_ADDRESS } from "../utils/script_constants";
 import { getUnspentBoxesForAddressUpdated } from '../ergo-related/explorer';
 import BlobRequestItem from '../components/BlobRequestItem';
 import OatmealBuyRequestList from '../components/OatmealBuyRequestList';
 import { waitingAlert } from '../utils/Alerts';
+
 
 
 export default class RequestBotPage extends React.Component {

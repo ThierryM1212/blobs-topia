@@ -4,8 +4,10 @@ import { processOatmealRequest } from '../ergo-related/bot_wasm.js';
 import { boxByTokenId, getUnspentBoxesForAddressUpdated } from '../ergo-related/explorer.js';
 import { ergoTreeToAddress } from "../ergo-related/serializer.js";
 import { displayTransaction, errorAlert, waitingAlert } from '../utils/Alerts.js';
-import { CONFIG_TOKEN_ID, MIN_NANOERG_BOX_VALUE, OATMEAL_PRICE, OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS, TX_FEE } from "../utils/constants.js";
+import { CONFIG_TOKEN_ID, MIN_NANOERG_BOX_VALUE, OATMEAL_PRICE, TX_FEE } from "../utils/constants.js";
+import { OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS } from "../utils/script_constants";
 import { formatERGAmount, formatLongString } from '../utils/utils.js';
+
 
 export default class OatmealBuyRequestItem extends React.Component {
     constructor(props) {

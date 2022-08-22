@@ -1,8 +1,7 @@
 import React, { Fragment } from 'react';
-import { BLOB_SCRIPT_ADDRESS, OATMEAL_PRICE } from '../utils/constants';
+import { BLOB_SCRIPT_ADDRESS } from "../utils/script_constants";
 import { getSpentAndUnspentBoxesFromMempool, searchBlobUnspentBoxes } from '../ergo-related/explorer';
 import BlobItem from '../components/BlobItem';
-import { formatERGAmount } from '../utils/utils';
 import { waitingAlert } from '../utils/Alerts';
 
 

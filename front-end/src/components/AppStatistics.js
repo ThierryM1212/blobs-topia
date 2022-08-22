@@ -1,7 +1,7 @@
 import React from 'react';
-import { getBalanceForAddress, getBoxesByAddress, getUnspentBoxesByAddress } from '../ergo-related/explorer';
+import { getBoxesByAddress, getUnspentBoxesByAddress } from '../ergo-related/explorer';
 import { getUtxosListValue } from '../ergo-related/wasm';
-import { BLOB_SCRIPT_ADDRESS, GAME_SCRIPT_ADDRESS } from '../utils/constants';
+import { BLOB_SCRIPT_ADDRESS, GAME_SCRIPT_ADDRESS } from "../utils/script_constants";
 import { formatERGAmount } from '../utils/utils';
 
 

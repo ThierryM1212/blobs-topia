@@ -1,11 +1,13 @@
 import JSONBigInt from 'json-bigint';
 import { errorAlert, promptErgAmount, waitingAlert } from "../utils/Alerts";
-import { BLOB_ERG_MIN_VALUE, BLOB_EXCHANGE_FEE, BLOB_PRICE, BLOB_REQUEST_SCRIPT_ADDRESS, BLOB_SCRIPT_ADDRESS, CONFIG_TOKEN_ID, GAME_ADDRESS, GAME_TOKEN_ID, MIN_NANOERG_BOX_VALUE, NANOERG_TO_ERG, OATMEAL_BUY_REQUEST_SCRIPT_ADDRESS, OATMEAL_TOKEN_ID, TX_FEE } from "../utils/constants";
+import { BLOB_ERG_MIN_VALUE, BLOB_EXCHANGE_FEE, BLOB_PRICE, CONFIG_TOKEN_ID, GAME_ADDRESS, GAME_TOKEN_ID, MIN_NANOERG_BOX_VALUE, NANOERG_TO_ERG, OATMEAL_TOKEN_ID, TX_FEE } from "../utils/constants";
+import { BLOB_REQUEST_SCRIPT_ADDRESS, BLOB_SCRIPT_ADDRESS, OATMEAL_BUY_REQUEST_SCRIPT_ADDRESS } from "../utils/script_constants";
 import { boxByTokenId, currentHeight } from "./explorer";
 import { encodeLong, encodeLongArray } from './serializer';
 import { addSimpleOutputBox, createTransaction, getUtxosListValue, parseUtxo, setBoxRegisterByteArray, verifyTransactionIO } from "./wasm";
 import { getBalance, getTokenUtxos, getUtxos, isValidWalletAddress, walletSignTx } from "./wallet.js";
 let ergolib = import('ergo-lib-wasm-browser');
+
 
 
 export async function refundRequest(blobRequestBoxJSON) {

@@ -1,9 +1,8 @@
 .App {
   text-align: center;
   font-family: 'Fuzzy Bubbles', cursive;
-  background-image: url("images/sky.png") ;
+  background-image: url("images/sky.jpg") ;
   background-repeat: repeat;   
-  background-size: contain;
 
   margin:auto;
   padding:0;
@@ -21,6 +20,10 @@
 .App-logo {
   height: 40vmin;
   pointer-events: none;
+}
+
+p {
+  font-family: Arial, sans-serif;
 }
 
 #navbar {
@@ -154,11 +157,8 @@ input[type=radio]:checked + div {
   border-radius: 5px;
 }
 
-.btn:focus:active {
-  outline-color: transparent;
-  outline-style:solid;
-  box-shadow: 0 0 0 4px #654ea3;
-  transition: 0.5s;
+.btn:active {
+  transform: translateY(4px);
 }
 
 .btn:hover:enabled {

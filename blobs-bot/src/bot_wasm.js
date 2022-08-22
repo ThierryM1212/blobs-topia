@@ -1,6 +1,7 @@
 import JSONBigInt from 'json-bigint';
-import { BLOB_MINT_FEE, BLOB_SCRIPT_ADDRESS, GAME_ADDRESS, GAME_SCRIPT_ADDRESS, GAME_TOKEN_ID, MIN_NANOERG_BOX_VALUE, NUM_OATMEAL_TOKEN_LOSER, NUM_OATMEAL_TOKEN_WINNER, OATMEAL_PRICE, OATMEAL_RESERVE_SCRIPT_ADDRESS, OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS, OATMEAL_TOKEN_ID, RESERVE_SCRIPT_ADDRESS, TX_FEE } from './constants.js';
+import { BLOB_MINT_FEE, GAME_ADDRESS, GAME_TOKEN_ID, MIN_NANOERG_BOX_VALUE, NUM_OATMEAL_TOKEN_LOSER, NUM_OATMEAL_TOKEN_WINNER, OATMEAL_PRICE, OATMEAL_TOKEN_ID, TX_FEE } from './constants.js';
 import { currentHeight, sendTx } from './explorer.js';
+import { BLOB_SCRIPT_ADDRESS, GAME_SCRIPT_ADDRESS, OATMEAL_RESERVE_SCRIPT_ADDRESS, OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS, RESERVE_SCRIPT_ADDRESS } from './script_constants.js';
 import { createTransaction, encodeLong, encodeLongArray, ergoTreeToAddress, signTransaction, signTransactionMultiContext } from './wasm.js';
 let ergolib = import('ergo-lib-wasm-nodejs');
 

@@ -1,3 +1,0 @@
-{
-    proveDlog(GameFundPK) || proveDlog(testPK)
-}

@@ -1,12 +1,12 @@
 import React, { Fragment } from 'react';
-import { RESERVE_SCRIPT_ADDRESS, GAME_ADDRESS, GAME_TOKEN_ID, OATMEAL_RESERVE_SCRIPT_ADDRESS, OATMEAL_TOKEN_ID, OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS} from '../utils/constants';
+import { GAME_ADDRESS, GAME_TOKEN_ID, OATMEAL_TOKEN_ID} from '../utils/constants';
+import { RESERVE_SCRIPT_ADDRESS, OATMEAL_RESERVE_SCRIPT_ADDRESS, OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS } from "../utils/script_constants";
 import {  getUnspentBoxesByAddress } from '../ergo-related/explorer';
 import ReserveItem from '../components/ReserveItem';
 import ConfigItem from '../components/ConfigItem';
 import OatmealReserveItem from '../components/OatmealReserveItem';
 import { mintGameTokenReserve, mintOatmealReserve, updateConfigurationBox } from '../ergo-related/admin_game';
 import { getRegisterValue, getTokenAmount } from '../ergo-related/wasm';
-
 
 
 export default class Admin extends React.Component {

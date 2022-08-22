@@ -1,4 +1,6 @@
-import { CONFIG_SCRIPT_ADDRESS, CONFIG_TOKEN_ID } from "./constants.js";
+import { CONFIG_TOKEN_ID } from "./constants.js";
+import { CONFIG_SCRIPT_ADDRESS } from './script_constants.js';
+
 import { boxByTokenId } from "./explorer.js";
 
 

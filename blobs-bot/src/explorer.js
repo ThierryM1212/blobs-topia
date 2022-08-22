@@ -3,7 +3,7 @@ import { TextDecoderStream } from 'node:stream/web';
 import JSONBigInt from 'json-bigint';
 import { DEFAULT_EXPLORER_API_ADDRESS } from './constants.js';
 
-async function get(url, apiKey = '') {
+export async function get(url, apiKey = '') {
     try {
         return await fetch(url, {
             headers: {
@@ -60,7 +60,7 @@ export async function sendTx(json) {
     return res;
 }
 
-async function postTx(url, body = {}, apiKey = '') {
+export async function postTx(url, body = {}, apiKey = '') {
     //console.log("post", url)
     const response = await fetch(url, {
         method: 'POST',
@@ -82,7 +82,7 @@ async function postTx(url, body = {}, apiKey = '') {
             return bodyRes;
         }
     } else {
-        console.log("fetch2", bodyRes);
+        //console.log("fetch2", bodyRes);
         return;
     }
 }

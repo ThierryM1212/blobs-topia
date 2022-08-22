@@ -2,11 +2,13 @@ import React, { Fragment } from 'react';
 import { engageFight } from '../ergo-related/bot_wasm';
 import { boxByTokenId, getUnspentBoxesByAddress } from '../ergo-related/explorer';
 import { displayTransaction, waitingAlert, errorAlert } from '../utils/Alerts';
-import { CONFIG_TOKEN_ID, OATMEAL_RESERVE_SCRIPT_ADDRESS } from '../utils/constants';
+import { CONFIG_TOKEN_ID } from '../utils/constants';
+import { OATMEAL_RESERVE_SCRIPT_ADDRESS } from "../utils/script_constants";
 import { formatERGAmount } from '../utils/utils';
 import BlobItem from './BlobItem';
 import { Checkbox } from './Checkbox';
 import JSONBigInt from 'json-bigint';
+
 
 export default class BlobFightPicker extends React.Component {
     constructor(props) {

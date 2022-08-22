@@ -1,9 +1,10 @@
 import React from 'react';
 import BlobItem from '../components/BlobItem';
 import { filterBlobList, getBlobPowers, getBlobVictories } from '../utils/utils';
-import { BLOB_SCRIPT_ADDRESS } from '../utils/constants';
+import { BLOB_SCRIPT_ADDRESS } from "../utils/script_constants";
 import { getUnspentBoxesForAddressUpdated } from '../ergo-related/explorer';
 import { waitingAlert } from '../utils/Alerts';
+
 
 
 export default class HallOfFamePage extends React.Component {

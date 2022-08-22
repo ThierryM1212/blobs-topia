@@ -61,14 +61,13 @@ export default class AboutPage extends React.Component {
                     <h5>What is required to play ?</h5>
                     <p>Nothing, even without ERG address nor wallet you can play the "bot", and process manually the blob requests, the match making or the fight results.</p>
                     <p>To own a blob you need a compatible ergo wallet: </p>
-                    <p>  Recommended setting: <strong>Nautilus on desktop Chrome browser</strong></p>
+                    <p>  Recommended setting: <strong>Nautilus or SAFEW on desktop Chrome browser</strong></p>
                     <p>This will allow you to run chained transactions to make the interaction with your blob faster.</p>
                 </div>
 
                 <div className='w-100 zoneabout d-flex flex-column align-items-start m-2 p-2'>
                     <h5>How to play on desktop ?</h5>
-                    <p>You need to setup your address in the dApp and uses Nautilus (recommended) or SAFEW wallet in your browser.</p>
-                    <p>With current SAFEW (v0.6.6) version you won't be able to run chained transactions.</p>
+                    <p>You need to setup your address in the dApp and uses Nautilus or SAFEW wallet in your browser.</p>
                 </div>
 
                 <div className='w-100 zoneabout d-flex flex-column align-items-start m-2 p-2'>

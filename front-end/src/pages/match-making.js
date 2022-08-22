@@ -1,8 +1,9 @@
 import React, { Fragment } from 'react';
-import { BLOB_SCRIPT_ADDRESS } from '../utils/constants';
+import { BLOB_SCRIPT_ADDRESS } from "../utils/script_constants";
 import BlobFightPicker from '../components/BlobFightPicker';
 import { getSpentAndUnspentBoxesFromMempool, searchBlobUnspentBoxes } from '../ergo-related/explorer';
 import { waitingAlert } from '../utils/Alerts';
+
 
 
 export default class MatchMakingPage extends React.Component {

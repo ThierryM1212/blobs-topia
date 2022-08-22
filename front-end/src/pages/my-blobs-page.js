@@ -1,5 +1,5 @@
 import React, { Fragment } from 'react';
-import { BLOB_REQUEST_SCRIPT_ADDRESS, BLOB_SCRIPT_ADDRESS } from '../utils/constants';
+import { BLOB_REQUEST_SCRIPT_ADDRESS, BLOB_SCRIPT_ADDRESS } from "../utils/script_constants";
 import { getSpentAndUnspentBoxesFromMempool, getUnspentBoxesForAddressUpdated, searchBlobUnspentBoxes } from '../ergo-related/explorer';
 import BlobItem from '../components/BlobItem';
 import { toHexString } from '../ergo-related/serializer';
@@ -7,6 +7,7 @@ import BlobRequestItem from '../components/BlobRequestItem';
 import { errorAlert, waitingAlert } from '../utils/Alerts';
 import { filterBlobList } from '../utils/utils';
 let ergolib = import('ergo-lib-wasm-browser');
+
 
 
 export default class MyBlobsPage extends React.Component {

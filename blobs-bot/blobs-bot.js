@@ -1,5 +1,6 @@
 import { getCurrentConfigBox } from './src/blobs_action.js';
-import { BLOB_REQUEST_SCRIPT_ADDRESS, BLOB_SCRIPT_ADDRESS, CONFIG_SCRIPT_ADDRESS, GAME_SCRIPT_ADDRESS, OATMEAL_BUY_REQUEST_SCRIPT_ADDRESS, OATMEAL_RESERVE_SCRIPT, OATMEAL_RESERVE_SCRIPT_ADDRESS, OATMEAL_SELL_RESERVE_SCRIPT, OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS, RESERVE_SCRIPT, RESERVE_SCRIPT_ADDRESS, TX_FEE } from "./src/constants.js";
+import { TX_FEE } from "./src/constants.js";
+import { BLOB_REQUEST_SCRIPT_ADDRESS, BLOB_SCRIPT_ADDRESS, CONFIG_SCRIPT_ADDRESS, GAME_SCRIPT_ADDRESS, OATMEAL_BUY_REQUEST_SCRIPT_ADDRESS, OATMEAL_RESERVE_SCRIPT, OATMEAL_RESERVE_SCRIPT_ADDRESS, OATMEAL_SELL_RESERVE_SCRIPT, OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS, RESERVE_SCRIPT, RESERVE_SCRIPT_ADDRESS } from "./src/script_constants.js";
 import { getMempoolUnspentBoxesByAddresses, getUnspentBoxesByAddress } from "./src/explorer.js";
 import dayjs from 'dayjs';
 import { engageFight, processBlobRequest, processFightResult, processOatmealRequest } from './src/bot_wasm.js';

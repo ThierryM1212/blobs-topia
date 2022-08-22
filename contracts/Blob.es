@@ -19,7 +19,7 @@
     val blobExchangeFee = configBox.R6[Coll[Long]].get(0)
     val txFee = configBox.R6[Coll[Long]].get(1)
     val oatmealReserverHash = configBox.R7[Coll[Byte]].get
-    val blobMinValue = 2000000L + txFee
+    val blobMinValue = 2 * BoxMinValue + txFee
     
     // verify basic attributes of a blob
     def isBlob(id: Int) = if (blake2b256(OUTPUTS(id).propositionBytes) == blobScriptHash ) {
@@ -41,7 +41,7 @@
     
     // KILL BLOB
     val validKill = if (!validBlob0) {
-        val blobKillMinFee = max(blobValueIn * blobExchangeFee / 1000, 1000000)
+        val blobKillMinFee = max(blobValueIn * blobExchangeFee / 1000, BoxMinValue)
         if (OUTPUTS(0).propositionBytes == proveDlog(GameFundPK).propBytes) {
             OUTPUTS(0).tokens(0)._1 == GameTokenNFTId                       &&
             OUTPUTS(0).tokens(0)._2 == 2                                    &&
@@ -58,7 +58,7 @@
     // ADD/WIDTHDRAW FUNDS
     val validAddWidthdrawFund = if (validBlob0 && blobStateIn == 0) {
         val blobValueDiff = max(blobValueIn - OUTPUTS(0).value, blobValueIn - OUTPUTS(0).value)
-        val minBlobWidthdrawFee = max(blobValueDiff * blobExchangeFee / 1000, 1000000L)
+        val minBlobWidthdrawFee = max(blobValueDiff * blobExchangeFee / 1000, BoxMinValue)
         if (OUTPUTS(1).propositionBytes == proveDlog(GameFundPK).propBytes) {
             OUTPUTS(1).value >= minBlobWidthdrawFee                       &&
             OUTPUTS(0).tokens(0)._2 == 2                                  &&
@@ -114,7 +114,7 @@
     // SELL BLOB
     val validSell = if (validBlob0 && (blobStateIn == 2)) {
         if (OUTPUTS.size > 3) {
-            val minBlobSellFee = max(blobStateValueIn * blobExchangeFee / 1000, 1000000L)
+            val minBlobSellFee = max(blobStateValueIn * blobExchangeFee / 1000, BoxMinValue)
             if (OUTPUTS(1).propositionBytes == proveDlog(GameFundPK).propBytes) {
                 OUTPUTS(1).value >= minBlobSellFee                            &&
                 OUTPUTS(2).propositionBytes == ownerPKin.propBytes            &&

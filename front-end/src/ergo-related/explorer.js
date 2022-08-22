@@ -1,7 +1,9 @@
 import { get, getStream } from './rest';
 import JSONBigInt from 'json-bigint';
-import { BLOB_SCRIPT, GAME_TOKEN_ID } from '../utils/constants';
+import { GAME_TOKEN_ID } from '../utils/constants';
+import { BLOB_SCRIPT } from "../utils/script_constants";
 import { ergoTreeToTemplateHash } from './serializer';
+
 
 export const trueAddress = '4MQyML64GnzMxZgm'; // dummy address to get unsigned tx from node, we only care about the boxes though in this case
 export const explorerApi = 'https://api.ergoplatform.com/api/v0';

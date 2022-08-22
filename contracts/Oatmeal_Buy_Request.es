@@ -10,7 +10,7 @@
     val oatmealPrice = configBox.R6[Coll[Long]].get(5)
     
     val validBuy =  if (OUTPUTS.size > 3) {
-                        val tokenSellAmount = (requestAmountNano - txFee - 1000000L) / oatmealPrice
+                        val tokenSellAmount = (requestAmountNano - txFee - BoxMinValue) / oatmealPrice
                         // dApp pay box
                         OUTPUTS(1).propositionBytes == proveDlog(GameFundPK).propBytes               &&
                         OUTPUTS(1).value >= tokenSellAmount * oatmealPrice                           &&

@@ -4,9 +4,11 @@ import { processBlobRequest } from '../ergo-related/bot_wasm.js';
 import { boxByTokenId, getUnspentBoxesForAddressUpdated } from '../ergo-related/explorer.js';
 import { decodeString } from "../ergo-related/serializer.js";
 import { displayTransaction, errorAlert, waitingAlert } from '../utils/Alerts.js';
-import { CONFIG_TOKEN_ID, RESERVE_SCRIPT_ADDRESS } from "../utils/constants.js";
+import { CONFIG_TOKEN_ID } from "../utils/constants.js";
+import { RESERVE_SCRIPT_ADDRESS } from "../utils/script_constants";
 import { formatERGAmount } from '../utils/utils.js';
 import ErgBlob from "./ErgBlob.js";
+
 
 export default class BlobRequestItem extends React.Component {
     constructor(props) {

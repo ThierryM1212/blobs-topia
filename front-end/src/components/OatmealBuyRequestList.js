@@ -1,7 +1,8 @@
 import React, { Fragment } from 'react';
-import { OATMEAL_BUY_REQUEST_SCRIPT_ADDRESS, OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS } from '../utils/constants';
+import { OATMEAL_BUY_REQUEST_SCRIPT_ADDRESS, OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS } from "../utils/script_constants";
 import { getSpentAndUnspentBoxesFromMempool, getUnspentBoxesForAddressUpdated } from '../ergo-related/explorer';
 import OatmealBuyRequestItem from './OatmealBuyRequestItem';
+
 
 export default class OatmealBuyRequestList extends React.Component {
     constructor(props) {
