@@ -7,7 +7,6 @@
     val configBox = CONTEXT.dataInputs(0)
     val validConfigBox = configBox.tokens(0)._1 == ConfigNFTId
     val blobScriptHash = configBox.R4[Coll[Byte]].get
-    val gameScriptHash = configBox.R5[Coll[Byte]].get
     
     val validBlobTokens = if (OUTPUTS(0).tokens.size == 1 ) { 
         OUTPUTS(0).tokens(0)._1 == GameTokenNFTId                                    &&

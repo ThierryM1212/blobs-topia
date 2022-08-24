@@ -136,6 +136,7 @@ export async function killBlob(blobBoxJSON) {
         const outputCandidates = (await ergolib).ErgoBoxCandidates.empty();
 
         // dApp return box
+        const blobBoxInWASM = (await ergolib).ErgoBox.from_json(JSONBigInt.stringify(blobBoxJSON));
         var dappReturnValue = Math.round(blobBoxJSON.value * BLOB_EXCHANGE_FEE / 1000);
         if (dappReturnValue < MIN_NANOERG_BOX_VALUE) {
             dappReturnValue = MIN_NANOERG_BOX_VALUE;
@@ -147,7 +148,12 @@ export async function killBlob(blobBoxJSON) {
             (await ergolib).Contract.pay_to_address((await ergolib).Address.from_base58(GAME_ADDRESS)),
             creationHeight);
         returnBoxBuilder.add_token(gameTokenId, blobTokenAmount);
-        await setBoxRegisterByteArray(returnBoxBuilder, 4, blobBoxJSON.boxId);
+        returnBoxBuilder.set_register_value(4, blobBoxInWASM.register_value(4));
+        returnBoxBuilder.set_register_value(5, blobBoxInWASM.register_value(5));
+        returnBoxBuilder.set_register_value(6, blobBoxInWASM.register_value(6));
+        returnBoxBuilder.set_register_value(7, blobBoxInWASM.register_value(7));
+        returnBoxBuilder.set_register_value(8, blobBoxInWASM.register_value(8));
+        returnBoxBuilder.set_register_value(9, blobBoxInWASM.register_value(9));
         try {
             outputCandidates.add(returnBoxBuilder.build());
         } catch (e) {

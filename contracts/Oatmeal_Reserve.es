@@ -98,12 +98,10 @@
     proveDlog(GameFundPK) ||
       sigmaProp( 
         validConfigBox                                                               &&
-
-        // Token reserve is third input box replicated in forth output box
         validReserve                                                                 &&
-        
-        // dApp Blob creation fee is third output box
-        validGameBox
+        validGameBox                                                                 &&
+        validBlob1                                                                   &&
+        validBlob2
         
       )
 }

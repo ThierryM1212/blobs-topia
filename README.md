@@ -27,7 +27,7 @@ Yes, most of the actions for a blob are only doable by the address set in that b
 React static js application
 
 ## contracts
-Ergo contracts used by the game to be compiled off line and integrated in the constant.js files
+Ergo contracts used by the game to be compiled off line and integrated in the script_constant.js files
 
 ## blobs-bot
 Off-chain bot that can process the dApp requests, not mandatory as the buttons exists in the front end

@@ -161,6 +161,7 @@ export async function mintGameTokenReserve(reserveName, reserveTokenAmount, rese
     if (await isValidWalletAddress(address)) {
         console.log("this.state.reserveTokenAmount", reserveTokenAmount)
         var utxos = await getTokenUtxos(reserveTokenAmount, GAME_TOKEN_ID);
+        console.log("utxos", utxos)
         var utxos1 = await getUtxos(TX_FEE + MIN_NANOERG_BOX_VALUE);
 
         utxos = utxos.concat(utxos1).filter((value, index, self) =>

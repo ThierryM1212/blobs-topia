@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react';
 import { BLOB_SCRIPT_ADDRESS, GAME_SCRIPT_ADDRESS } from "../utils/script_constants";
-import { getTransactionsByAddress, getUnspentBoxesForAddressUpdated } from '../ergo-related/explorer';
+import { getTransactionsByAddress, getUnspentBoxesForAddressUpdated, getUnspentBoxesForAddressUpdated2 } from '../ergo-related/explorer';
 import FightItem from '../components/FightItem';
 import { waitingAlert } from '../utils/Alerts';
 

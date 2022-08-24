@@ -14,7 +14,6 @@
     val configBox = CONTEXT.dataInputs(0)
     val validConfigBox = configBox.tokens(0)._1 == ConfigNFTId
     val blobScriptHash = configBox.R4[Coll[Byte]].get
-    val gameScriptHash = configBox.R5[Coll[Byte]].get
     val txFee = configBox.R6[Coll[Long]].get(1)
     
     val validBlob = if (blake2b256(OUTPUTS(0).propositionBytes) == blobScriptHash ) {
@@ -33,29 +32,21 @@
                         false
                     }
     
-    val validReserve =  if (OUTPUTS.size > 1) {
-                            if (OUTPUTS(1).R4[Coll[Byte]].isDefined) {
-                                if (OUTPUTS(1).tokens.size == 1) {
-                                    blake2b256(OUTPUTS(1).propositionBytes) == blake2b256(SELF.propositionBytes) &&
-                                    OUTPUTS(1).R4[Coll[Byte]].get == reserveName                                 &&
-                                    OUTPUTS(1).tokens(0)._1 == GameTokenNFTId                                    &&
-                                    OUTPUTS(1).tokens(0)._2 == reserveTokens._2 - 2                              &&
-                                    OUTPUTS(1).value == reserveValue                                             &&
-                                    OUTPUTS(1).R5[Coll[Long]].get(0) == iniAttackLevel                           &&
-                                    OUTPUTS(1).R5[Coll[Long]].get(1) == iniDefenseLevel                          &&
-                                    OUTPUTS(1).R6[Coll[Long]].get(0) == blobPrice                                &&
-                                    OUTPUTS(1).R6[Coll[Long]].get(1) == blobMintFee                              &&
-                                    OUTPUTS(1).R7[Long].get == uniqueId + 1
-                                    
-                                } else {
-                                    false
-                                }
-                            } else {
-                                false
-                            }
+    val validReserve = if (OUTPUTS(1).propositionBytes == SELF.propositionBytes) {
+                            OUTPUTS(1).R4[Coll[Byte]].get == reserveName                                 &&
+                            OUTPUTS(1).tokens.size == 1                                                  &&
+                            OUTPUTS(1).tokens(0)._1 == GameTokenNFTId                                    &&
+                            OUTPUTS(1).tokens(0)._2 == reserveTokens._2 - 2                              &&
+                            OUTPUTS(1).value == reserveValue                                             &&
+                            OUTPUTS(1).R5[Coll[Long]].get(0) == iniAttackLevel                           &&
+                            OUTPUTS(1).R5[Coll[Long]].get(1) == iniDefenseLevel                          &&
+                            OUTPUTS(1).R6[Coll[Long]].get(0) == blobPrice                                &&
+                            OUTPUTS(1).R6[Coll[Long]].get(1) == blobMintFee                              &&
+                            OUTPUTS(1).R7[Long].get == uniqueId + 1
                         } else {
                             false
                         }
+                        
     
     val validMintFee =  if (OUTPUTS.size > 2) {
                             OUTPUTS(2).value >= blobMintFee                                 &&
