@@ -13,15 +13,14 @@ function NavigationBar(props) {
             <Navbar.Collapse id="basic-navbar-nav">
                 <Nav className="mr-auto">
                     <Nav.Link href={"/"}>Home</Nav.Link>
-                    <Nav.Link href={"/create"}>Create a Blob</Nav.Link>
                     <Nav.Link href={"/myblobs"}>My Blobs</Nav.Link>
+                    <Nav.Link href={"/matchmaking"}>Match making</Nav.Link>
+                    <Nav.Link href={"/fights"}>Figths</Nav.Link>
                     <Nav.Link href={"/blobsshop"}>Blobs shop</Nav.Link>
                     <Nav.Link href={"/oatmealshop"}>Oatmeal shop</Nav.Link>
                     <Nav.Link href={"/about"}>About</Nav.Link>
                     <NavDropdown title="More" id="basic-nav-dropdown" variant="dark">
                         <NavDropdown.Item href={"/request-bot"}>Requests bot</NavDropdown.Item>
-                        <NavDropdown.Item href={"/matchmaking"}>Match making</NavDropdown.Item>
-                        <NavDropdown.Item href={"/fights"}>Figths</NavDropdown.Item>
                         <NavDropdown.Item href={"/halloffame"}>Hall of fame</NavDropdown.Item>
                         <NavDropdown.Item href={"/admin"}>Admin</NavDropdown.Item>
                     </NavDropdown>

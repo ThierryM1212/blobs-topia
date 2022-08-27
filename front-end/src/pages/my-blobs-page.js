@@ -78,7 +78,7 @@ export default class MyBlobsPage extends React.Component {
         spentBoxIds = spentBoxes2.map(box => box.boxId).concat(spentBoxIds);
         blobBoxes = blobBoxesTmp.concat(newBoxes2).filter(box => !spentBoxIds.includes(box.boxId));
         //console.log("blobBoxes", blobBoxes)
-        
+
         var blobList = [];
         for (const box of blobBoxes) {
             try {
@@ -102,9 +102,15 @@ export default class MyBlobsPage extends React.Component {
         return (
             <Fragment >
                 <br />
-                <h5>
-                    Blob fighters
-                </h5>
+                <div className='w-75 d-flex flex-row justify-content-between align-items-center'>
+                    <div></div>
+                    <h5>
+                        Blob fighters
+                    </h5>
+                    <button className='btn btn-ultra-blue' onClick={() => {
+                        window.open("/create", '_self').focus();
+                    }} > Mint new blob</button>
+                </div>
                 <div className="w-75 d-flex flex-wrap">
                     {this.state.blobList.map(item => (
                         <BlobItem
