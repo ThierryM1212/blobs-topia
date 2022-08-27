@@ -1,7 +1,8 @@
 import Swal from 'sweetalert2/src/sweetalert2.js';
 import withReactContent from 'sweetalert2-react-content';
 import BlobWaitAnim from '../components/BlobWaitAnim';
-import { encodeContract } from '../ergo-related/serializer';
+import { encodeContract, ergoTreeToAddress } from '../ergo-related/serializer';
+import { formatLongString, getKeyByValue } from './utils';
 
 
 export function waitingAlert(title) {
@@ -149,5 +150,42 @@ export function promptErgAddr() {
                 reject();
             }
         });
+    });
+}
+
+export function promptErgAddrList(addrList) {
+    return new Promise(function (resolve, reject) {
+        var inputOptions = {};
+        for (const addr of addrList) {
+            inputOptions[addr] = formatLongString(addr, 10)  ;
+        }
+        console.log("inputOptions[addrList[0]]",addrList[0]);
+        Swal.fire({
+            title: "Set ERG address",
+            input: 'select',
+            inputValue: localStorage.getItem('address') ?? '',
+            inputOptions: inputOptions,
+            focusConfirm: false,
+            showCancelButton: true,
+            showConfirmButton: true,
+            customClass: {
+                input: "monotype",
+            },
+            inputValidator: function (value) {
+                return new Promise(function (resolve, reject) {
+                  if (value !== '') {
+                    resolve()
+                  } else {
+                    reject('The ERG address is invalid')
+                  }
+                })
+              }
+            }).then(function (result) {
+                if (result.value) {
+                    resolve(result.value);
+                } else {
+                    reject();
+                }
+            });
     });
 }

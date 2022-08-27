@@ -1,6 +1,6 @@
 import React from 'react';
-import { getBalance } from '../ergo-related/wallet';
-import { promptErgAddr } from "../utils/Alerts"
+import { getBalance, getWalletAddressList } from '../ergo-related/wallet';
+import { promptErgAddr, promptErgAddrList } from "../utils/Alerts"
 import { OATMEAL_TOKEN_ID } from '../utils/constants';
 import { formatERGAmount, formatLongString } from '../utils/utils';
 import ergoLogo from "../images/ergo-erg-logo.png";
@@ -28,7 +28,15 @@ export default class InputAddress extends React.Component {
     };
 
     async promptErgAddress() {
-        const newAddr = await promptErgAddr();
+        const addrList = await getWalletAddressList();
+        console.log("addrList", addrList)
+        var newAddr = '';
+        if (addrList.length > 0) {
+            newAddr = await promptErgAddrList(addrList);
+        } else {
+            newAddr = await promptErgAddr();
+        }
+
         //console.log("promptErgAddress", newAddr);
         if (newAddr) {
             this.setAddress(newAddr)

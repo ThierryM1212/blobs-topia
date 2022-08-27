@@ -14,6 +14,10 @@ export function formatERGAmount(amountStr) {
     return parseFloat(parseInt(amountStr) / NANOERG_TO_ERG).toFixed(4);
 }
 
+export function getKeyByValue(object, value) {
+    return Object.keys(object).find(key => object[key] === value);
+}
+
 function getRandomInt(max) {
     return Math.floor(Math.random() * (max));
 }
@@ -77,7 +81,7 @@ export function filterBlobList(blobList) {
             if (blob.globalIndex > blobsById[blobId].globalIndex) {
                 blobsById[blobId] = blob;
             }
-        }       
+        }
     }
     return Object.values(blobsById);
 }

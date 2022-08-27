@@ -78,6 +78,20 @@ export async function isValidWalletAddress(address) {
     }
 }
 
+export async function getWalletAddressList() {
+    if (hasExtensionConnector()) {
+        const walletConnected = await connectWallet();
+        if (walletConnected && hasConnectorInjected()) {
+            const address_list = await ergo.get_used_addresses();
+            return address_list;
+        } else {
+            return [];
+        }
+    } else {
+        return [];
+    }
+}
+
 export async function getBalance(tokenId = 'ERG') {
     //console.log('getBalance', tokenId);
     const walletConnected = await connectWallet();
