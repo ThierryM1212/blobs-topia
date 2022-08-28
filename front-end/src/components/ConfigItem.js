@@ -1,5 +1,5 @@
 import React, { Fragment } from 'react';
-import { decodeHex, decodeLongArray } from '../ergo-related/serializer';
+import { decodeHex, decodeHexArray, decodeLongArray } from '../ergo-related/serializer';
 import { CONFIG_TOKEN_ID } from '../utils/constants';
 import { boxByTokenId } from '../ergo-related/explorer'
 import { getRegisterValue } from '../ergo-related/wasm';
@@ -41,6 +41,16 @@ export default class ConfigItem extends React.Component {
         return out;
     }
 
+    async getRegisterHexArray(box, register) {
+        var out = [];
+        try {
+            out = await decodeHexArray(getRegisterValue(box, register))
+        } catch (e) {
+            console.log("getRegisterString", e);
+        }
+        return out;
+    }
+
     async componentDidMount() {
         const currentConfigBox = await boxByTokenId(CONFIG_TOKEN_ID);
         //console.log("ConfigItem componentDidMount currentConfigBox", currentConfigBox);
@@ -49,6 +59,8 @@ export default class ConfigItem extends React.Component {
             const R5Str = await this.getRegisterHex(currentConfigBox[0], "R5");
             const R6array = await this.getRegisterLongArray(currentConfigBox[0], "R6");
             const R7Str = await this.getRegisterHex(currentConfigBox[0], "R7");
+            const R8 = await this.getRegisterHexArray(currentConfigBox[0], "R8");
+            console.log("R8",R8)
 
             this.setState({
                 boxId: currentConfigBox[0].boxId ?? '',

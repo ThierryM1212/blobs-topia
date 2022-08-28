@@ -1,6 +1,7 @@
 import React, { Fragment } from 'react';
 import { NANOERG_TO_ERG } from '../utils/constants';
 
+
 export class BlobState extends React.Component {
     render() {
         const STATE_LABEL_MAP = {

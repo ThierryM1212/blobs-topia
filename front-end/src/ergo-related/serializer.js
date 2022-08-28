@@ -76,6 +76,10 @@ export async function decodeHex(encoded) {
     return toHexString((await ergolib).Constant.decode_from_base16(encoded).to_byte_array())
 }
 
+export async function decodeHexArray(encoded) {
+    return (await ergolib).Constant.decode_from_base16(encoded).to_coll_coll_byte().map(r => toHexString(r))
+}
+
 export function ergToNano(erg) {
     if (erg === undefined) return 0
     if (erg.startsWith('.')) return parseInt(erg.slice(1) + '0'.repeat(9 - erg.length + 1))

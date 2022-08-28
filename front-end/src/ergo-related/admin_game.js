@@ -140,6 +140,12 @@ export async function updateConfigurationBox() {
         configBoxBuilder.set_register_value(6, await encodeLongArray(gameConf));
         configBoxBuilder.set_register_value(7, await encodeHexConst(OATMEAL_RESERVE_SCRIPT_HASH));
 
+        const scriptHashArray = [BLOB_SCRIPT_HASH, GAME_SCRIPT_HASH, OATMEAL_RESERVE_SCRIPT_HASH];
+        const registerValue8 = scriptHashArray.map((val) => {
+            return new Uint8Array(Buffer.from(val, 'hex'))
+        });
+        configBoxBuilder.set_register_value(8, (await ergolib).Constant.from_coll_coll_byte(registerValue8));
+
         configBoxBuilder.add_token(configTokenId, configTokenAmount);
         try {
             outputCandidates.add(configBoxBuilder.build());
