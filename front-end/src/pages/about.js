@@ -95,7 +95,8 @@ export default class AboutPage extends React.Component {
                     <p>Current blob price: <strong>{formatERGAmount(BLOB_PRICE)} ERG</strong></p>
                     <p>Current blob mint fee: <strong>{formatERGAmount(BLOB_MINT_FEE)} ERG</strong></p>
                     <p> - The deposit, widthdraw and sell operations have a fee configured.</p>
-                    <p>Current dApp fee: <strong>max({BLOB_EXCHANGE_FEE / 10} %, {formatERGAmount(MIN_NANOERG_BOX_VALUE)}) ERG</strong></p>
+                    <p>Current deposit, widthdraw or kill fee: <strong>max({BLOB_EXCHANGE_FEE / 10} %, {formatERGAmount(MIN_NANOERG_BOX_VALUE)}) ERG</strong></p>
+                    <p>Current sell fee: <strong>max({ 2 * BLOB_EXCHANGE_FEE / 10} %, {formatERGAmount(MIN_NANOERG_BOX_VALUE)}) ERG</strong></p>
                     <p> - There is no dApp fee on the fights, the miner transaction fees are taken from the figth bets.</p>
                     <p> - Those fees are configurable and may be adjusted by the game owner.</p>
                 </div>

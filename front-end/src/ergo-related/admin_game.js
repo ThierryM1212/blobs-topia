@@ -1,8 +1,8 @@
 import { errorAlert, waitingAlert } from '../utils/Alerts';
 import { BLOB_EXCHANGE_FEE, BLOB_MINT_FEE, BLOB_PRICE, CONFIG_TOKEN_ID, GAME_ADDRESS, GAME_TOKEN_ID, INI_BLOB_ATT_LEVEL, INI_BLOB_DEF_LEVEL, INI_BLOB_GAME, INI_BLOB_VICTORY, MAX_POWER_DIFF, MIN_NANOERG_BOX_VALUE, NANOERG_TO_ERG, NUM_OATMEAL_TOKEN_LOSER, NUM_OATMEAL_TOKEN_WINNER, OATMEAL_PRICE, OATMEAL_TOKEN_ID, TX_FEE } from '../utils/constants';
-import { BLOB_SCRIPT_HASH, CONFIG_SCRIPT_ADDRESS, GAME_SCRIPT_HASH, OATMEAL_RESERVE_SCRIPT_HASH, RESERVE_SCRIPT_ADDRESS } from "../utils/script_constants";
+import { BLOB_SCRIPT_HASH, BURN_ALL_SCRIPT_HASH, CONFIG_SCRIPT_ADDRESS, GAME_SCRIPT_HASH, OATMEAL_RESERVE_SCRIPT_HASH, RESERVE_SCRIPT_ADDRESS } from "../utils/script_constants";
 import { boxById, boxByTokenId, currentHeight } from './explorer';
-import { encodeHexConst, encodeLong, encodeLongArray } from './serializer';
+import { encodeLong, encodeLongArray } from './serializer';
 import { createTransaction, getBoxSelection, parseUtxo, setBoxRegisterByteArray, verifyTransactionIO } from './wasm';
 import { getAllUtxos, getTokenUtxos, getUtxos, isValidWalletAddress, walletSignTx } from './wallet.js';
 let ergolib = import('ergo-lib-wasm-browser');
@@ -134,17 +134,13 @@ export async function updateConfigurationBox() {
             boxValue,
             (await ergolib).Contract.pay_to_address((await ergolib).Address.from_base58(CONFIG_SCRIPT_ADDRESS)),
             creationHeight);
-        configBoxBuilder.set_register_value(4, await encodeHexConst(BLOB_SCRIPT_HASH));
-        configBoxBuilder.set_register_value(5, await encodeHexConst(GAME_SCRIPT_HASH));
-        const gameConf = [BLOB_EXCHANGE_FEE, TX_FEE, NUM_OATMEAL_TOKEN_LOSER, NUM_OATMEAL_TOKEN_WINNER, MAX_POWER_DIFF, OATMEAL_PRICE];
-        configBoxBuilder.set_register_value(6, await encodeLongArray(gameConf));
-        configBoxBuilder.set_register_value(7, await encodeHexConst(OATMEAL_RESERVE_SCRIPT_HASH));
-
-        const scriptHashArray = [BLOB_SCRIPT_HASH, GAME_SCRIPT_HASH, OATMEAL_RESERVE_SCRIPT_HASH];
-        const registerValue8 = scriptHashArray.map((val) => {
+        const scriptHashArray = [BLOB_SCRIPT_HASH, GAME_SCRIPT_HASH, OATMEAL_RESERVE_SCRIPT_HASH, BURN_ALL_SCRIPT_HASH];
+        const registerValue4 = scriptHashArray.map((val) => {
             return new Uint8Array(Buffer.from(val, 'hex'))
         });
-        configBoxBuilder.set_register_value(8, (await ergolib).Constant.from_coll_coll_byte(registerValue8));
+        configBoxBuilder.set_register_value(4, (await ergolib).Constant.from_coll_coll_byte(registerValue4));
+        const gameConf = [BLOB_EXCHANGE_FEE, TX_FEE, NUM_OATMEAL_TOKEN_LOSER, NUM_OATMEAL_TOKEN_WINNER, MAX_POWER_DIFF, OATMEAL_PRICE];
+        configBoxBuilder.set_register_value(5, await encodeLongArray(gameConf));
 
         configBoxBuilder.add_token(configTokenId, configTokenAmount);
         try {

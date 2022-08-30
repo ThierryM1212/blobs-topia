@@ -10,11 +10,11 @@
     // config box
     val configBox = CONTEXT.dataInputs(0)
     val validConfigBox = configBox.tokens(0)._1 == ConfigNFTId
-    val blobScriptHash = configBox.R4[Coll[Byte]].get
-    val txFee = configBox.R6[Coll[Long]].get(1)
-    val numOatmealLose = configBox.R6[Coll[Long]].get(2)
-    val numOatmealWin = configBox.R6[Coll[Long]].get(3)
-    val maxPowerDiff = configBox.R6[Coll[Long]].get(4)
+    val blobScriptHash = configBox.R4[Coll[Coll[Byte]]].get(0)
+    val txFee = configBox.R5[Coll[Long]].get(1)
+    val numOatmealLose = configBox.R5[Coll[Long]].get(2)
+    val numOatmealWin = configBox.R5[Coll[Long]].get(3)
+    val maxPowerDiff = configBox.R5[Coll[Long]].get(4)
     
     // Weighting the stats for the max value: Att: 10, Def: 5, games: 4, victories: 8
     val p1Power = 6*p1Info(0)+3*p1Info(1)+2*p1Info(2)+4*p1Info(3)

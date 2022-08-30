@@ -13,8 +13,8 @@
     // config box
     val configBox = CONTEXT.dataInputs(0)
     val validConfigBox = configBox.tokens(0)._1 == ConfigNFTId
-    val blobScriptHash = configBox.R4[Coll[Byte]].get
-    val txFee = configBox.R6[Coll[Long]].get(1)
+    val blobScriptHash = configBox.R4[Coll[Coll[Byte]]].get(0)
+    val txFee = configBox.R5[Coll[Long]].get(1)
     
     val validBlob = if (blake2b256(OUTPUTS(0).propositionBytes) == blobScriptHash ) {
                         OUTPUTS(0).tokens(0)._1 == GameTokenNFTId              &&

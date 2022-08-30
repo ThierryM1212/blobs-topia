@@ -1,7 +1,7 @@
 import JSONBigInt from 'json-bigint';
 import { errorAlert, promptErgAmount, waitingAlert } from "../utils/Alerts";
 import { BLOB_ERG_MIN_VALUE, BLOB_EXCHANGE_FEE, BLOB_PRICE, CONFIG_TOKEN_ID, GAME_ADDRESS, GAME_TOKEN_ID, MIN_NANOERG_BOX_VALUE, NANOERG_TO_ERG, OATMEAL_TOKEN_ID, TX_FEE } from "../utils/constants";
-import { BLOB_REQUEST_SCRIPT_ADDRESS, BLOB_SCRIPT_ADDRESS, OATMEAL_BUY_REQUEST_SCRIPT_ADDRESS } from "../utils/script_constants";
+import { BLOB_REQUEST_SCRIPT_ADDRESS, BLOB_SCRIPT_ADDRESS, BURN_ALL_SCRIPT_ADDRESS, OATMEAL_BUY_REQUEST_SCRIPT_ADDRESS } from "../utils/script_constants";
 import { boxByTokenId, currentHeight } from "./explorer";
 import { encodeLong, encodeLongArray } from './serializer';
 import { addSimpleOutputBox, createTransaction, getUtxosListValue, parseUtxo, setBoxRegisterByteArray, verifyTransactionIO } from "./wasm";
@@ -145,7 +145,7 @@ export async function killBlob(blobBoxJSON) {
         const dappReturnValueBox = (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str(dappReturnValue.toString()));;
         const returnBoxBuilder = new (await ergolib).ErgoBoxCandidateBuilder(
             dappReturnValueBox,
-            (await ergolib).Contract.pay_to_address((await ergolib).Address.from_base58(GAME_ADDRESS)),
+            (await ergolib).Contract.pay_to_address((await ergolib).Address.from_base58(BURN_ALL_SCRIPT_ADDRESS)),
             creationHeight);
         returnBoxBuilder.add_token(gameTokenId, blobTokenAmount);
         returnBoxBuilder.set_register_value(4, blobBoxInWASM.register_value(4));
@@ -180,7 +180,7 @@ export async function buyBlob(blobBoxJSON) {
     console.log("buyBlob");
     const creationHeight = await currentHeight();
     const amountNano = parseInt(blobBoxJSON.additionalRegisters.R8.renderedValue);
-    const dAppFeeNano = Math.max(Math.round(amountNano * BLOB_EXCHANGE_FEE / 1000), MIN_NANOERG_BOX_VALUE);
+    const dAppFeeNano = Math.max(Math.round(amountNano * 2 * BLOB_EXCHANGE_FEE / 1000), MIN_NANOERG_BOX_VALUE);
 
     const address = localStorage.getItem('address');
     var alert = waitingAlert("Preparing the transaction...");
@@ -416,10 +416,10 @@ export async function feedBlob(blobBoxJSON, amountDefense, amountAttack) {
             throw e;
         }
 
-        // Oatmeal return box
+        // Oatmeal burn box
         const oatMealReturnBox = new (await ergolib).ErgoBoxCandidateBuilder(
             (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str((MIN_NANOERG_BOX_VALUE).toString())),
-            (await ergolib).Contract.pay_to_address((await ergolib).Address.from_base58(GAME_ADDRESS)),
+            (await ergolib).Contract.pay_to_address((await ergolib).Address.from_base58(BURN_ALL_SCRIPT_ADDRESS)),
             creationHeight);
         oatMealReturnBox.add_token(oatmealTokenId, oatmealTokenAmount);
         try {

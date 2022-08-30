@@ -7,11 +7,11 @@
     // config box
     val configBox = CONTEXT.dataInputs(0)
     val validConfigBox = configBox.tokens(0)._1 == ConfigNFTId
-    val blobScriptHash = configBox.R4[Coll[Byte]].get
-    val gameScriptHash = configBox.R5[Coll[Byte]].get
-    val txFee = configBox.R6[Coll[Long]].get(1)
-    val numOatmealLose = configBox.R6[Coll[Long]].get(2)
-    val numOatmealWin = configBox.R6[Coll[Long]].get(3)
+    val blobScriptHash = configBox.R4[Coll[Coll[Byte]]].get(0)
+    val gameScriptHash = configBox.R4[Coll[Coll[Byte]]].get(1)
+    val txFee = configBox.R5[Coll[Long]].get(1)
+    val numOatmealLose = configBox.R5[Coll[Long]].get(2)
+    val numOatmealWin = configBox.R5[Coll[Long]].get(3)
     val totalOatmeal = numOatmealLose + numOatmealWin
     
     // verify the different improvable stats of a blob are replicated

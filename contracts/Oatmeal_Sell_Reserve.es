@@ -7,7 +7,7 @@
     // config box
     val configBox = CONTEXT.dataInputs(0)
     val validConfigBox = configBox.tokens(0)._1 == ConfigNFTId
-    val oatmealPrice = configBox.R6[Coll[Long]].get(5)
+    val oatmealPrice = configBox.R5[Coll[Long]].get(5)
     
     val validSell =  if (OUTPUTS.size > 3) {
                         val tokenSellAmount = reserveTokens._2 - OUTPUTS(0).tokens(0)._2
