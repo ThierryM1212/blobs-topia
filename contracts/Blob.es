@@ -31,12 +31,6 @@
         false
     }
 
-    // verify the different improvable stats of a blob are replicated
-    def isBlobR5Replicated(id:Int) = OUTPUTS(id).R5[Coll[Long]].get(0) == blobAttLevelIn            &&
-                                     OUTPUTS(id).R5[Coll[Long]].get(1) == blobDefLevelIn            &&
-                                     OUTPUTS(id).R5[Coll[Long]].get(2) == blobNumGameIn             &&
-                                     OUTPUTS(id).R5[Coll[Long]].get(3) == blobNumWinIn
-    
     // BASIC BLOB VERIFICATION in OUTPUTS(0) and OUTPUTS(1)
     val validBlob0 = isBlob(0)
     val validBlob1 = isBlob(1)
@@ -65,7 +59,7 @@
             OUTPUTS(1).value >= minBlobWidthdrawFee                       &&
             OUTPUTS(0).tokens(0)._2 == 2                                  &&
             OUTPUTS(0).R4[Coll[Byte]].get == blobDescIn                   &&
-            isBlobR5Replicated(0)                                         &&
+            OUTPUTS(0).R5[Coll[Long]].get == SELF.R5[Coll[Long]].get      &&
             OUTPUTS(0).R6[SigmaProp].get == ownerPKin                     &&
             OUTPUTS(0).R7[Long].get == 0                                  &&
             OUTPUTS(0).R8[Long].get == 0                                  &&
@@ -83,7 +77,7 @@
         OUTPUTS(0).value == blobValueIn                               &&
         OUTPUTS(0).tokens(0)._2 == 2                                  &&
         OUTPUTS(0).R4[Coll[Byte]].get == blobDescIn                   &&
-        isBlobR5Replicated(0)                                         &&
+        OUTPUTS(0).R5[Coll[Long]].get == SELF.R5[Coll[Long]].get      &&
         OUTPUTS(0).R6[SigmaProp].get == ownerPKin                     &&
         OUTPUTS(0).R9[Long].get == blobUniqueId                       &&
         (
@@ -104,7 +98,7 @@
         OUTPUTS(0).value == blobValueIn                               &&
         OUTPUTS(0).tokens(0)._2 == 2                                  &&
         OUTPUTS(0).R4[Coll[Byte]].get == blobDescIn                   &&
-        isBlobR5Replicated(0)                                         &&
+        OUTPUTS(0).R5[Coll[Long]].get == SELF.R5[Coll[Long]].get      &&
         OUTPUTS(0).R6[SigmaProp].get == ownerPKin                     &&
         OUTPUTS(0).R7[Long].get == 0                                  &&
         OUTPUTS(0).R8[Long].get == 0                                  &&
@@ -124,7 +118,7 @@
                 OUTPUTS(0).value == blobValueIn                               &&
                 OUTPUTS(0).tokens(0)._2 == 2                                  &&
                 OUTPUTS(0).R4[Coll[Byte]].get == blobDescIn                   &&
-                isBlobR5Replicated(0)                                         &&
+                OUTPUTS(0).R5[Coll[Long]].get == SELF.R5[Coll[Long]].get      &&
                 OUTPUTS(0).R7[Long].get == 0                                  &&
                 OUTPUTS(0).R8[Long].get == 0                                  &&
                 OUTPUTS(0).R9[Long].get == blobUniqueId

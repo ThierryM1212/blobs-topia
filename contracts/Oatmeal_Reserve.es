@@ -15,10 +15,7 @@
     val totalOatmeal = numOatmealLose + numOatmealWin
     
     // verify the different improvable stats of a blob are replicated
-    def isBlobR5Replicated(id:Int) = OUTPUTS(id).R5[Coll[Long]].get(0) == INPUTS(id).R5[Coll[Long]].get(0)            &&
-                                     OUTPUTS(id).R5[Coll[Long]].get(1) == INPUTS(id).R5[Coll[Long]].get(1)            &&
-                                     OUTPUTS(id).R5[Coll[Long]].get(2) == INPUTS(id).R5[Coll[Long]].get(2)            &&
-                                     OUTPUTS(id).R5[Coll[Long]].get(3) == INPUTS(id).R5[Coll[Long]].get(3)
+    def isBlobR5Replicated(id:Int) = OUTPUTS(id).R5[Coll[Long]].get == INPUTS(id).R5[Coll[Long]].get
     
     val validBlob1 = if (OUTPUTS.size > 3 && INPUTS.size == 3) {
                             if (blake2b256(OUTPUTS(0).propositionBytes) == blobScriptHash) {

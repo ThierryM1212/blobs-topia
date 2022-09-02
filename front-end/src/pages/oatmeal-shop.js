@@ -4,6 +4,7 @@ import oatmealLogo from "../images/oatmeal.png";
 import { formatERGAmount } from '../utils/utils';
 import OatmealBuyRequestList from '../components/OatmealBuyRequestList';
 import { createOatmealBuyRequest } from '../ergo-related/blob';
+import OatmealSeller from "../images/oatmeal_seller.png";
 
 
 export default class OatmealShopPage extends React.Component {
@@ -35,10 +36,12 @@ export default class OatmealShopPage extends React.Component {
         return (
             <Fragment >
                 <div className="w-75 d-flex flex-column align-items-center m-2 p-2">
+                    
                     <h4>Buy oatmeal</h4>
                     <h6>Use Oatmeal to feed your blobs and increase their power !</h6>
                     <h6>1 Oatmeal token for 1 attack point or 1 defense point</h6>
-                    <div className="w-100 zoneabout d-flex flex-column align-items-start m-2 p-2">
+                    <div className="w-100 zoneabout d-flex flex-row align-items-center m-2 p-2">
+                        
                         <table>
                             <tbody>
                                 <tr>
@@ -89,6 +92,7 @@ export default class OatmealShopPage extends React.Component {
                                 </tr>
                             </tbody>
                         </table>
+                        <img src={OatmealSeller} alt="Oatmeal seller" />
                     </div>
                 </div>
                 <OatmealBuyRequestList reRenderKey={this.state.reRenderKey}/>

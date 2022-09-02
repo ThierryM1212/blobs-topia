@@ -198,12 +198,14 @@ export async function getUtxos(amountToSend) {
     if (walletAccessGranted && hasExtensionConnector()) {
         const utxos = await ergo.get_utxos(fullAmountToSend.toString());
         const filteredUtxos = [];
-        for (const utxo of utxos) {
-            try {
-                (await ergolib).ErgoBox.from_json(JSONBigInt.stringify(utxo));
-                filteredUtxos.push(utxo);
-            } catch (e) {
-                console.error('[getUtxos] UTxO failed parsing:', utxo, e);
+        if (utxos && Array.isArray(utxos)) {
+            for (const utxo of utxos) {
+                try {
+                    (await ergolib).ErgoBox.from_json(JSONBigInt.stringify(utxo));
+                    filteredUtxos.push(utxo);
+                } catch (e) {
+                    console.error('[getUtxos] UTxO failed parsing:', utxo, e);
+                }
             }
         }
         return filteredUtxos;
