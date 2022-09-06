@@ -4,8 +4,7 @@
     val reserveValue = SELF.value
     val reserveTokens = SELF.tokens(0)
     val reserveName = SELF.R4[Coll[Byte]].get
-    val iniAttackLevel = SELF.R5[Coll[Long]].get(0)
-    val iniDefenseLevel = SELF.R5[Coll[Long]].get(1)
+    val reserveIniBlobStats = SELF.R5[Coll[Int]].get
     val blobPrice = SELF.R6[Coll[Long]].get(0)
     val blobMintFee = SELF.R6[Coll[Long]].get(1)
     val uniqueId = SELF.R7[Long].get
@@ -19,10 +18,7 @@
     val validBlob = if (blake2b256(OUTPUTS(0).propositionBytes) == blobScriptHash ) {
                         OUTPUTS(0).tokens(0)._1 == GameTokenNFTId              &&
                         OUTPUTS(0).tokens(0)._2 == 2                           &&
-                        OUTPUTS(0).R5[Coll[Long]].get(0) == iniAttackLevel     &&
-                        OUTPUTS(0).R5[Coll[Long]].get(1) == iniDefenseLevel    &&
-                        OUTPUTS(0).R5[Coll[Long]].get(2) == 0L                 &&
-                        OUTPUTS(0).R5[Coll[Long]].get(3) == 0L                 &&
+                        OUTPUTS(0).R5[Coll[Int]].get == reserveIniBlobStats    &&
                         OUTPUTS(0).R6[SigmaProp].isDefined                     &&
                         OUTPUTS(0).R7[Long].get == 0L                          &&
                         OUTPUTS(0).R8[Long].get == 0L                          &&
@@ -38,8 +34,7 @@
                             OUTPUTS(1).tokens(0)._1 == GameTokenNFTId                                    &&
                             OUTPUTS(1).tokens(0)._2 == reserveTokens._2 - 2                              &&
                             OUTPUTS(1).value == reserveValue                                             &&
-                            OUTPUTS(1).R5[Coll[Long]].get(0) == iniAttackLevel                           &&
-                            OUTPUTS(1).R5[Coll[Long]].get(1) == iniDefenseLevel                          &&
+                            OUTPUTS(1).R5[Coll[Int]].get == reserveIniBlobStats                          &&
                             OUTPUTS(1).R6[Coll[Long]].get(0) == blobPrice                                &&
                             OUTPUTS(1).R6[Coll[Long]].get(1) == blobMintFee                              &&
                             OUTPUTS(1).R7[Long].get == uniqueId + 1

@@ -32,6 +32,14 @@ export async function decodeLongArray(encodedArray) {
     return (await ergolib).Constant.decode_from_base16(encodedArray).to_i64_str_array().map(cur => parseInt(cur))
 }
 
+export async function encodeIntArray(intArray) {
+    return (await ergolib).Constant.from_i32_array(intArray);
+}
+
+export async function decodeIntArray(encodedArray) {
+    return (await ergolib).Constant.decode_from_base16(encodedArray).to_i32_array()
+}
+
 export async function encodeInt(num) {
     return (await ergolib).Constant.from_i32(num);
 }

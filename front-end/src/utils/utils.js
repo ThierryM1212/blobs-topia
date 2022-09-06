@@ -1,4 +1,4 @@
-import { MAX_POWER_DIFF, NANOERG_TO_ERG } from "./constants";
+import { BLOB_ARMORS, MAX_POWER_DIFF, NANOERG_TO_ERG } from "./constants";
 import JSONBigInt from 'json-bigint';
 
 export function formatLongString(str, num) {
@@ -23,28 +23,42 @@ function getRandomInt(max) {
 }
 
 export function getBlobPowers(blobInfoStr) {
-    const attPower = 6 * getBlobAttLevel(blobInfoStr) + 3 * getBlobDefLevel(blobInfoStr) + 2 * getBlobVictories(blobInfoStr) + 4 * getBlobGames(blobInfoStr);
-    const defPower = 5 * getBlobDefLevel(blobInfoStr) + 5 * getBlobGames(blobInfoStr);
+    const blobInfo = JSONBigInt.parse(blobInfoStr);
+    const attPower = 6 * getBlobAttLevel(blobInfo) + 3 * getBlobDefLevel(blobInfo) + 2 * getBlobVictories(blobInfo) + 4 * getBlobGames(blobInfo) + getBlobArmorAttPower(blobInfo);
+    const defPower = 5 * getBlobDefLevel(blobInfo) + 5 * getBlobGames(blobInfo) + getBlobArmorDefPower(blobInfo);
     return [attPower, defPower];
 }
-export function getBlobAttLevel(blobInfoStr) {
-    const blobInfo = JSONBigInt.parse(blobInfoStr);
+export function getBlobAttLevel(blobInfo) {
     return blobInfo[0];
 }
-export function getBlobDefLevel(blobInfoStr) {
-    const blobInfo = JSONBigInt.parse(blobInfoStr);
+export function getBlobDefLevel(blobInfo) {
     return blobInfo[1];
 }
-export function getBlobGames(blobInfoStr) {
-    const blobInfo = JSONBigInt.parse(blobInfoStr);
+export function getBlobGames(blobInfo) {
     return blobInfo[2];
 }
-export function getBlobVictories(blobInfoStr) {
-    const blobInfo = JSONBigInt.parse(blobInfoStr);
+export function getBlobVictories(blobInfo) {
     return blobInfo[3];
 }
+export function getBlobArmorDefPower(blobInfo) {
+    return BLOB_ARMORS[blobInfo[4]].defense_power;;
+}
+export function getBlobArmorAttPower(blobInfo) {
+    return BLOB_ARMORS[blobInfo[4]].attack_power;;
+}
 
+export function chunkArray(myArray, chunk_size){
+    var index = 0;
+    var arrayLength = myArray.length;
+    var tempArray = [];
+    
+    for (index = 0; index < arrayLength; index += chunk_size) {
+        const myChunk = myArray.slice(index, index+chunk_size);
+        tempArray.push(myChunk);
+    }
 
+    return tempArray;
+}
 
 export function computeP1WinningChance(blob1, blob2) {
     const maxPowerDiff = MAX_POWER_DIFF;

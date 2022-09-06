@@ -31,6 +31,17 @@ export function errorAlert(title, msg) {
     return MySwal;
 }
 
+export function confirmAlert(msg, txt, confirmMsg = 'Yes', denyMsg = 'No') {
+    return Swal.fire({
+        title: msg,
+        html: txt,
+        showDenyButton: true,
+        confirmButtonText: confirmMsg,
+        denyButtonText: denyMsg,
+        allowOutsideClick: false,
+    })
+}
+
 export function displayTransaction(txId) {
     const MySwal = withReactContent(Swal)
     MySwal.fire({

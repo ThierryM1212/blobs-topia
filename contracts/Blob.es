@@ -2,10 +2,11 @@
     // input
     val blobValueIn = SELF.value
     val blobDescIn = SELF.R4[Coll[Byte]].get
-    val blobAttLevelIn = SELF.R5[Coll[Long]].get(0)
-    val blobDefLevelIn = SELF.R5[Coll[Long]].get(1)
-    val blobNumGameIn = SELF.R5[Coll[Long]].get(2)
-    val blobNumWinIn = SELF.R5[Coll[Long]].get(3)
+    val blobAttLevelIn = SELF.R5[Coll[Int]].get(0)
+    val blobDefLevelIn = SELF.R5[Coll[Int]].get(1)
+    val blobNumGameIn = SELF.R5[Coll[Int]].get(2)
+    val blobNumWinIn = SELF.R5[Coll[Int]].get(3)
+    val blobArmorLvlIn = SELF.R5[Coll[Int]].get(4)
     val ownerPKin = SELF.R6[SigmaProp].get
     val blobStateIn = SELF.R7[Long].get
     val blobStateValueIn = SELF.R8[Long].get
@@ -20,11 +21,13 @@
     val oatmealReserverHash = configBox.R4[Coll[Coll[Byte]]].get(2)
     val blobExchangeFee = configBox.R5[Coll[Long]].get(0)
     val txFee = configBox.R5[Coll[Long]].get(1)
-    
+    val armorConf = configBox.R6[Coll[Long]].get // [armor0Price, armor0Att, armor0Def, armor1Price, armor1Att, armor1Def,... , armor3Def]
+
     val blobMinValue = 2 * BoxMinValue + txFee
     
     // verify basic attributes of a blob
     def isBlob(id: Int) = if (blake2b256(OUTPUTS(id).propositionBytes) == blobScriptHash ) {
+        OUTPUTS(id).tokens.size == 1                                             &&
         OUTPUTS(id).tokens(0)._1 == GameTokenNFTId                               &&
         OUTPUTS(id).value >= blobMinValue
     } else {
@@ -59,7 +62,7 @@
             OUTPUTS(1).value >= minBlobWidthdrawFee                       &&
             OUTPUTS(0).tokens(0)._2 == 2                                  &&
             OUTPUTS(0).R4[Coll[Byte]].get == blobDescIn                   &&
-            OUTPUTS(0).R5[Coll[Long]].get == SELF.R5[Coll[Long]].get      &&
+            OUTPUTS(0).R5[Coll[Int]].get == SELF.R5[Coll[Int]].get        &&
             OUTPUTS(0).R6[SigmaProp].get == ownerPKin                     &&
             OUTPUTS(0).R7[Long].get == 0                                  &&
             OUTPUTS(0).R8[Long].get == 0                                  &&
@@ -77,7 +80,7 @@
         OUTPUTS(0).value == blobValueIn                               &&
         OUTPUTS(0).tokens(0)._2 == 2                                  &&
         OUTPUTS(0).R4[Coll[Byte]].get == blobDescIn                   &&
-        OUTPUTS(0).R5[Coll[Long]].get == SELF.R5[Coll[Long]].get      &&
+        OUTPUTS(0).R5[Coll[Int]].get == SELF.R5[Coll[Int]].get        &&
         OUTPUTS(0).R6[SigmaProp].get == ownerPKin                     &&
         OUTPUTS(0).R9[Long].get == blobUniqueId                       &&
         (
@@ -98,7 +101,7 @@
         OUTPUTS(0).value == blobValueIn                               &&
         OUTPUTS(0).tokens(0)._2 == 2                                  &&
         OUTPUTS(0).R4[Coll[Byte]].get == blobDescIn                   &&
-        OUTPUTS(0).R5[Coll[Long]].get == SELF.R5[Coll[Long]].get      &&
+        OUTPUTS(0).R5[Coll[Int]].get == SELF.R5[Coll[Int]].get        &&
         OUTPUTS(0).R6[SigmaProp].get == ownerPKin                     &&
         OUTPUTS(0).R7[Long].get == 0                                  &&
         OUTPUTS(0).R8[Long].get == 0                                  &&
@@ -118,7 +121,7 @@
                 OUTPUTS(0).value == blobValueIn                               &&
                 OUTPUTS(0).tokens(0)._2 == 2                                  &&
                 OUTPUTS(0).R4[Coll[Byte]].get == blobDescIn                   &&
-                OUTPUTS(0).R5[Coll[Long]].get == SELF.R5[Coll[Long]].get      &&
+                OUTPUTS(0).R5[Coll[Int]].get == SELF.R5[Coll[Int]].get        &&
                 OUTPUTS(0).R7[Long].get == 0                                  &&
                 OUTPUTS(0).R8[Long].get == 0                                  &&
                 OUTPUTS(0).R9[Long].get == blobUniqueId
@@ -176,23 +179,35 @@
     }
 
     // FEED BLOB
+    // Upgrade blob armor
     val validFeed = if (validBlob0 && !validBlob1 && (blobStateIn == 0)) {
         if (OUTPUTS.size > 2) {
             if (blake2b256(OUTPUTS(1).propositionBytes) == burnAllScriptHash) {
-                OUTPUTS(0).value == blobValueIn                                &&
-                OUTPUTS(0).R4[Coll[Byte]].get == blobDescIn                    &&
-                OUTPUTS(0).R5[Coll[Long]].get(2) == blobNumGameIn              &&
-                OUTPUTS(0).R5[Coll[Long]].get(3) == blobNumWinIn               &&
-                OUTPUTS(0).R6[SigmaProp].get == ownerPKin                      &&
-                OUTPUTS(0).R7[Long].get == 0                                   &&
-                OUTPUTS(0).R8[Long].get == 0                                   &&
-                OUTPUTS(0).R9[Long].get == blobUniqueId                        &&
-                OUTPUTS(0).tokens(0)._2 == 2                                   &&
-                OUTPUTS(1).tokens.size == 1                                    &&
-                OUTPUTS(1).tokens(0)._1 == OatmealTokenNFTId                   &&
-                OUTPUTS(0).R5[Coll[Long]].get(0) <= 1000                       &&
-                OUTPUTS(0).R5[Coll[Long]].get(1) <= 1000                       &&
-                OUTPUTS(1).tokens(0)._2 >= (OUTPUTS(0).R5[Coll[Long]].get(0) + OUTPUTS(0).R5[Coll[Long]].get(1)) - (blobAttLevelIn + blobDefLevelIn)
+                OUTPUTS(0).value == blobValueIn                               &&
+                OUTPUTS(0).R4[Coll[Byte]].get == blobDescIn                   &&
+                OUTPUTS(0).R5[Coll[Int]].get(2) == blobNumGameIn              &&
+                OUTPUTS(0).R5[Coll[Int]].get(3) == blobNumWinIn               &&
+                OUTPUTS(0).R6[SigmaProp].get == ownerPKin                     &&
+                OUTPUTS(0).R7[Long].get == 0                                  &&
+                OUTPUTS(0).R8[Long].get == 0                                  &&
+                OUTPUTS(0).R9[Long].get == blobUniqueId                       &&
+                OUTPUTS(0).tokens(0)._2 == 2                                  &&
+                OUTPUTS(1).tokens.size == 1                                   &&
+                OUTPUTS(1).tokens(0)._1 == OatmealTokenNFTId                  &&
+                (
+                    ( // increase attack and/or defense lvl
+                        OUTPUTS(0).R5[Coll[Int]].get(0) <= 1000                      &&
+                        OUTPUTS(0).R5[Coll[Int]].get(1) <= 1000                      &&
+                        OUTPUTS(0).R5[Coll[Int]].get(4) == blobArmorLvlIn            &&
+                        OUTPUTS(1).tokens(0)._2 >= (OUTPUTS(0).R5[Coll[Int]].get(0) + OUTPUTS(0).R5[Coll[Int]].get(1)) - (blobAttLevelIn + blobDefLevelIn)
+                    ) ||
+                    ( // upgrade armor
+                        OUTPUTS(0).R5[Coll[Int]].get(0) == blobAttLevelIn            &&
+                        OUTPUTS(0).R5[Coll[Int]].get(1) == blobDefLevelIn            &&
+                        OUTPUTS(0).R5[Coll[Int]].get(4) == blobArmorLvlIn + 1        &&
+                        OUTPUTS(1).tokens(0)._2 >= armorConf(3 * (blobArmorLvlIn + 1))
+                    )
+                )
             } else {
                 false
             }

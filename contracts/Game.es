@@ -2,10 +2,10 @@
 
     val p1PK = SELF.R4[SigmaProp].get
     val p1UniqueId = SELF.R5[Long].get
-    val p1Info = SELF.R6[Coll[Long]].get
+    val p1Info = SELF.R6[Coll[Int]].get
     val p2PK = SELF.R7[SigmaProp].get
     val p2UniqueId = SELF.R8[Long].get
-    val p2Info = SELF.R9[Coll[Long]].get
+    val p2Info = SELF.R9[Coll[Int]].get
     
     // config box
     val configBox = CONTEXT.dataInputs(0)
@@ -15,13 +15,19 @@
     val numOatmealLose = configBox.R5[Coll[Long]].get(2)
     val numOatmealWin = configBox.R5[Coll[Long]].get(3)
     val maxPowerDiff = configBox.R5[Coll[Long]].get(4)
+    val armorConf = configBox.R5[Coll[Long]].get // [armor0Price, armor0Att, armor0Def, armor1Price, armor1Att, armor1Def,... , armor3Def]
+
+    val p1ArmorAtt = armorConf(3 * p1Info(4) + 1)
+    val p2ArmorAtt = armorConf(3 * p2Info(4) + 1)
+    val p1ArmorDef = armorConf(3 * p1Info(4) + 2)
+    val p2ArmorDef = armorConf(3 * p2Info(4) + 2)
     
-    // Weighting the stats for the max value: Att: 10, Def: 5, games: 4, victories: 8
-    val p1Power = 6*p1Info(0)+3*p1Info(1)+2*p1Info(2)+4*p1Info(3)
-    val p2Power = 6*p2Info(0)+3*p2Info(1)+2*p2Info(2)+4*p2Info(3)
-    // Weighting the stats for the min value: Def: 10, games: 10
-    val p1Def = 5*p1Info(1) + 5*p1Info(2)
-    val p2Def = 5*p2Info(1) + 5*p2Info(2)
+    // Weighting the stats for the max value: Att: 6, Def: 3, games: 2, victories: 4
+    val p1Power = 6*p1Info(0) + 3*p1Info(1) + 2*p1Info(2) + 4*p1Info(3) + p1ArmorAtt
+    val p2Power = 6*p2Info(0) + 3*p2Info(1) + 2*p2Info(2) + 4*p2Info(3) + p2ArmorAtt
+    // Weighting the stats for the min value: Def: 5, games: 5
+    val p1Def = 5*p1Info(1) + 5*p1Info(2) + p1ArmorDef
+    val p2Def = 5*p2Info(1) + 5*p2Info(2) + p2ArmorDef
     
     // Probability problem is as follow:
     //   P1 and P2 pick 2 numbers P1 in [a,b] and P2 in [a+n,b+n]
@@ -96,25 +102,43 @@
     }
     
     // check if blob1 and blob2 have their game played statistics increased properly 
-    val validP1Info = if (OUTPUTS(0).R5[Coll[Long]].isDefined) {
-        val outP1Info = OUTPUTS(0).R5[Coll[Long]].get
+    val validP1Info = if (OUTPUTS(0).R5[Coll[Int]].isDefined) {
+        val outP1Info = OUTPUTS(0).R5[Coll[Int]].get
         anyOf(Coll(
                 // P1 win increase party+1, victories+1
-                p1win && outP1Info(0) == p1Info(0) && outP1Info(1) == p1Info(1) && outP1Info(2) == p1Info(2)+1 && outP1Info(3) == p1Info(3)+1,
+                p1win && outP1Info(0) == p1Info(0) && 
+                outP1Info(1) == p1Info(1)          && 
+                outP1Info(2) == p1Info(2)+1        && 
+                outP1Info(3) == p1Info(3)+1        && 
+                outP1Info(4) == p1Info(4),
                 // P1 lose increase party+1
-                !p1win && outP1Info(0) == p1Info(0) && outP1Info(1) == p1Info(1) && outP1Info(2) == p1Info(2)+1 && outP1Info(3) == p1Info(3),
+                !p1win && outP1Info(0) == p1Info(0) &&
+                outP1Info(1) == p1Info(1)           && 
+                outP1Info(2) == p1Info(2)+1         && 
+                outP1Info(3) == p1Info(3)           && 
+                outP1Info(4) == p1Info(4),
               ))
     } else {
         false
     }
     
-    val validP2Info = if (OUTPUTS(1).R5[Coll[Long]].isDefined) {
-        val outP2Info = OUTPUTS(1).R5[Coll[Long]].get
+    val validP2Info = if (OUTPUTS(1).R5[Coll[Int]].isDefined) {
+        val outP2Info = OUTPUTS(1).R5[Coll[Int]].get
         anyOf(Coll(
                 // P2 win increase party+1, victories+1
-                !p1win && outP2Info(0) == p2Info(0) && outP2Info(1) == p2Info(1) && outP2Info(2) == p2Info(2)+1 && outP2Info(3) == p2Info(3)+1,
+                !p1win                              && 
+                outP2Info(0) == p2Info(0)           &&
+                outP2Info(1) == p2Info(1)           && 
+                outP2Info(2) == p2Info(2)+1         && 
+                outP2Info(3) == p2Info(3)+1         &&
+                outP2Info(4) == p2Info(4),
                 // P2 lose increase party+1
-                p1win && outP2Info(0) == p2Info(0) && outP2Info(1) == p2Info(1) && outP2Info(2) == p2Info(2)+1 && outP2Info(3) == p2Info(3),
+                p1win                               &&
+                outP2Info(0) == p2Info(0)           &&
+                outP2Info(1) == p2Info(1)           && 
+                outP2Info(2) == p2Info(2)+1         && 
+                outP2Info(3) == p2Info(3)           &&
+                outP2Info(4) == p2Info(4),
               ))
     } else {
         false

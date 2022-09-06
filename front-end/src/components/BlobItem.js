@@ -2,15 +2,16 @@ import React, { Fragment } from 'react';
 import ErgBlob from './ErgBlob';
 import { Rating } from 'react-simple-star-rating'
 import { copySuccess, promptFeedAmount } from '../utils/Alerts';
-import { NANOERG_TO_ERG, RATING_RANGES } from '../utils/constants';
+import { BLOB_ARMORS, NANOERG_TO_ERG, RATING_RANGES } from '../utils/constants';
 
-import { decodeString, decodeLongArray, ergoTreeToAddress } from '../ergo-related/serializer';
+import { decodeString, decodeLongArray, ergoTreeToAddress, decodeIntArray } from '../ergo-related/serializer';
 import { addWidthDrawBlob, buyBlob, feedBlob, killBlob, setBlobStatus } from '../ergo-related/blob';
 import { BlobState } from './BlobState';
-import { formatLongString } from '../utils/utils';
+import { formatLongString, getBlobPowers } from '../utils/utils';
 import CopyIcon from '../images/outline_content_copy_black_24dp.png';
 import OpenAction from '../images/outline_keyboard_double_arrow_right_black_24dp.png';
 import CloseAction from '../images/outline_keyboard_double_arrow_left_black_24dp.png';
+import PaperArmor from '../images/armure_carton.png';
 
 export default class BlobItem extends React.Component {
     constructor(props) {
@@ -50,9 +51,7 @@ export default class BlobItem extends React.Component {
         //console.log("blobBoxJSON", box)
         const desc = await decodeString(box.additionalRegisters.R4.serializedValue);
         const descArray = desc.toString().split(":");
-        const decodedInfo = await decodeLongArray(box.additionalRegisters.R5.serializedValue);
-        const power = 10 * decodedInfo[0] + 5 * decodedInfo[1] + 4 * decodedInfo[2] + 8 * decodedInfo[3];
-        const defense = 10 * decodedInfo[1] + 10 * decodedInfo[2];
+        const [power, defense] = getBlobPowers(box.additionalRegisters.R5.renderedValue);
         const ownerAddress = await ergoTreeToAddress("00" + box.additionalRegisters.R6.serializedValue);
         const averagePower = (power + defense) / 2;
         //const averagePower = 6000;
@@ -75,7 +74,7 @@ export default class BlobItem extends React.Component {
             eyes_pos: descArray[3],
             mouth_type: descArray[4],
             name: descArray[0],
-            info: decodedInfo,
+            info: JSON.parse(box.additionalRegisters.R5.renderedValue),
             power: power,
             defense: defense,
             blobId: box.additionalRegisters.R9.renderedValue,
@@ -101,7 +100,7 @@ export default class BlobItem extends React.Component {
     }
 
     async buy(blobBoxJSON) {
-        await buyBlob(blobBoxJSON)
+        await buyBlob(blobBoxJSON);
         await this.state.updateList();
     }
 
@@ -112,7 +111,12 @@ export default class BlobItem extends React.Component {
 
     async feed(blobBoxJSON) {
         const [defAmount, attAmount] = await promptFeedAmount();
-        await feedBlob(blobBoxJSON, defAmount, attAmount)
+        await feedBlob(blobBoxJSON, 'feed', defAmount, attAmount);
+        await this.state.updateList();
+    }
+
+    async upgradeArmor(blobBoxJSON) {
+        await feedBlob(blobBoxJSON, 'armor');
         await this.state.updateList();
     }
 
@@ -146,6 +150,14 @@ export default class BlobItem extends React.Component {
                         mouth_type={this.state.mouth_type}
                         name={this.state.name}
                     />
+                    <div className="d-flex flex-row justify-content-between m-2">
+                        <div></div>
+                        <div className="d-flex flex-column align-items-center">
+                            <img className="armor" src={PaperArmor} alt={BLOB_ARMORS[0].name} />
+                            {BLOB_ARMORS[0].name}
+                        </div>
+                        <div></div>
+                    </div>
                     <div className="border-white d-flex flex-column align-items-center p-2" >
                         <div className="d-flex flex-row justify-content-between w-100">
                             <div><strong>Value</strong></div>
@@ -166,6 +178,10 @@ export default class BlobItem extends React.Component {
                         <div className="d-flex flex-row justify-content-between w-100">
                             <div>Defense</div>
                             <div>{this.state.info[1]}</div>
+                        </div>
+                        <div className="d-flex flex-row justify-content-between w-100">
+                            <div>Armor</div>
+                            <div>{this.state.info[4]}</div>
                         </div>
                         <div className="d-flex flex-row justify-content-between w-100">
                             <div>Fights</div>
@@ -220,6 +236,8 @@ export default class BlobItem extends React.Component {
                                             disabled={this.state.state[0] !== '1'} >Cancel fight</button>
                                         <button className="btn btn-ultra-voilet m-1" onClick={() => this.feed(this.state.blobBoxJSON)}
                                             disabled={this.state.state[0] !== '0'} >Feed</button>
+                                        <button className="btn btn-ultra-voilet m-1" onClick={() => this.upgradeArmor(this.state.blobBoxJSON)}
+                                            disabled={this.state.state[0] !== '0'} >Upgrade armor</button>
                                     </Fragment>
                                     :
                                     <Fragment>

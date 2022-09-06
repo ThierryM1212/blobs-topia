@@ -133,6 +133,17 @@ input[type="text"], textarea {
   
 }
 
+.armor {
+  border: 0px solid rgb(0, 0, 0);
+  border-radius: 10px;
+  background: linear-gradient(to bottom right, rgba(31, 34, 36, 0.5), rgba(48, 36, 48, 0.5));
+  min-width: 3rem;
+  max-width: 4rem;
+  padding: 2px;
+  height: 100%;
+  color: black;
+}
+
 /* winning percent*/
 .winning-percent {
   position: relative;

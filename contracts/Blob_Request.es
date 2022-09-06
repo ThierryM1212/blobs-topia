@@ -19,7 +19,7 @@
     } else {
         false
     }
-    val validBlobRegister5 = OUTPUTS(0).R5[Coll[Long]].isDefined
+    val validBlobRegister5 = OUTPUTS(0).R5[Coll[Int]].isDefined
     val validBlobRegister6 = if (OUTPUTS(0).R6[SigmaProp].isDefined) {
         OUTPUTS(0).R6[SigmaProp].get == ownerPKin
     } else {
@@ -37,7 +37,7 @@
     }
     val validBlobRegister9 = OUTPUTS(0).R9[Long].isDefined
     
-    ownerPKin ||
+    ownerPKin || // refund
     sigmaProp(
         // Blob is first output
         validConfigBox                                                               &&

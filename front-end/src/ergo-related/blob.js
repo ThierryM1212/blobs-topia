@@ -1,9 +1,9 @@
 import JSONBigInt from 'json-bigint';
-import { errorAlert, promptErgAmount, waitingAlert } from "../utils/Alerts";
-import { BLOB_ERG_MIN_VALUE, BLOB_EXCHANGE_FEE, BLOB_PRICE, CONFIG_TOKEN_ID, GAME_ADDRESS, GAME_TOKEN_ID, MIN_NANOERG_BOX_VALUE, NANOERG_TO_ERG, OATMEAL_TOKEN_ID, TX_FEE } from "../utils/constants";
+import { confirmAlert, errorAlert, promptErgAmount, waitingAlert } from "../utils/Alerts";
+import { BLOB_ARMORS, BLOB_ERG_MIN_VALUE, BLOB_EXCHANGE_FEE, BLOB_PRICE, CONFIG_TOKEN_ID, GAME_ADDRESS, GAME_TOKEN_ID, MIN_NANOERG_BOX_VALUE, NANOERG_TO_ERG, OATMEAL_TOKEN_ID, TX_FEE } from "../utils/constants";
 import { BLOB_REQUEST_SCRIPT_ADDRESS, BLOB_SCRIPT_ADDRESS, BURN_ALL_SCRIPT_ADDRESS, OATMEAL_BUY_REQUEST_SCRIPT_ADDRESS } from "../utils/script_constants";
 import { boxByTokenId, currentHeight } from "./explorer";
-import { encodeLong, encodeLongArray } from './serializer';
+import { encodeIntArray, encodeLong } from './serializer';
 import { addSimpleOutputBox, createTransaction, getUtxosListValue, parseUtxo, setBoxRegisterByteArray, verifyTransactionIO } from "./wasm";
 import { getBalance, getTokenUtxos, getUtxos, isValidWalletAddress, walletSignTx } from "./wallet.js";
 let ergolib = import('ergo-lib-wasm-browser');
@@ -354,10 +354,32 @@ export async function createBlobRequest(name, color1, color2, eyes_pos, mouth_ty
     return null;
 }
 
-export async function feedBlob(blobBoxJSON, amountDefense, amountAttack) {
+export async function feedBlob(blobBoxJSON, mode, amountDefense = 0, amountAttack = 0) {
+    var infoArray = JSON.parse(blobBoxJSON.additionalRegisters.R5.renderedValue);
+    var totalOatmealTokens = 0;
+    if (mode === 'feed') {
+        totalOatmealTokens = amountDefense + amountAttack;
+        infoArray[0] = infoArray[0] + amountAttack;
+        infoArray[1] = infoArray[1] + amountDefense;
+    }
+    if (mode === 'armor') {
+        var currentArmorLvl = infoArray[4];
+        if (currentArmorLvl + 1 > BLOB_ARMORS.length) {
+            errorAlert("Already at max level of armor")
+            return;
+        }
+        totalOatmealTokens = BLOB_ARMORS[currentArmorLvl + 1].oatmeal_price;
+        infoArray[4] = infoArray[4] + 1;
+        const res = await confirmAlert("Upgrade blob armor to level " + infoArray[4],
+            "Price: " + totalOatmealTokens + " Oatmeal", "OK", "No")
+        if (!res.isConfirmed) {
+            return;
+        }
+    }
+
     const tokenBalance = await getBalance(OATMEAL_TOKEN_ID);
-    if (tokenBalance < amountDefense + amountAttack) {
-        errorAlert("Not enough Oatmeal tokens, only "+tokenBalance.toString()+" available")
+    if (tokenBalance < totalOatmealTokens) {
+        errorAlert("Not enough Oatmeal tokens, only " + tokenBalance.toString() + " available")
         return;
     }
 
@@ -369,7 +391,7 @@ export async function feedBlob(blobBoxJSON, amountDefense, amountAttack) {
         var utxos = [];
         var utxos2 = [];
         try {
-            utxos = await getTokenUtxos(amountAttack + amountDefense, OATMEAL_TOKEN_ID);
+            utxos = await getTokenUtxos(totalOatmealTokens, OATMEAL_TOKEN_ID);
             utxos2 = await getUtxos(TX_FEE + MIN_NANOERG_BOX_VALUE);
         } catch (e) {
             console.log(e);
@@ -391,7 +413,7 @@ export async function feedBlob(blobBoxJSON, amountDefense, amountAttack) {
         const blobTokenAmount = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str("2"));
 
         const oatmealTokenId = (await ergolib).TokenId.from_str(OATMEAL_TOKEN_ID);
-        const oatmealTokenAmount = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str((amountAttack + amountDefense).toString()));
+        const oatmealTokenAmount = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str((totalOatmealTokens).toString()));
 
         // BLOB with stat increased
         const blobBoxInWASM = (await ergolib).ErgoBox.from_json(JSONBigInt.stringify(blobBoxJSON));
@@ -400,10 +422,7 @@ export async function feedBlob(blobBoxJSON, amountDefense, amountAttack) {
             (await ergolib).Contract.pay_to_address((await ergolib).Address.from_base58(BLOB_SCRIPT_ADDRESS)),
             creationHeight);
         blobBoxBuilder.set_register_value(4, blobBoxInWASM.register_value(4));
-        var infoArray = JSON.parse(blobBoxJSON.additionalRegisters.R5.renderedValue);
-        infoArray[0] = infoArray[0] + amountAttack;
-        infoArray[1] = infoArray[1] + amountDefense;
-        blobBoxBuilder.set_register_value(5, await encodeLongArray(infoArray));
+        blobBoxBuilder.set_register_value(5, await encodeIntArray(infoArray));
         blobBoxBuilder.set_register_value(6, blobBoxInWASM.register_value(6));
         blobBoxBuilder.set_register_value(7, blobBoxInWASM.register_value(7));
         blobBoxBuilder.set_register_value(8, blobBoxInWASM.register_value(8));
@@ -435,13 +454,10 @@ export async function feedBlob(blobBoxJSON, amountDefense, amountAttack) {
         if (verifyTransactionIO(correctTx)) {
             await walletSignTx(alert, correctTx, address);
         }
-
-
     } else {
         errorAlert("Incorrect address", "The address provided does not match the address connected to Yoroi wallet")
     }
     return null;
-
 }
 
 export async function createOatmealBuyRequest(ergAmount) {

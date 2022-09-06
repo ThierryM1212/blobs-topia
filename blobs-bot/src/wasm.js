@@ -211,3 +211,11 @@ export async function ergoTreeToAddress(ergoTree) {
     const address = (await ergolib).Address.recreate_from_ergo_tree(ergoT);
     return address.to_base58();
 }
+
+export async function encodeIntArray(intArray) {
+    return (await ergolib).Constant.from_i32_array(intArray);
+}
+
+export async function decodeIntArray(encodedArray) {
+    return (await ergolib).Constant.decode_from_base16(encodedArray).to_i32_array()
+}

@@ -14,19 +14,16 @@
     val numOatmealWin = configBox.R5[Coll[Long]].get(3)
     val totalOatmeal = numOatmealLose + numOatmealWin
     
-    // verify the different improvable stats of a blob are replicated
-    def isBlobR5Replicated(id:Int) = OUTPUTS(id).R5[Coll[Long]].get == INPUTS(id).R5[Coll[Long]].get
-    
     val validBlob1 = if (OUTPUTS.size > 3 && INPUTS.size == 3) {
                             if (blake2b256(OUTPUTS(0).propositionBytes) == blobScriptHash) {
                                 OUTPUTS(0).value == INPUTS(0).value - INPUTS(0).R8[Long].get    &&
                                 OUTPUTS(0).R4[Coll[Byte]].get == INPUTS(0).R4[Coll[Byte]].get   &&
-                                isBlobR5Replicated(0)                                           &&
+                                OUTPUTS(0).R5[Coll[Int]].get == INPUTS(0).R5[Coll[Int]].get     &&
                                 OUTPUTS(0).R6[SigmaProp].get == INPUTS(0).R6[SigmaProp].get     &&
                                 OUTPUTS(0).R7[Long].get == 3                                    &&
                                 OUTPUTS(0).R8[Long].get == INPUTS(0).R8[Long].get               &&
                                 OUTPUTS(0).R9[Long].get == INPUTS(0).R9[Long].get               &&
-                                OUTPUTS(0).tokens(0)._1 == GameTokenNFTId                      &&
+                                OUTPUTS(0).tokens(0)._1 == GameTokenNFTId                       &&
                                 OUTPUTS(0).tokens(0)._2 == 1
                             } else {
                                 false
@@ -39,7 +36,7 @@
                             if (blake2b256(OUTPUTS(1).propositionBytes) == blobScriptHash) {
                                 OUTPUTS(1).value == INPUTS(1).value - INPUTS(1).R8[Long].get    &&
                                 OUTPUTS(1).R4[Coll[Byte]].get == INPUTS(1).R4[Coll[Byte]].get   &&
-                                isBlobR5Replicated(1)                                           &&
+                                OUTPUTS(1).R5[Coll[Int]].get == INPUTS(1).R5[Coll[Int]].get     &&
                                 OUTPUTS(1).R6[SigmaProp].get == INPUTS(1).R6[SigmaProp].get     &&
                                 OUTPUTS(1).R7[Long].get == 3                                    &&
                                 OUTPUTS(1).R8[Long].get == INPUTS(1).R8[Long].get               &&
@@ -63,18 +60,12 @@
                                 OUTPUTS(2).value >= 2 * OUTPUTS(0).R8[Long].get - txFee                  &&
                                 OUTPUTS(2).R4[SigmaProp].get == OUTPUTS(0).R6[SigmaProp].get             &&
                                 OUTPUTS(2).R5[Long].get == OUTPUTS(0).R9[Long].get                       &&
-                                OUTPUTS(2).R6[Coll[Long]].get(0) == OUTPUTS(0).R5[Coll[Long]].get(0)     &&
-                                OUTPUTS(2).R6[Coll[Long]].get(1) == OUTPUTS(0).R5[Coll[Long]].get(1)     &&
-                                OUTPUTS(2).R6[Coll[Long]].get(2) == OUTPUTS(0).R5[Coll[Long]].get(2)     &&
-                                OUTPUTS(2).R6[Coll[Long]].get(3) == OUTPUTS(0).R5[Coll[Long]].get(3)     &&
+                                OUTPUTS(2).R6[Coll[Int]].get == OUTPUTS(0).R5[Coll[Int]].get             &&
                                 // blob in second position for the figth                                  
                                 OUTPUTS(2).value >= 2 * OUTPUTS(1).R8[Long].get - txFee                  &&
                                 OUTPUTS(2).R7[SigmaProp].get == OUTPUTS(1).R6[SigmaProp].get             &&
                                 OUTPUTS(2).R8[Long].get == OUTPUTS(1).R9[Long].get                       &&
-                                OUTPUTS(2).R9[Coll[Long]].get(0) == OUTPUTS(1).R5[Coll[Long]].get(0)     &&
-                                OUTPUTS(2).R9[Coll[Long]].get(1) == OUTPUTS(1).R5[Coll[Long]].get(1)     &&
-                                OUTPUTS(2).R9[Coll[Long]].get(2) == OUTPUTS(1).R5[Coll[Long]].get(2)     &&
-                                OUTPUTS(2).R9[Coll[Long]].get(3) == OUTPUTS(1).R5[Coll[Long]].get(3)
+                                OUTPUTS(2).R9[Coll[Int]].get == OUTPUTS(1).R5[Coll[Int]].get
                             } else {
                                 false
                             }

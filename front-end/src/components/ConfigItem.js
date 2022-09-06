@@ -3,7 +3,7 @@ import { decodeHex, decodeHexArray, decodeLongArray } from '../ergo-related/seri
 import { CONFIG_TOKEN_ID } from '../utils/constants';
 import { boxByTokenId } from '../ergo-related/explorer'
 import { getRegisterValue } from '../ergo-related/wasm';
-import { formatERGAmount } from '../utils/utils';
+import { chunkArray, formatERGAmount } from '../utils/utils';
 
 
 export default class ConfigItem extends React.Component {
@@ -22,6 +22,7 @@ export default class ConfigItem extends React.Component {
             numOatmealWinner: 0,
             maxPowerDiff: 0,
             oatmealPrice: 0,
+            armorStatArray: [],
         };
     }
 
@@ -61,6 +62,7 @@ export default class ConfigItem extends React.Component {
         if (currentConfigBox.length > 0) {
             const R5LongArray = await this.getRegisterLongArray(currentConfigBox[0], "R5");
             const R4StrArray = await this.getRegisterHexArray(currentConfigBox[0], "R4");
+            const R6LongArray = await this.getRegisterLongArray(currentConfigBox[0], "R6");
 
             this.setState({
                 boxId: currentConfigBox[0].boxId ?? '',
@@ -75,12 +77,13 @@ export default class ConfigItem extends React.Component {
                 numOatmealWinner: R5LongArray[3] ?? 0,
                 maxPowerDiff: R5LongArray[4] ?? 0,
                 oatmealPrice: R5LongArray[5] ?? 0,
+                armorStatArray: chunkArray(R6LongArray, 3) ?? [],
             });
         }
     }
 
     render() {
-        const currentBoxDisplay = {
+        var currentBoxDisplay = {
             "Box id": this.state.boxId,
             "Box address": this.state.boxAddress,
             "Blob script hash": this.state.blobScriptHash,
@@ -100,7 +103,7 @@ export default class ConfigItem extends React.Component {
                 <table className="m-1" >
                     <tbody>
                         {
-                            Object.keys(currentBoxDisplay).map( key =>
+                            Object.keys(currentBoxDisplay).map(key =>
                                 <tr key={key}>
                                     <td>
                                         {key}:
@@ -111,6 +114,20 @@ export default class ConfigItem extends React.Component {
                                 </tr>
                             )
                         }
+                    </tbody>
+                </table>
+                <table className="m-1" >
+                    <tbody>
+                        <th>
+                            <td>Armor lvl</td><td>Oatmeal price</td><td>Att power</td><td>Def power</td>
+                            {
+                                this.state.armorStatArray.map((armor, index) =>
+                                    <tr>
+                                        <td>{index}</td><td>{armor[0]}</td><td>{armor[1]}</td><td>{armor[2]}</td>
+                                    </tr>
+                                )
+                            }
+                        </th>
                     </tbody>
                 </table>
             </Fragment>
