@@ -3,6 +3,11 @@ import withReactContent from 'sweetalert2-react-content';
 import BlobWaitAnim from '../components/BlobWaitAnim';
 import { encodeContract, ergoTreeToAddress } from '../ergo-related/serializer';
 import { formatLongString, getKeyByValue } from './utils';
+import WeaponItem from '../components/WeaponItem';
+import { Fragment } from 'react';
+import { BLOB_ARMORS, BLOB_WEAPONS, WEAPONS_TYPES, WEAPONS_UPGRADE_PRICES } from './items_constants';
+import oatmealLogo from "../images/oatmeal.png";
+import ArmorItem from '../components/ArmorItem';
 
 
 export function waitingAlert(title) {
@@ -63,9 +68,9 @@ export function displayErgoPayTransaction(txId, reducedTx) {
         showConfirmButton: true,
         html: `<p>Send the transaction to wallet: <a href="ergopay:${reducedTx}" target="_blank" > Sign ${txId} with ErgoPay </a></p>`,
     },
-    function(){ 
-        window.location.reload();
-    });
+        function () {
+            window.location.reload();
+        });
     return MySwal;
 }
 
@@ -168,9 +173,9 @@ export function promptErgAddrList(addrList) {
     return new Promise(function (resolve, reject) {
         var inputOptions = {};
         for (const addr of addrList) {
-            inputOptions[addr] = formatLongString(addr, 10)  ;
+            inputOptions[addr] = formatLongString(addr, 10);
         }
-        console.log("inputOptions[addrList[0]]",addrList[0]);
+        //console.log("inputOptions[addrList[0]]",addrList[0]);
         Swal.fire({
             title: "Set ERG address",
             input: 'select',
@@ -184,19 +189,106 @@ export function promptErgAddrList(addrList) {
             },
             inputValidator: function (value) {
                 return new Promise(function (resolve, reject) {
-                  if (value !== '') {
-                    resolve()
-                  } else {
-                    reject('The ERG address is invalid')
-                  }
+                    if (value !== '') {
+                        resolve()
+                    } else {
+                        reject('The ERG address is invalid')
+                    }
                 })
-              }
-            }).then(function (result) {
-                if (result.value) {
-                    resolve(result.value);
-                } else {
-                    reject();
-                }
-            });
+            }
+        }).then(function (result) {
+            if (result.value) {
+                resolve(result.value);
+            } else {
+                reject();
+            }
+        });
     });
+}
+
+export function promptWeaponType(types = [1, 2, 3]) {
+    return new Promise(function (resolve, reject) {
+        const MySwal = withReactContent(Swal)
+        MySwal.fire({
+            title: "Choose your weapon type",
+            html:
+                <div className='w-100 d-flex flex-column '>
+                    <div className='w-100 d-flex flex-row justify-content-center'>
+                        Price: {WEAPONS_UPGRADE_PRICES[0]}
+                        <img src={oatmealLogo} width="20px" heigth="20px" alt="Oatmeal" />
+                    </div>
+                    <br/>
+                    <div className='w-100 d-flex flex-row justify-content-between align-items-center'>
+                        <div></div>
+                        {
+                            types.map(i =>
+                                <Fragment>
+                                    <div className='weaponChooser' disabled={true}
+                                        onClick={() => { Swal.getPopup().querySelector('#weanponChoosen').value = i; MySwal.clickConfirm(); }}>
+                                        <WeaponItem weaponType={i} weaponLevel={0} />
+                                        <div>{WEAPONS_TYPES[i]}</div>
+                                    </div>
+                                    <div></div>
+                                </Fragment>
+                            )
+                        }
+                        <input type="text" id="weanponChoosen" class="swal2-input" hidden></input>
+                        
+                    </div>
+                    {
+                        types.length === 2 ? <div>The weapon level will be reset to 0.</div> : null
+                    }
+                    
+                </div>,
+            focusConfirm: false,
+            showCancelButton: true,
+            showConfirmButton: false,
+            preConfirm: async () => {
+                const weaponChoosen = Swal.getPopup().querySelector('#weanponChoosen').value;
+                return { weaponChoosen: weaponChoosen };
+            }
+        }).then((result) => {
+            if (result.value) {
+                resolve(result.value.weaponChoosen);
+            } else {
+                reject();
+            }
+        });
+    });
+}
+
+export function promptUpgradeItem(type, iniLvl, weaponType = 0) {
+        const MySwal = withReactContent(Swal)
+        return MySwal.fire({
+            title: "Upgrade your " + type,
+            html:
+                <div className='w-100 d-flex flex-column '>
+                    <div className='w-100 d-flex flex-row justify-content-center'>
+                        Price: {type ==='weapon' ? WEAPONS_UPGRADE_PRICES[iniLvl+1] : BLOB_ARMORS[iniLvl+1].oatmeal_price}
+                        <img src={oatmealLogo} width="20px" heigth="20px" alt="Oatmeal" />
+                    </div>
+                    <br/>
+                    <div className='w-100 d-flex flex-row justify-content-between align-items-center'>
+                        <div></div>
+                        {
+                            type === 'armor' ?
+                            <Fragment>
+                                <ArmorItem armorLevel={iniLvl} />
+                                <div class="arrow-1"></div>
+                                <ArmorItem armorLevel={iniLvl+1} />
+                            </Fragment>
+                            : <Fragment>
+                                <WeaponItem weaponType={weaponType} weaponLevel={iniLvl} />
+                                <div class="arrow-1"></div>
+                                <WeaponItem weaponType={weaponType} weaponLevel={iniLvl+1}/>
+                            </Fragment>
+                        }
+                        <div></div>
+                    </div>
+                </div>,
+            focusConfirm: false,
+            showCancelButton: true,
+            showConfirmButton: true,
+        
+        });
 }

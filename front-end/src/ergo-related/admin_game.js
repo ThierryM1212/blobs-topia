@@ -1,5 +1,6 @@
 import { errorAlert, waitingAlert } from '../utils/Alerts';
-import { BLOB_ARMORS, BLOB_EXCHANGE_FEE, BLOB_MINT_FEE, BLOB_PRICE, CONFIG_TOKEN_ID, GAME_ADDRESS, GAME_TOKEN_ID, INI_BLOB_ARMOR_LVL, INI_BLOB_ATT_LEVEL, INI_BLOB_DEF_LEVEL, INI_BLOB_GAME, INI_BLOB_VICTORY, MAX_POWER_DIFF, MIN_NANOERG_BOX_VALUE, NANOERG_TO_ERG, NUM_OATMEAL_TOKEN_LOSER, NUM_OATMEAL_TOKEN_WINNER, OATMEAL_PRICE, OATMEAL_TOKEN_ID, TX_FEE } from '../utils/constants';
+import { BLOB_EXCHANGE_FEE, BLOB_MINT_FEE, BLOB_PRICE, CONFIG_TOKEN_ID, GAME_ADDRESS, GAME_TOKEN_ID, INI_BLOB_ARMOR_LVL, INI_BLOB_ATT_LEVEL, INI_BLOB_DEF_LEVEL, INI_BLOB_GAME, INI_BLOB_VICTORY, INI_BLOB_WEAPON_LVL, INI_BLOB_WEAPON_TYPE, MAX_POWER_DIFF, MIN_NANOERG_BOX_VALUE, NANOERG_TO_ERG, NUM_OATMEAL_TOKEN_LOSER, NUM_OATMEAL_TOKEN_WINNER, OATMEAL_PRICE, OATMEAL_TOKEN_ID, TX_FEE } from '../utils/constants';
+import { BLOB_ARMORS, BLOB_WEAPONS, WEAPONS_UPGRADE_PRICES } from '../utils/items_constants';
 import { BLOB_SCRIPT_HASH, BURN_ALL_SCRIPT_HASH, CONFIG_SCRIPT_ADDRESS, GAME_SCRIPT_HASH, OATMEAL_RESERVE_SCRIPT_HASH, RESERVE_SCRIPT_ADDRESS } from "../utils/script_constants";
 import { boxById, boxByTokenId, currentHeight } from './explorer';
 import { encodeIntArray, encodeLong, encodeLongArray } from './serializer';
@@ -146,7 +147,12 @@ export async function updateConfigurationBox() {
             armorConf.push([armor.oatmeal_price.toString(), armor.attack_power.toString(), armor.defense_power.toString()]);
         }
         configBoxBuilder.set_register_value(6, await encodeLongArray(armorConf.flat()));
-
+        configBoxBuilder.set_register_value(7, await encodeLongArray(WEAPONS_UPGRADE_PRICES));
+        var weaponPowers = [];
+        for (const weapon of BLOB_WEAPONS) {
+            weaponPowers.push([weapon.attack_power.toString(), weapon.defense_power.toString()]);
+        }
+        configBoxBuilder.set_register_value(8, await encodeIntArray(weaponPowers.flat()));
         configBoxBuilder.add_token(configTokenId, configTokenAmount);
         try {
             outputCandidates.add(configBoxBuilder.build());
@@ -197,7 +203,7 @@ export async function mintGameTokenReserve(reserveName, reserveTokenAmount, rese
             (await ergolib).Contract.pay_to_address((await ergolib).Address.from_base58(RESERVE_SCRIPT_ADDRESS)),
             creationHeight);
         await setBoxRegisterByteArray(reserveBoxBuilder, 4, reserveName);
-        const blobIniConf = [INI_BLOB_ATT_LEVEL, INI_BLOB_DEF_LEVEL, INI_BLOB_GAME, INI_BLOB_VICTORY, INI_BLOB_ARMOR_LVL];
+        const blobIniConf = [INI_BLOB_ATT_LEVEL, INI_BLOB_DEF_LEVEL, INI_BLOB_GAME, INI_BLOB_VICTORY, INI_BLOB_ARMOR_LVL, INI_BLOB_WEAPON_TYPE, INI_BLOB_WEAPON_LVL];
         reserveBoxBuilder.set_register_value(5, await encodeIntArray(blobIniConf));
         const blobPrices = [BLOB_PRICE, BLOB_MINT_FEE];
         reserveBoxBuilder.set_register_value(6, await encodeLongArray(blobPrices));

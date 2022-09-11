@@ -142,6 +142,13 @@ input[type="text"], textarea {
   padding: 2px;
   height: 100%;
   color: black;
+  font-family: Arial, sans-serif;
+}
+.armorValue {
+  color:rgba(17, 185, 17, 0.8);
+  font-weight: bold;
+  font-size: larger;
+  
 }
 
 /* winning percent*/
@@ -160,6 +167,7 @@ input[type="text"], textarea {
 
 .transparent-image {
   opacity: 0.5;
+  padding: 0px;
 }
 
 .color-nav {
@@ -172,6 +180,18 @@ input[type=radio]:checked + div {
   border-radius: 5px;
 }
 
+.weaponChooser {
+  transition: 0.5s;
+}
+.weaponChooser:hover {
+  box-shadow: 0 0 0 2px #654ea3 inset;
+  transition: 0.5s;
+}
+.weaponChooser:active {
+  box-shadow: 0 0 0 2px rgba(17, 185, 17, 0.5) inset;
+}
+
+
 .btn:active {
   transform: translateY(4px);
 }
@@ -179,6 +199,7 @@ input[type=radio]:checked + div {
 .btn:hover:enabled {
   box-shadow: 0 0 0 2px #654ea3;
   transition: 0.7s;
+  
 }
 
 .btn-ultra-voilet {
@@ -285,3 +306,19 @@ input[type="checkbox"]:disabled {
   cursor: not-allowed;
 }
 
+/* Animated arrow */
+.arrow-1 {
+  width:100px;
+  height:30px;
+  display: flex;
+}
+.arrow-1:before {
+  content: "";
+  background: currentColor;
+  width:15px;
+  clip-path: polygon(0 10px,calc(100% - 15px) 10px,calc(100% - 15px) 0,100% 50%,calc(100% - 15px) 100%,calc(100% - 15px) calc(100% - 10px),0 calc(100% - 10px));
+  animation: a1 1.5s infinite linear;
+}
+@keyframes a1 {
+  50%,100%{flex-grow: 1}
+}

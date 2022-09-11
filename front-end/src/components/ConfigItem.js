@@ -1,5 +1,5 @@
 import React, { Fragment } from 'react';
-import { decodeHex, decodeHexArray, decodeLongArray } from '../ergo-related/serializer';
+import { decodeHex, decodeHexArray, decodeIntArray, decodeLongArray } from '../ergo-related/serializer';
 import { CONFIG_TOKEN_ID } from '../utils/constants';
 import { boxByTokenId } from '../ergo-related/explorer'
 import { getRegisterValue } from '../ergo-related/wasm';
@@ -23,6 +23,8 @@ export default class ConfigItem extends React.Component {
             maxPowerDiff: 0,
             oatmealPrice: 0,
             armorStatArray: [],
+            weaponUpgradePrices: [],
+            weaponStatArray: [],
         };
     }
 
@@ -32,6 +34,16 @@ export default class ConfigItem extends React.Component {
             longArray = await decodeLongArray(getRegisterValue(box, register))
         } catch (e) {
             console.log("getRegisterLongArray", e);
+        }
+        return longArray;
+    }
+
+    async getRegisterIntArray(box, register) {
+        var longArray = [];
+        try {
+            longArray = await decodeIntArray(getRegisterValue(box, register))
+        } catch (e) {
+            console.log("getRegisterIntArray", e);
         }
         return longArray;
     }
@@ -58,11 +70,14 @@ export default class ConfigItem extends React.Component {
 
     async componentDidMount() {
         const currentConfigBox = await boxByTokenId(CONFIG_TOKEN_ID);
-        //console.log("ConfigItem componentDidMount currentConfigBox", currentConfigBox);
+        console.log("ConfigItem componentDidMount currentConfigBox", currentConfigBox);
         if (currentConfigBox.length > 0) {
-            const R5LongArray = await this.getRegisterLongArray(currentConfigBox[0], "R5");
             const R4StrArray = await this.getRegisterHexArray(currentConfigBox[0], "R4");
+            const R5LongArray = await this.getRegisterLongArray(currentConfigBox[0], "R5");
             const R6LongArray = await this.getRegisterLongArray(currentConfigBox[0], "R6");
+            const R7LongArray = await this.getRegisterLongArray(currentConfigBox[0], "R7");
+            const R8IntArray = await this.getRegisterIntArray(currentConfigBox[0], "R8");
+            console.log("R8IntArray", R8IntArray)
 
             this.setState({
                 boxId: currentConfigBox[0].boxId ?? '',
@@ -78,6 +93,8 @@ export default class ConfigItem extends React.Component {
                 maxPowerDiff: R5LongArray[4] ?? 0,
                 oatmealPrice: R5LongArray[5] ?? 0,
                 armorStatArray: chunkArray(R6LongArray, 3) ?? [],
+                weaponUpgradePrices: R7LongArray,
+                weaponStatArray: chunkArray(R8IntArray, 2) ?? [],
             });
         }
     }
@@ -97,6 +114,7 @@ export default class ConfigItem extends React.Component {
             "Max power diff": this.state.maxPowerDiff,
             "Oatmeal price": formatERGAmount(this.state.oatmealPrice) + " ERG",
         };
+        console.log("weaponStatArray", this.state.weaponStatArray)
 
         return (
             <Fragment>
@@ -116,18 +134,88 @@ export default class ConfigItem extends React.Component {
                         }
                     </tbody>
                 </table>
+                <h5>Armor statistics and prices</h5>
                 <table className="m-1" >
                     <tbody>
-                        <th>
+                        <tr>
                             <td>Armor lvl</td><td>Oatmeal price</td><td>Att power</td><td>Def power</td>
-                            {
-                                this.state.armorStatArray.map((armor, index) =>
-                                    <tr>
-                                        <td>{index}</td><td>{armor[0]}</td><td>{armor[1]}</td><td>{armor[2]}</td>
-                                    </tr>
-                                )
-                            }
-                        </th>
+
+                        </tr>
+                        {
+                            this.state.armorStatArray.map((armor, index) =>
+                                <tr>
+                                    <td>{index}</td><td>{armor[0]}</td><td>{armor[1]}</td><td>{armor[2]}</td>
+                                </tr>
+                            )
+                        }
+                    </tbody>
+                </table>
+                <h5>Weapon upgrade prices</h5>
+                <table className="m-1" >
+                    <tbody>
+                        <tr>
+                            <td>Change weapon Oatmeal</td>
+                            <td>lvl 0-{'>'}1</td>
+                            <td>lvl 1-{'>'}2</td>
+                            <td>lvl 2-{'>'}3</td>
+                        </tr>
+                        <tr>
+                            <td>{this.state.weaponUpgradePrices[0]} Oatmeal</td>
+                            <td>{this.state.weaponUpgradePrices[1]} Oatmeal</td>
+                            <td>{this.state.weaponUpgradePrices[2]} Oatmeal</td>
+                            <td>{this.state.weaponUpgradePrices[3]} Oatmeal</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h5>Weapon statistics</h5>
+
+                <table className="m-1" >
+                    <tbody>
+                        <tr>
+                            <td>level</td>
+                            <td colspan="2">Stick</td>
+                            <td colspan="2">Swords</td>
+                            <td colspan="2">Axes</td>
+                            <td colspan="2">Maces</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>Att</td><td>Def</td>
+                            <td>Att</td><td>Def</td>
+                            <td>Att</td><td>Def</td>
+                            <td>Att</td><td>Def</td>
+                        </tr>
+                        {
+                            this.state.weaponStatArray[0] ?
+                                <Fragment>
+                                    {
+                                        [0, 1, 2, 3].map(i =>
+                                            <tr>
+                                                <td>{i}</td>
+                                                {
+                                                    i === 0 ?
+                                                    <Fragment>
+                                                        <td>{this.state.weaponStatArray[0][0]}</td>
+                                                        <td>{this.state.weaponStatArray[0][1]}</td>
+                                                    </Fragment>
+                                                    :
+                                                    <Fragment>
+                                                        <td></td>
+                                                        <td></td>
+                                                    </Fragment>
+                                                }
+                                                <td>{this.state.weaponStatArray[i+1][0]}</td>
+                                                <td>{this.state.weaponStatArray[i+1][1]}</td>
+                                                <td>{this.state.weaponStatArray[i+5][0]}</td>
+                                                <td>{this.state.weaponStatArray[i+5][1]}</td>
+                                                <td>{this.state.weaponStatArray[i+9][0]}</td>
+                                                <td>{this.state.weaponStatArray[i+9][1]}</td>
+                                            </tr>
+                                        )
+                                    }
+                                </Fragment>
+                                : null
+                        }
                     </tbody>
                 </table>
             </Fragment>

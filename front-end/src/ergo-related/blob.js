@@ -1,6 +1,7 @@
 import JSONBigInt from 'json-bigint';
-import { confirmAlert, errorAlert, promptErgAmount, waitingAlert } from "../utils/Alerts";
-import { BLOB_ARMORS, BLOB_ERG_MIN_VALUE, BLOB_EXCHANGE_FEE, BLOB_PRICE, CONFIG_TOKEN_ID, GAME_ADDRESS, GAME_TOKEN_ID, MIN_NANOERG_BOX_VALUE, NANOERG_TO_ERG, OATMEAL_TOKEN_ID, TX_FEE } from "../utils/constants";
+import { confirmAlert, errorAlert, promptErgAmount, promptUpgradeItem, promptWeaponType, waitingAlert } from "../utils/Alerts";
+import { BLOB_ERG_MIN_VALUE, BLOB_EXCHANGE_FEE, BLOB_PRICE, CONFIG_TOKEN_ID, GAME_ADDRESS, GAME_TOKEN_ID, MIN_NANOERG_BOX_VALUE, NANOERG_TO_ERG, OATMEAL_TOKEN_ID, TX_FEE } from "../utils/constants";
+import { BLOB_ARMORS, WEAPONS_UPGRADE_PRICES } from '../utils/items_constants';
 import { BLOB_REQUEST_SCRIPT_ADDRESS, BLOB_SCRIPT_ADDRESS, BURN_ALL_SCRIPT_ADDRESS, OATMEAL_BUY_REQUEST_SCRIPT_ADDRESS } from "../utils/script_constants";
 import { boxByTokenId, currentHeight } from "./explorer";
 import { encodeIntArray, encodeLong } from './serializer';
@@ -354,26 +355,54 @@ export async function createBlobRequest(name, color1, color2, eyes_pos, mouth_ty
     return null;
 }
 
-export async function feedBlob(blobBoxJSON, mode, amountDefense = 0, amountAttack = 0) {
+export async function feedBlob(blobBoxJSON, mode, var1 = 0, var2 = 0) {
     var infoArray = JSON.parse(blobBoxJSON.additionalRegisters.R5.renderedValue);
     var totalOatmealTokens = 0;
     if (mode === 'feed') {
-        totalOatmealTokens = amountDefense + amountAttack;
-        infoArray[0] = infoArray[0] + amountAttack;
-        infoArray[1] = infoArray[1] + amountDefense;
+        totalOatmealTokens = var1 + var2;
+        infoArray[0] = infoArray[0] + var2; // Attack
+        infoArray[1] = infoArray[1] + var1; // Defense
     }
     if (mode === 'armor') {
         var currentArmorLvl = infoArray[4];
         if (currentArmorLvl + 1 > BLOB_ARMORS.length) {
-            errorAlert("Already at max level of armor")
+            errorAlert("Already at max level of the armor")
             return;
         }
         totalOatmealTokens = BLOB_ARMORS[currentArmorLvl + 1].oatmeal_price;
         infoArray[4] = infoArray[4] + 1;
-        const res = await confirmAlert("Upgrade blob armor to level " + infoArray[4],
-            "Price: " + totalOatmealTokens + " Oatmeal", "OK", "No")
+        //const res = await confirmAlert("Upgrade blob armor to level " + infoArray[4],
+        //    "Price: " + totalOatmealTokens + " Oatmeal", "OK", "No")
+        const res = await promptUpgradeItem('armor', currentArmorLvl);
         if (!res.isConfirmed) {
             return;
+        }
+    }
+    if (mode === 'choose weapon' || (mode === 'upgrade weapon')) {
+        const currentWeaponType = infoArray[5];
+        const currentWeaponLvl = infoArray[6];
+
+        if (mode === 'choose weapon') {
+            infoArray[5] = await promptWeaponType([1, 2, 3].filter(i => i !== currentWeaponType));
+            infoArray[6] = 0;
+            totalOatmealTokens = WEAPONS_UPGRADE_PRICES[0];
+        }
+
+        if (mode === 'upgrade weapon') {
+            if (currentWeaponType === 0) {
+                errorAlert("Cannot upgrade initial weapon")
+                return;
+            }
+            if (currentWeaponLvl >= 3) {
+                errorAlert("Already at max level of the weapon")
+                return;
+            }
+            const res = await promptUpgradeItem('weapon', currentWeaponLvl, currentWeaponType);
+            if (!res.isConfirmed) {
+                return;
+            }
+            infoArray[6] = currentWeaponLvl + 1;
+            totalOatmealTokens = WEAPONS_UPGRADE_PRICES[currentWeaponLvl + 1];
         }
     }
 

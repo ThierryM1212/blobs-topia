@@ -7,6 +7,8 @@
     val blobNumGameIn = SELF.R5[Coll[Int]].get(2)
     val blobNumWinIn = SELF.R5[Coll[Int]].get(3)
     val blobArmorLvlIn = SELF.R5[Coll[Int]].get(4)
+    val blobWeaponTypeIn = SELF.R5[Coll[Int]].get(5)
+    val blobWeaponLvlIn = SELF.R5[Coll[Int]].get(6)
     val ownerPKin = SELF.R6[SigmaProp].get
     val blobStateIn = SELF.R7[Long].get
     val blobStateValueIn = SELF.R8[Long].get
@@ -22,6 +24,7 @@
     val blobExchangeFee = configBox.R5[Coll[Long]].get(0)
     val txFee = configBox.R5[Coll[Long]].get(1)
     val armorConf = configBox.R6[Coll[Long]].get // [armor0Price, armor0Att, armor0Def, armor1Price, armor1Att, armor1Def,... , armor3Def]
+    val weaponUpgradePricesConf = configBox.R7[Coll[Long]].get // [ choose weapon/change type , 0->1, 1->2, 2->3] weapons upgrade prices
 
     val blobMinValue = 2 * BoxMinValue + txFee
     
@@ -179,8 +182,8 @@
     }
 
     // FEED BLOB
-    // Upgrade blob armor
-    val validFeed = if (validBlob0 && !validBlob1 && (blobStateIn == 0)) {
+    // Upgrade blob armor or weapon
+    val validUpgrade = if (validBlob0 && !validBlob1 && (blobStateIn == 0)) {
         if (OUTPUTS.size > 2) {
             if (blake2b256(OUTPUTS(1).propositionBytes) == burnAllScriptHash) {
                 OUTPUTS(0).value == blobValueIn                               &&
@@ -199,13 +202,39 @@
                         OUTPUTS(0).R5[Coll[Int]].get(0) <= 1000                      &&
                         OUTPUTS(0).R5[Coll[Int]].get(1) <= 1000                      &&
                         OUTPUTS(0).R5[Coll[Int]].get(4) == blobArmorLvlIn            &&
+                        OUTPUTS(0).R5[Coll[Int]].get(5) == blobWeaponTypeIn          &&
+                        OUTPUTS(0).R5[Coll[Int]].get(6) == blobWeaponLvlIn           &&
                         OUTPUTS(1).tokens(0)._2 >= (OUTPUTS(0).R5[Coll[Int]].get(0) + OUTPUTS(0).R5[Coll[Int]].get(1)) - (blobAttLevelIn + blobDefLevelIn)
                     ) ||
                     ( // upgrade armor
                         OUTPUTS(0).R5[Coll[Int]].get(0) == blobAttLevelIn            &&
                         OUTPUTS(0).R5[Coll[Int]].get(1) == blobDefLevelIn            &&
                         OUTPUTS(0).R5[Coll[Int]].get(4) == blobArmorLvlIn + 1        &&
+                        OUTPUTS(0).R5[Coll[Int]].get(5) == blobWeaponTypeIn          &&
+                        OUTPUTS(0).R5[Coll[Int]].get(6) == blobWeaponLvlIn           &&
                         OUTPUTS(1).tokens(0)._2 >= armorConf(3 * (blobArmorLvlIn + 1))
+                    ) ||
+                    ( // choose / upgrade weapon
+                        OUTPUTS(0).R5[Coll[Int]].get(0) == blobAttLevelIn            &&
+                        OUTPUTS(0).R5[Coll[Int]].get(1) == blobDefLevelIn            &&
+                        OUTPUTS(0).R5[Coll[Int]].get(4) == blobArmorLvlIn            &&
+                        // type 0 initial weapon lvl 0
+                        // type 1 sword lvl 0,1,2,3
+                        // type 2 axe lvl 0,1,2,3
+                        // type 3 mace lvl 0,1,2,3
+                        (
+                            ( // choose a weapon - change weapon type (also reset level)
+                                OUTPUTS(0).R5[Coll[Int]].get(5) > 0                     &&
+                                OUTPUTS(0).R5[Coll[Int]].get(5) != blobWeaponTypeIn     &&
+                                OUTPUTS(0).R5[Coll[Int]].get(6) == 0                    &&
+                                OUTPUTS(1).tokens(0)._2 >= weaponUpgradePricesConf(0)
+                            ) ||
+                            ( // upgrade weapon - same type, lvl + 1
+                                OUTPUTS(0).R5[Coll[Int]].get(5) == blobWeaponTypeIn     &&
+                                OUTPUTS(0).R5[Coll[Int]].get(6) == blobWeaponLvlIn + 1  &&
+                                OUTPUTS(1).tokens(0)._2 >= weaponUpgradePricesConf(blobWeaponLvlIn + 1)
+                            )
+                        )
                     )
                 )
             } else {
@@ -228,7 +257,7 @@
                                     validAddWidthdrawFund   ||
                                     validSetStatus          ||
                                     validUnsetStatus        ||
-                                    validFeed
+                                    validUpgrade
                                   )
             ) ||
             (// Action by anyone

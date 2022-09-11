@@ -19,40 +19,13 @@ export const INI_BLOB_DEF_LEVEL = 1;
 export const INI_BLOB_GAME = 0;
 export const INI_BLOB_VICTORY = 0;
 export const INI_BLOB_ARMOR_LVL = 0;
+export const INI_BLOB_WEAPON_TYPE = 0;
+export const INI_BLOB_WEAPON_LVL = 0;
 export const NUM_OATMEAL_TOKEN_LOSER = 1;
 export const NUM_OATMEAL_TOKEN_WINNER = 3;
 export const MAX_POWER_DIFF = 3300;
 export const OATMEAL_PRICE = 1000000;
-export const BLOB_ARMORS = [ // order matters
-    {
-        name: "Cardboard armor",
-        description: "Better than nothing",
-        defense_power: 25,
-        attack_power: 0,
-        oatmeal_price: 0,
-    },
-    {
-        name: "Bronze armor",
-        description: "Well manufactured first level armor",
-        defense_power: 200,
-        attack_power: 25,
-        oatmeal_price: 25,
-    },
-    {
-        name: "Silver armor",
-        description: "High quality armor",
-        defense_power: 500,
-        attack_power: 50,
-        oatmeal_price: 50,
-    },
-    {
-        name: "Gold armor",
-        description: "Best blob armor, bright, light and strong",
-        defense_power: 1000,
-        attack_power: 100,
-        oatmeal_price: 100,
-    },
-]
+
 
 export const RATING_RANGES = [250, 1000, 3000, 6000, 9000];
 

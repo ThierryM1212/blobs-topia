@@ -1,4 +1,5 @@
-import { BLOB_ARMORS, MAX_POWER_DIFF, NANOERG_TO_ERG } from "./constants";
+import { MAX_POWER_DIFF, NANOERG_TO_ERG } from "./constants";
+import { BLOB_ARMORS, BLOB_WEAPONS } from '../utils/items_constants';
 import JSONBigInt from 'json-bigint';
 
 export function formatLongString(str, num) {
@@ -24,8 +25,15 @@ function getRandomInt(max) {
 
 export function getBlobPowers(blobInfoStr) {
     const blobInfo = JSONBigInt.parse(blobInfoStr);
-    const attPower = 6 * getBlobAttLevel(blobInfo) + 3 * getBlobDefLevel(blobInfo) + 2 * getBlobVictories(blobInfo) + 4 * getBlobGames(blobInfo) + getBlobArmorAttPower(blobInfo);
-    const defPower = 5 * getBlobDefLevel(blobInfo) + 5 * getBlobGames(blobInfo) + getBlobArmorDefPower(blobInfo);
+    const attPower = 6 * getBlobAttLevel(blobInfo)
+        + 2 * getBlobGames(blobInfo)
+        + 4 * getBlobVictories(blobInfo)
+        + getBlobArmorAttPower(blobInfo)
+        + getBlobWeaponAttPower(blobInfo);
+    const defPower = 5 * getBlobDefLevel(blobInfo)
+        + 5 * getBlobGames(blobInfo)
+        + getBlobArmorDefPower(blobInfo)
+        + getBlobWeaponDefPower(blobInfo);
     return [attPower, defPower];
 }
 export function getBlobAttLevel(blobInfo) {
@@ -41,19 +49,25 @@ export function getBlobVictories(blobInfo) {
     return blobInfo[3];
 }
 export function getBlobArmorDefPower(blobInfo) {
-    return BLOB_ARMORS[blobInfo[4]].defense_power;;
+    return BLOB_ARMORS[blobInfo[4]].defense_power;
 }
 export function getBlobArmorAttPower(blobInfo) {
-    return BLOB_ARMORS[blobInfo[4]].attack_power;;
+    return BLOB_ARMORS[blobInfo[4]].attack_power;
+}
+export function getBlobWeaponDefPower(blobInfo) {
+    return BLOB_WEAPONS.find(weapon => weapon.lvl === blobInfo[6] && weapon.type === blobInfo[5]).defense_power
+}
+export function getBlobWeaponAttPower(blobInfo) {
+    return BLOB_WEAPONS.find(weapon => weapon.lvl === blobInfo[6] && weapon.type === blobInfo[5]).attack_power
 }
 
-export function chunkArray(myArray, chunk_size){
+export function chunkArray(myArray, chunk_size) {
     var index = 0;
     var arrayLength = myArray.length;
     var tempArray = [];
-    
+
     for (index = 0; index < arrayLength; index += chunk_size) {
-        const myChunk = myArray.slice(index, index+chunk_size);
+        const myChunk = myArray.slice(index, index + chunk_size);
         tempArray.push(myChunk);
     }
 

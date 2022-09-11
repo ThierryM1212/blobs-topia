@@ -46,7 +46,7 @@ export default class FightItem extends React.Component {
         const currentConfigBox = await boxByTokenId(CONFIG_TOKEN_ID);
         //console.log("processFight", this.state, currentConfigBox);
         const [p1WinTxId, p2WinTxId] = await processFightResult(this.state.blob1, this.state.blob2, this.state.gameBox, currentConfigBox[0]);
-        //console.log("processFight", p1WinTxId, p2WinTxId)
+        console.log("processFight", p1WinTxId, p2WinTxId)
         this.setState({
             p1WinTxId: p1WinTxId[0],
             p1Winindex: p1WinTxId[1],

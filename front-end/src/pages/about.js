@@ -128,8 +128,8 @@ export default class AboutPage extends React.Component {
 
                 <div className='w-100 zoneabout d-flex flex-column align-items-start m-2 p-2'>
                     <h5>How are computed the Attack power and the defense power of my blob ?</h5>
-                    <p>Attack power = 6 * Attack Level + 3 * Defense level + 2 * Number of game + 4 * Number of victories</p>
-                    <p>Defense power = 5 * Defense level + 5 * Number of game</p>
+                    <p>Attack power = 6 * Attack Level + 3 * Defense level + 2 * Number of game + 4 * Number of victories + Armor attack power</p>
+                    <p>Defense power = 5 * Defense level + 5 * Number of game + Armor defense power</p>
                 </div>
 
                 <div className='w-100 zoneabout d-flex flex-column align-items-start m-2 p-2'>

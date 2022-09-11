@@ -16,18 +16,45 @@
     val numOatmealWin = configBox.R5[Coll[Long]].get(3)
     val maxPowerDiff = configBox.R5[Coll[Long]].get(4)
     val armorConf = configBox.R5[Coll[Long]].get // [armor0Price, armor0Att, armor0Def, armor1Price, armor1Att, armor1Def,... , armor3Def]
+    val weaponSpecConf = configBox.R8[Coll[Int]].get // [Att00, Def00, Att10, Def10, Att11, Def11, Att12, Def12, Att13, Def13, Att20, Def20, ... Def33]
 
     val p1ArmorAtt = armorConf(3 * p1Info(4) + 1)
     val p2ArmorAtt = armorConf(3 * p2Info(4) + 1)
     val p1ArmorDef = armorConf(3 * p1Info(4) + 2)
     val p2ArmorDef = armorConf(3 * p2Info(4) + 2)
+
+    val p1WeaponType = p1Info(5)
+    val p2WeaponType = p2Info(5)
+    val p1WeaponLvl = p1Info(6)
+    val p2WeaponLvl = p2Info(6)
+
+    val p1WeaponAtt = if (p1WeaponType == 0) {
+        weaponSpecConf(0)
+    } else {
+        weaponSpecConf(2 + 8 * (p1WeaponType-1) + 2 * p1WeaponLvl)
+    }
+    val p2WeaponAtt = if (p2WeaponType == 0) {
+        weaponSpecConf(0)
+    } else {
+        weaponSpecConf(2 + 8 * (p2WeaponType-1) + 2 * p2WeaponLvl)
+    }
+    val p1WeaponDef = if (p1WeaponType == 0) {
+        weaponSpecConf(1)
+    } else {
+        weaponSpecConf(2 + 8 * (p1WeaponType-1) + 2 * p1WeaponLvl + 1)
+    }
+    val p2WeaponDef = if (p2WeaponType == 0) {
+        weaponSpecConf(1)
+    } else {
+        weaponSpecConf(2 + 8 * (p2WeaponType-1) + 2 * p2WeaponLvl + 1)
+    }
     
-    // Weighting the stats for the max value: Att: 6, Def: 3, games: 2, victories: 4
-    val p1Power = 6*p1Info(0) + 3*p1Info(1) + 2*p1Info(2) + 4*p1Info(3) + p1ArmorAtt
-    val p2Power = 6*p2Info(0) + 3*p2Info(1) + 2*p2Info(2) + 4*p2Info(3) + p2ArmorAtt
+    // Weighting the stats for the max value: Att: 6, games: 2, victories: 4
+    val p1Power = 6*p1Info(0) + 2*p1Info(2) + 4*p1Info(3) + p1ArmorAtt + p1WeaponAtt
+    val p2Power = 6*p2Info(0) + 2*p2Info(2) + 4*p2Info(3) + p2ArmorAtt + p2WeaponAtt
     // Weighting the stats for the min value: Def: 5, games: 5
-    val p1Def = 5*p1Info(1) + 5*p1Info(2) + p1ArmorDef
-    val p2Def = 5*p2Info(1) + 5*p2Info(2) + p2ArmorDef
+    val p1Def = 5*p1Info(1) + 5*p1Info(2) + p1ArmorDef + p1WeaponDef
+    val p2Def = 5*p2Info(1) + 5*p2Info(2) + p2ArmorDef + p2WeaponDef
     
     // Probability problem is as follow:
     //   P1 and P2 pick 2 numbers P1 in [a,b] and P2 in [a+n,b+n]

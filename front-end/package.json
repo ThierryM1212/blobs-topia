@@ -16,6 +16,7 @@
     "blobshape": "^1.0.0",
     "crypto-js": "^4.1.1",
     "ergo-lib-wasm-browser": "^0.17.0",
+    "html2canvas": "^1.4.1",
     "react": "^17.0.1",
     "react-bootstrap": "^2.0.3",
     "react-color": "^2.19.3",
@@ -25,11 +26,13 @@
     "react-router-dom": "^6.0.2",
     "react-scripts": "4.0.1",
     "react-simple-star-rating": "^4.0.5",
+    "react-tooltip": "^4.2.21",
     "reactcss": "^1.2.3",
     "sweetalert2": "^11.3.0",
     "sweetalert2-react-content": "^4.2.0",
     "text-decoding": "^1.0.0",
     "typescript": "^4.1.3",
+    "uuidv4": "^6.2.13",
     "web-vitals": "^0.2.4"
   },
   "scripts": {
