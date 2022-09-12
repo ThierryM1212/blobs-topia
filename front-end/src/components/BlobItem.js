@@ -1,6 +1,5 @@
 import React, { Fragment } from 'react';
 import ErgBlob from './ErgBlob';
-import { Rating } from 'react-simple-star-rating'
 import { confirmAlert, copySuccess, promptFeedAmount } from '../utils/Alerts';
 import { NANOERG_TO_ERG, RATING_RANGES } from '../utils/constants';
 import { BLOB_ARMORS, BLOB_WEAPONS, WEAPONS_UPGRADE_PRICES } from '../utils/items_constants';
@@ -17,6 +16,7 @@ import BlobActionButton from './BlobActionButton';
 import exportAsImage from '../utils/exportAsImage';
 import ImageButton from './ImageButton';
 import WeaponItem from './WeaponItem';
+import BlobRating from './BlobRating';
 
 export default class BlobItem extends React.Component {
     constructor(props) {
@@ -37,7 +37,7 @@ export default class BlobItem extends React.Component {
             blobId: '0',
             showActions: props.showActions ?? false,
             ownerAddress: '',
-            rating: 0,
+            averagePower: 0,
             disableActions: props.disableActions ?? false,
             showStatus: props.showStatus ?? true,
             showOwner: props.showOwner ?? false,
@@ -58,18 +58,6 @@ export default class BlobItem extends React.Component {
         const descArray = desc.toString().split(":");
         const [power, defense] = getBlobPowers(box.additionalRegisters.R5.renderedValue);
         const ownerAddress = await ergoTreeToAddress("00" + box.additionalRegisters.R6.serializedValue);
-        const averagePower = (power + defense) / 2;
-        //const averagePower = 6000;
-        var rating = 0;
-        for (const i of RATING_RANGES) {
-            if (averagePower >= i) {
-                rating++;
-            } else {
-                break;
-            }
-        }
-        //console.log("rating", rating);
-        //console.log("ownerAddress", ownerAddress);
 
         this.setState({
             boxId: box.boxId,
@@ -85,7 +73,6 @@ export default class BlobItem extends React.Component {
             blobId: box.additionalRegisters.R9.renderedValue,
             state: [box.additionalRegisters.R7.renderedValue, box.additionalRegisters.R8.renderedValue],
             ownerAddress: ownerAddress,
-            rating: rating,
             showActions: this.state.showActions,
         })
     }
@@ -155,12 +142,11 @@ export default class BlobItem extends React.Component {
 
     render() {
         const ownBlob = (this.state.ownerAddress === localStorage.getItem('address'));
-        console.log("this.state.info",this.state.info)
         return (
             <div className="zonecard d-flex flex-row m-1 p-1 align-items-center" >
                 <div className="d-flex flex-column zoneblob " ref={this.blobRef} >
                     <div className="d-flex flex-row justify-content-between w-100">
-                        <Rating initialValue={this.state.rating} readonly={true} size={20} />
+                        <BlobRating averagePower={(this.state.power + this.state.defense)/2} />
                         <div className="d-flex flex-row align-items-end">
                             <ImageButton action={() => exportAsImage(this.blobRef.current, this.state.name + "_" + (new Date().toISOString()).slice(0, -5))}
                                 alt="photo"

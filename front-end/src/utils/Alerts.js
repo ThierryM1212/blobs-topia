@@ -66,7 +66,14 @@ export function displayErgoPayTransaction(txId, reducedTx) {
         allowOutsideClick: true,
         icon: 'success',
         showConfirmButton: true,
-        html: `<p>Send the transaction to wallet: <a href="ergopay:${reducedTx}" target="_blank" > Sign ${txId} with ErgoPay </a></p>`,
+        html: <div><p>Send the transaction to wallet </p>
+            <button className='btn btn-ultra-voilet m-1' onClick={() => {
+                const url = `ergopay:${reducedTx}`;
+                window.open(url, '_blank').focus();
+            }} > Sign with ErgoPay
+            </button>
+        </div>
+        ,
     },
         function () {
             window.location.reload();
@@ -217,7 +224,7 @@ export function promptWeaponType(types = [1, 2, 3]) {
                         Price: {WEAPONS_UPGRADE_PRICES[0]}
                         <img src={oatmealLogo} width="20px" heigth="20px" alt="Oatmeal" />
                     </div>
-                    <br/>
+                    <br />
                     <div className='w-100 d-flex flex-row justify-content-between align-items-center'>
                         <div></div>
                         {
@@ -233,12 +240,12 @@ export function promptWeaponType(types = [1, 2, 3]) {
                             )
                         }
                         <input type="text" id="weanponChoosen" class="swal2-input" hidden></input>
-                        
+
                     </div>
                     {
                         types.length === 2 ? <div>The weapon level will be reset to 0.</div> : null
                     }
-                    
+
                 </div>,
             focusConfirm: false,
             showCancelButton: true,
@@ -258,37 +265,37 @@ export function promptWeaponType(types = [1, 2, 3]) {
 }
 
 export function promptUpgradeItem(type, iniLvl, weaponType = 0) {
-        const MySwal = withReactContent(Swal)
-        return MySwal.fire({
-            title: "Upgrade your " + type,
-            html:
-                <div className='w-100 d-flex flex-column '>
-                    <div className='w-100 d-flex flex-row justify-content-center'>
-                        Price: {type ==='weapon' ? WEAPONS_UPGRADE_PRICES[iniLvl+1] : BLOB_ARMORS[iniLvl+1].oatmeal_price}
-                        <img src={oatmealLogo} width="20px" heigth="20px" alt="Oatmeal" />
-                    </div>
-                    <br/>
-                    <div className='w-100 d-flex flex-row justify-content-between align-items-center'>
-                        <div></div>
-                        {
-                            type === 'armor' ?
+    const MySwal = withReactContent(Swal)
+    return MySwal.fire({
+        title: "Upgrade your " + type,
+        html:
+            <div className='w-100 d-flex flex-column '>
+                <div className='w-100 d-flex flex-row justify-content-center'>
+                    Price: {type === 'weapon' ? WEAPONS_UPGRADE_PRICES[iniLvl + 1] : BLOB_ARMORS[iniLvl + 1].oatmeal_price}
+                    <img src={oatmealLogo} width="20px" heigth="20px" alt="Oatmeal" />
+                </div>
+                <br />
+                <div className='w-100 d-flex flex-row justify-content-between align-items-center'>
+                    <div></div>
+                    {
+                        type === 'armor' ?
                             <Fragment>
                                 <ArmorItem armorLevel={iniLvl} />
                                 <div class="arrow-1"></div>
-                                <ArmorItem armorLevel={iniLvl+1} />
+                                <ArmorItem armorLevel={iniLvl + 1} />
                             </Fragment>
                             : <Fragment>
                                 <WeaponItem weaponType={weaponType} weaponLevel={iniLvl} />
                                 <div class="arrow-1"></div>
-                                <WeaponItem weaponType={weaponType} weaponLevel={iniLvl+1}/>
+                                <WeaponItem weaponType={weaponType} weaponLevel={iniLvl + 1} />
                             </Fragment>
-                        }
-                        <div></div>
-                    </div>
-                </div>,
-            focusConfirm: false,
-            showCancelButton: true,
-            showConfirmButton: true,
-        
-        });
+                    }
+                    <div></div>
+                </div>
+            </div>,
+        focusConfirm: false,
+        showCancelButton: true,
+        showConfirmButton: true,
+
+    });
 }

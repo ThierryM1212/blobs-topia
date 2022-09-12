@@ -36,66 +36,46 @@ export default class OatmealShopPage extends React.Component {
         return (
             <Fragment >
                 <div className="w-75 d-flex flex-column align-items-center m-2 p-2">
-                    
                     <h4>Buy oatmeal</h4>
                     <h6>Use Oatmeal to feed your blobs and increase their power !</h6>
                     <h6>1 Oatmeal token for 1 attack point or 1 defense point</h6>
-                    <div className="w-100 zoneabout d-flex flex-row align-items-center m-2 p-2">
-                        
-                        <table>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <h6>Price</h6>
-                                    </td>
-                                    <td>
-                                        <h6><strong>{formatERGAmount(OATMEAL_PRICE)} ERG</strong> per Oatmeal token
-                                            <img src={oatmealLogo} width="20px" heigth="20px" alt="Oatmeal" />
-                                        </h6>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        Amount
-                                    </td>
-                                    <td>
-                                        <input id="oatmealAmount"
-                                            type="numeric"
-                                            onChange={this.handleChangeOatmealAmount}
-                                            value={this.state.oatmealAmount}
-                                        />
-                                    </td>
-                                </tr>
+                    <h6>Use Oatmeal to upgrade your armor and weapon</h6>
+                    <div className="w-100 zoneabout d-flex flex-row align-items-center">
+                        <div className='d-flex flex-column'>
+                            <div className='d-flex flex-column m-2 p-2 zoneprice align-items-center'>
+                                <br />
+                                <div> <strong>{formatERGAmount(OATMEAL_PRICE)} ERG</strong></div>
+                                <div> per Oatmeal </div>
+                                <br />
+                            </div>
+                            <div className='d-flex flex-column m-2 p-2  align-items-center'>
+                                <input id="oatmealAmount"
+                                    type="numeric"
+                                    onChange={this.handleChangeOatmealAmount}
+                                    value={this.state.oatmealAmount}
+                                    autocomplete="off"
+                                />
                                 {
                                     this.state.oatmealAmount > 0 ?
-                                        <tr>
-                                            <td>
-                                                Total cost
-                                            </td>
-                                            <td>
-                                                <strong>{formatERGAmount(this.state.oatmealAmount * OATMEAL_PRICE + 2 * TX_FEE)} ERG</strong>
-                                            </td>
-                                        </tr>
-                                        : null
+                                        <div className='d-flex flex-row m-2 p-2'>
+                                            <div>Price:&nbsp;</div>
+                                            <strong>{formatERGAmount(this.state.oatmealAmount * OATMEAL_PRICE + 2 * TX_FEE)} ERG</strong>
+                                        </div>
+                                        : <div className='d-flex flex-row m-2 p-2'>
+                                            <div>&nbsp;</div>
+                                        </div>
                                 }
-                                <tr>
-                                    <td>
-
-                                    </td>
-                                    <td>
-                                        <button className="btn btn-ultra-voilet m-1"
-                                            onClick={() => this.buy()}
-                                            disabled={this.state.oatmealAmount <= 0}>
-                                            Buy
-                                        </button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                                <button className="btn btn-ultra-voilet m-1"
+                                    onClick={() => this.buy()}
+                                    disabled={this.state.oatmealAmount <= 0}>
+                                    Buy Oatmeal
+                                </button>
+                            </div>
+                        </div>
                         <img src={OatmealSeller} alt="Oatmeal seller" />
                     </div>
                 </div>
-                <OatmealBuyRequestList reRenderKey={this.state.reRenderKey}/>
+                <OatmealBuyRequestList reRenderKey={this.state.reRenderKey} />
             </Fragment>
         )
     }
