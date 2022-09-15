@@ -1,3 +1,3 @@
 {
-    proveDlog(GameFundPK) || sigmaProp( 1 == 0 )
+    proveDlog(GameFundPK) || sigmaProp( 1 == 2 )
 }

@@ -15,7 +15,7 @@
     val numOatmealLose = configBox.R5[Coll[Long]].get(2)
     val numOatmealWin = configBox.R5[Coll[Long]].get(3)
     val maxPowerDiff = configBox.R5[Coll[Long]].get(4)
-    val armorConf = configBox.R5[Coll[Long]].get // [armor0Price, armor0Att, armor0Def, armor1Price, armor1Att, armor1Def,... , armor3Def]
+    val armorConf = configBox.R6[Coll[Long]].get // [armor0Price, armor0Att, armor0Def, armor1Price, armor1Att, armor1Def,... , armor3Def]
     val weaponSpecConf = configBox.R8[Coll[Int]].get // [Att00, Def00, Att10, Def10, Att11, Def11, Att12, Def12, Att13, Def13, Att20, Def20, ... Def33]
 
     val p1ArmorAtt = armorConf(3 * p1Info(4) + 1)

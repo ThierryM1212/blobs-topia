@@ -4,8 +4,8 @@ import { BLOB_ARMORS, BLOB_WEAPONS, WEAPONS_UPGRADE_PRICES } from '../utils/item
 import { BLOB_SCRIPT_HASH, BURN_ALL_SCRIPT_HASH, CONFIG_SCRIPT_ADDRESS, GAME_SCRIPT_HASH, OATMEAL_RESERVE_SCRIPT_HASH, RESERVE_SCRIPT_ADDRESS } from "../utils/script_constants";
 import { boxById, boxByTokenId, currentHeight } from './explorer';
 import { encodeIntArray, encodeLong, encodeLongArray } from './serializer';
-import { createTransaction, getBoxSelection, parseUtxo, setBoxRegisterByteArray, verifyTransactionIO } from './wasm';
-import { getAllUtxos, getTokenUtxos, getUtxos, isValidWalletAddress, walletSignTx } from './wallet.js';
+import { createTransaction, parseUtxo, setBoxRegisterByteArray, verifyTransactionIO } from './wasm';
+import { getTokenUtxos, getUtxos, isValidWalletAddress, walletSignTx } from './wallet.js';
 let ergolib = import('ergo-lib-wasm-browser');
 
 
@@ -14,7 +14,7 @@ export async function burnGameTokenReserve(boxId) {
     const address = localStorage.getItem('address');
     const alert = waitingAlert("Preparing the transaction...");
     if (await isValidWalletAddress(address)) {
-        var utxos = await getUtxos(TX_FEE);
+        var utxos = await getUtxos(TX_FEE + MIN_NANOERG_BOX_VALUE);
         const reservebox = await boxById(boxId);
         const reserveboxFixed = parseUtxo(reservebox);
         utxos.push(reserveboxFixed);
@@ -26,7 +26,10 @@ export async function burnGameTokenReserve(boxId) {
             reserveTokenAmount)
         );
 
-        const boxSelection = await getBoxSelection(utxos, MIN_NANOERG_BOX_VALUE / NANOERG_TO_ERG, tokens);
+        const inputsWASM = (await ergolib).ErgoBoxes.from_boxes_json(utxos);
+        const dataListWASM = new (await ergolib).ErgoBoxAssetsDataList();
+        const boxSelection = new (await ergolib).BoxSelection(inputsWASM, dataListWASM);
+
         const creationHeight = await currentHeight();
         const outputCandidates = (await ergolib).ErgoBoxCandidates.empty();
         const boxValue = (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str(MIN_NANOERG_BOX_VALUE.toString()));
@@ -60,7 +63,7 @@ export async function burnOatmealReserve(boxId) {
     const address = localStorage.getItem('address');
     const alert = waitingAlert("Preparing the transaction...");
     if (await isValidWalletAddress(address)) {
-        var utxos = await getUtxos(TX_FEE);
+        var utxos = await getUtxos(TX_FEE + MIN_NANOERG_BOX_VALUE);
         const reservebox = await boxById(boxId);
         const reserveboxFixed = parseUtxo(reservebox);
         utxos.push(reserveboxFixed);
@@ -72,7 +75,10 @@ export async function burnOatmealReserve(boxId) {
             reserveTokenAmount)
         );
 
-        const boxSelection = await getBoxSelection(utxos, MIN_NANOERG_BOX_VALUE / NANOERG_TO_ERG, tokens);
+        const inputsWASM = (await ergolib).ErgoBoxes.from_boxes_json(utxos);
+        const dataListWASM = new (await ergolib).ErgoBoxAssetsDataList();
+        const boxSelection = new (await ergolib).BoxSelection(inputsWASM, dataListWASM);
+
         const creationHeight = await currentHeight();
         const outputCandidates = (await ergolib).ErgoBoxCandidates.empty();
         const boxValue = (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str(MIN_NANOERG_BOX_VALUE.toString()));
@@ -108,14 +114,11 @@ export async function updateConfigurationBox() {
     if (await isValidWalletAddress(address)) {
         const creationHeight = await currentHeight();
         // select the inputs
-        var utxos = await getAllUtxos();
-        console.log("utxos", utxos);
+        var utxos = await getUtxos(TX_FEE + MIN_NANOERG_BOX_VALUE);
         const currentConfigBox = await boxByTokenId(CONFIG_TOKEN_ID);
-        console.log("ConfigItem componentDidMount currentConfigBox", currentConfigBox);
         if (currentConfigBox.length > 0) {
             utxos.push(currentConfigBox[0]);
         }
-        console.log("utxos2", utxos);
 
         var tokens = new (await ergolib).Tokens();
         const configTokenId = (await ergolib).TokenId.from_str(CONFIG_TOKEN_ID);
@@ -124,8 +127,10 @@ export async function updateConfigurationBox() {
             configTokenId,
             configTokenAmount)
         );
-        const boxSelection = await getBoxSelection(utxos, MIN_NANOERG_BOX_VALUE / NANOERG_TO_ERG, tokens);
-        console.log("boxSelection", boxSelection);
+
+        const inputsWASM = (await ergolib).ErgoBoxes.from_boxes_json(utxos);
+        const dataListWASM = new (await ergolib).ErgoBoxAssetsDataList();
+        const boxSelection = new (await ergolib).BoxSelection(inputsWASM, dataListWASM);
 
         const outputCandidates = (await ergolib).ErgoBoxCandidates.empty();
         // prepare the new config box
@@ -153,6 +158,11 @@ export async function updateConfigurationBox() {
             weaponPowers.push([weapon.attack_power.toString(), weapon.defense_power.toString()]);
         }
         configBoxBuilder.set_register_value(8, await encodeIntArray(weaponPowers.flat()));
+        //const testArray = [(await ergolib).array_as_tuple(["0", "2", "3"]),
+        //(await ergolib).array_as_tuple(["4", "5", "6"]),
+        //(await ergolib).array_as_tuple(["7", "8", "9"])];
+        //console.log("R9 type", (await ergolib).Constant.from_js(testArray).dbg_tpe())
+        //configBoxBuilder.set_register_value(9, (await ergolib).Constant.from_js(testArray));
         configBoxBuilder.add_token(configTokenId, configTokenAmount);
         try {
             outputCandidates.add(configBoxBuilder.build());
@@ -191,7 +201,10 @@ export async function mintGameTokenReserve(reserveName, reserveTokenAmount, rese
             gameTokenId,
             reserveTokenAmountWASM)
         );
-        const boxSelection = await getBoxSelection(utxos, MIN_NANOERG_BOX_VALUE / NANOERG_TO_ERG, tokens);
+
+        const inputsWASM = (await ergolib).ErgoBoxes.from_boxes_json(utxos);
+        const dataListWASM = new (await ergolib).ErgoBoxAssetsDataList();
+        const boxSelection = new (await ergolib).BoxSelection(inputsWASM, dataListWASM);
 
         // prepare the reserve output box
         const creationHeight = await currentHeight();
@@ -233,7 +246,9 @@ export async function mintOatmealReserve(reserveAddress, oatmealReserveTokenAmou
     const address = localStorage.getItem('address');
     const alert = waitingAlert("Preparing the transaction...");
     if (await isValidWalletAddress(address)) {
-        var utxos = await getAllUtxos();
+        var utxos = await getUtxos(TX_FEE + MIN_NANOERG_BOX_VALUE);
+        var utxos1 = await getTokenUtxos(oatmealReserveTokenAmount, OATMEAL_TOKEN_ID);
+        utxos = utxos.concat(utxos1);
         console.log(utxos);
         var tokens = new (await ergolib).Tokens();
         console.log("this.state.oatmealReserveTokenAmount", oatmealReserveTokenAmount)
@@ -243,7 +258,10 @@ export async function mintOatmealReserve(reserveAddress, oatmealReserveTokenAmou
             oatmealTokenId,
             reserveTokenAmount)
         );
-        const boxSelection = await getBoxSelection(utxos, MIN_NANOERG_BOX_VALUE / NANOERG_TO_ERG, tokens);
+
+        const inputsWASM = (await ergolib).ErgoBoxes.from_boxes_json(utxos);
+        const dataListWASM = new (await ergolib).ErgoBoxAssetsDataList();
+        const boxSelection = new (await ergolib).BoxSelection(inputsWASM, dataListWASM);
 
         // prepare the reserve output box
         const creationHeight = await currentHeight();

@@ -15,7 +15,7 @@
     "@types/react-dom": "^16.9.10",
     "blobshape": "^1.0.0",
     "crypto-js": "^4.1.1",
-    "ergo-lib-wasm-browser": "^0.17.0",
+    "ergo-lib-wasm-browser": "^0.20.1",
     "html2canvas": "^1.4.1",
     "react": "^17.0.1",
     "react-bootstrap": "^2.0.3",

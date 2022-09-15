@@ -1,6 +1,6 @@
 let ergolib = import('ergo-lib-wasm-nodejs');
 import JSONBigInt from 'json-bigint';
-import { NANOERG_TO_ERG, TX_FEE } from './constants.js';
+import { TX_FEE } from './constants.js';
 import { currentHeight, getExplorerBlockHeaders, getExplorerBlockHeadersFull } from './explorer.js';
 
 
@@ -16,28 +16,6 @@ export async function getErgoStateContext2(contextId) {
     const block_headers = (await ergolib).BlockHeaders.from_json(explorerContext);
     const pre_header = (await ergolib).PreHeader.from_block_header(block_headers.get(0));
     return new (await ergolib).ErgoStateContext(pre_header, block_headers);
-}
-
-export async function getBoxSelection(utxos, amountFloat, tokens) {
-    const amountToSend = Math.round((amountFloat * NANOERG_TO_ERG)).toString();
-    const amountToSendBoxValue = (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str(amountToSend));
-    const selector = new (await ergolib).SimpleBoxSelector();
-    let boxSelection = {};
-
-    try {
-        boxSelection = selector.select(
-            (await ergolib).ErgoBoxes.from_boxes_json(utxos),
-            (await ergolib).BoxValue.from_i64(amountToSendBoxValue.as_i64()),
-            tokens);
-    } catch (e) {
-        let msg = "[Wallet] Error: "
-        if (JSON.stringify(e).includes("BoxValue out of bounds")) {
-            msg = msg + "Increase the Erg amount to process the transaction. "
-            return msg;
-        }
-        throw (e);
-    }
-    return boxSelection;
 }
 
 export async function signTransaction(unsignedTx, inputs, dataInputs, wallet) {
@@ -73,20 +51,60 @@ export async function encodeLong(num) {
     return (await ergolib).Constant.from_i64((await ergolib).I64.from_str(num));
 }
 
-export async function createTransaction(boxSelection, outputCandidates, dataInputs, changeAddress, utxos, txFee = undefined) {
-    const creationHeight = await currentHeight();
-    var fee = TX_FEE;
-    if (txFee) {
-        fee = txFee;
+async function boxCandidateToJsonMin(boxCandidate) {
+    var res = {};
+    res["value"] = boxCandidate.value().as_i64().as_num().toString();
+    res["ergoTree"] = boxCandidate.ergo_tree().to_base16_bytes();
+    res["address"] = (await ergolib).Address.recreate_from_ergo_tree(boxCandidate.ergo_tree()).to_base58();
+    var tokens = [];
+    for (let i = 0; i < boxCandidate.tokens().len(); i++) {
+        tokens.push(boxCandidate.tokens().get(i).to_js_eip12())
     }
+    res["assets"] = tokens;
+    return res;
+}
+async function boxCandidatesToJsonMin(boxCandidates) {
+    var res = [];
+    for (let i = 0; i < boxCandidates.len(); i++) {
+        res.push(await boxCandidateToJsonMin(boxCandidates.get(i)))
+    }
+    return res;
+}
+
+export async function createTransaction(boxSelection, outputCandidates, dataInputs, changeAddress, utxos) {
+    const creationHeight = await currentHeight();
+
+    // build the change box
+    var outputJs = await boxCandidatesToJsonMin(outputCandidates);
+    const missingErgs = getMissingErg(utxos, outputJs) - BigInt(TX_FEE);
+    const tokens = getMissingTokens(utxos, outputJs);
+    
+    if (missingErgs > 0 || Object.keys(tokens) > 0) {
+        const changeBoxValue = (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str(missingErgs.toString()));
+        const changeBoxBuilder = new (await ergolib).ErgoBoxCandidateBuilder(
+            changeBoxValue,
+            (await ergolib).Contract.pay_to_address((await ergolib).Address.from_base58(changeAddress)),
+            creationHeight);
+            for (const tokId of Object.keys(tokens)) {
+                const tokenId = (await ergolib).TokenId.from_str(tokId);
+                const tokenAmount = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str(tokens[tokId].toString()));
+                changeBoxBuilder.add_token(tokenId, tokenAmount);
+            }
+        try {
+            outputCandidates.add(changeBoxBuilder.build());
+        } catch (e) {
+            console.log(`building error: ${e}`);
+            throw e;
+        }
+    }
+
     const txBuilder = (await ergolib).TxBuilder.new(
         boxSelection,
         outputCandidates,
         creationHeight,
-        (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str(fee.toString())),
-        (await ergolib).Address.from_base58(changeAddress),
-        (await ergolib).BoxValue.SAFE_USER_MIN());
-    const dataInputsWASM = new (await ergolib).DataInputs();
+        (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str(TX_FEE.toString())),
+        (await ergolib).Address.from_base58(changeAddress));
+    var dataInputsWASM = new (await ergolib).DataInputs();
     for (const box of dataInputs) {
         const boxIdWASM = (await ergolib).BoxId.from_str(box.boxId);
         const dataInputWASM = new (await ergolib).DataInput(boxIdWASM);
@@ -94,15 +112,12 @@ export async function createTransaction(boxSelection, outputCandidates, dataInpu
     }
     txBuilder.set_data_inputs(dataInputsWASM);
     const tx = parseUnsignedTx(txBuilder.build().to_json());
-    //console.log(`tx: ${JSONBigInt.stringify(tx)}`);
 
     const unsignedTx = (await ergolib).UnsignedTransaction.from_json(JSONBigInt.stringify(tx))
-    //console.log("unsignedTx",unsignedTx,unsignedTx.id().to_str(),unsignedTx.id().to_str());
     var correctTx = parseUnsignedTx(unsignedTx.to_json());
 
     // Put back complete selected inputs in the same order
     correctTx.inputs = correctTx.inputs.map(box => {
-        //console.log(`box: ${JSONBigInt.stringify(box)}`);
         const fullBoxInfo = parseUtxo(utxos.find(utxo => utxo.boxId === box.boxId));
         return {
             ...fullBoxInfo,
@@ -111,14 +126,13 @@ export async function createTransaction(boxSelection, outputCandidates, dataInpu
     });
     // Put back complete selected datainputs in the same order
     correctTx.dataInputs = correctTx.dataInputs.map(box => {
-        //console.log(`box: ${JSONBigInt.stringify(box)}`);
         const fullBoxInfo = parseUtxo(dataInputs.find(utxo => utxo.boxId === box.boxId));
         return {
             ...fullBoxInfo,
             extension: {}
         };
     });
-    //console.log(`correctTx tx: ${JSONBigInt.stringify(correctTx)}`);
+
     return correctTx;
 }
 
@@ -218,4 +232,78 @@ export async function encodeIntArray(intArray) {
 
 export async function decodeIntArray(encodedArray) {
     return (await ergolib).Constant.decode_from_base16(encodedArray).to_i32_array()
+}
+
+export function getUtxosListValue(utxos) {
+    return utxos.reduce((acc, utxo) => acc += BigInt(utxo.value), BigInt(0));
+}
+
+export function getTokenListFromUtxos(utxos) {
+    var tokenList = {};
+    for (const i in utxos) {
+        for (const j in utxos[i].assets) {
+            if (utxos[i].assets[j].tokenId in tokenList) {
+                tokenList[utxos[i].assets[j].tokenId] = BigInt(tokenList[utxos[i].assets[j].tokenId]) + BigInt(utxos[i].assets[j].amount);
+            } else {
+                tokenList[utxos[i].assets[j].tokenId] = BigInt(utxos[i].assets[j].amount);
+            }
+        }
+    }
+    return tokenList;
+}
+
+export function getMissingErg(inputs, outputs) {
+    const amountIn = getUtxosListValue(inputs);
+    const amountOut = getUtxosListValue(outputs);
+    if (amountIn >= amountOut) {
+        return amountIn - amountOut;
+    } else {
+        return BigInt(0);
+    }
+}
+
+export function getMissingTokens(inputs, outputs) {
+    const tokensIn = getTokenListFromUtxos(inputs);
+    const tokensOut = getTokenListFromUtxos(outputs);
+    var res = {};
+    if (tokensIn !== {}) {
+        for (const token in tokensIn) {
+            if (tokensOut !== {} && token in tokensOut) {
+                if (tokensIn[token] - tokensOut[token] > 0) {
+                    res[token] = tokensIn[token] - tokensOut[token];
+                }
+            } else {
+                res[token] = tokensIn[token];
+            }
+        }
+    }
+    return res;
+}
+
+export async function buildBalanceBox(inputs, outputs, address) {
+    const missingErgs = getMissingErg(inputs, outputs).toString();
+    const contract = await encodeContract(address);
+    const tokens = buildTokenList(getMissingTokens(inputs, outputs));
+    const height = await currentHeight();
+
+    return {
+        value: missingErgs,
+        ergoTree: contract,
+        assets: tokens,
+        additionalRegisters: {},
+        creationHeight: height,
+        extension: {},
+        index: undefined,
+        boxId: undefined,
+    };
+}
+
+export function buildTokenList(tokens) {
+    var res = [];
+    if (tokens !== {}) {
+        for (const i in tokens) {
+            res.push({ "tokenId": i, "amount": tokens[i].toString() });
+        }
+    };
+    return res;
 }

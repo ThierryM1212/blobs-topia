@@ -12,7 +12,7 @@
   "dependencies": {
     "@coinbarn/ergo-ts": "^0.3.0",
     "dayjs": "^1.11.4",
-    "ergo-lib-wasm-nodejs": "^0.17.0",
+    "ergo-lib-wasm-nodejs": "^0.20.1",
     "fs": "^0.0.1-security",
     "json-bigint": "^1.0.0",
     "node-fetch": "^3.2.6",

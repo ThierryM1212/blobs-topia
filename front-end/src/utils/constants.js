@@ -7,7 +7,7 @@ export const DEFAULT_EXPLORER_ADDRESS = "https://explorer.ergoplatform.com/";
 
 export const GAME_ADDRESS = "9h8ujgHBKcCgJRbBrCY9rgfqLtjZyvsSEh2E4u1pQXuX8zNRo3y";
 export const GAME_TOKEN_ID = "27906e87b1bcd90d040136898c74e3aa56455504881e3cf75ae859bbedd085c9";
-export const CONFIG_TOKEN_ID = "09ef6c93c6fe2534d6b840c8524a173fea2b7cb1bb0c1c1f0f739dc310e6d10b";
+export const CONFIG_TOKEN_ID = "839aeda1a589b18355eee8da3fe3f3d4b4a91e774f303baaf85010aa9c4b9ec7";
 export const OATMEAL_TOKEN_ID = "c022e32e43fe48fc0646bb91f4979c72cace5097c5608192db788458461fdc99";
 export const BLOB_PRICE = 10000000;
 export const BLOB_ERG_MIN_VALUE = 2 * MIN_NANOERG_BOX_VALUE + TX_FEE;

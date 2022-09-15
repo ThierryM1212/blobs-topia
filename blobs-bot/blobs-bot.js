@@ -171,7 +171,7 @@ async function processFigth() {
 
 async function processFightsResult() {
     try {
-        const gameBoxes = await getUnspentBoxesByAddress(GAME_SCRIPT_ADDRESS);
+        const gameBoxes = (await getUnspentBoxesByAddress(GAME_SCRIPT_ADDRESS)).concat(mempoolBoxes[GAME_SCRIPT_ADDRESS]);
         if (gameBoxes.length === 0) {
             console.log("No Game found")
             return;
