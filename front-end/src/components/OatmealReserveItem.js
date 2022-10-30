@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import { burnOatmealReserve } from '../ergo-related/admin_game';
 
 
@@ -7,7 +7,10 @@ export default class OatmealReserveItem extends React.Component {
         super(props);
         this.state = {
             boxId: props.boxId,
+            tokenId: props.tokenId,
             tokenAmount: props.tokenAmount,
+            tokenId2: props.tokenId2,
+            tokenAmount2: props.tokenAmount2,
         };
     }
 
@@ -37,12 +40,42 @@ export default class OatmealReserveItem extends React.Component {
                     </tr>
                     <tr>
                         <td>
+                            Token ID:
+                        </td>
+                        <td>
+                            {this.formatLongString(this.state.tokenId)}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
                             Token amount:
                         </td>
                         <td>
                             {this.state.tokenAmount}
                         </td>
                     </tr>
+                    {
+                        this.state.tokenAmount2 ?
+                            <Fragment>
+                                <tr>
+                                    <td>
+                                        Token ID:
+                                    </td>
+                                    <td>
+                                        {this.formatLongString(this.state.tokenId2)}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        Token amount:
+                                    </td>
+                                    <td>
+                                        {this.state.tokenAmount2}
+                                    </td>
+                                </tr>
+                            </Fragment>
+                            : null
+                    }
                     <tr>
                         <td></td>
                         <td className="tdright">

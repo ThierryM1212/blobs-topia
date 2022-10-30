@@ -1,6 +1,6 @@
 import JSONBigInt from 'json-bigint';
-import { BLOB_MINT_FEE, GAME_ADDRESS, GAME_TOKEN_ID, MIN_NANOERG_BOX_VALUE, NUM_OATMEAL_TOKEN_LOSER, NUM_OATMEAL_TOKEN_WINNER, OATMEAL_PRICE, OATMEAL_TOKEN_ID, TX_FEE } from '../utils/constants.js';
-import { BLOB_SCRIPT_ADDRESS, GAME_SCRIPT_ADDRESS, OATMEAL_RESERVE_SCRIPT_ADDRESS, OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS, RESERVE_SCRIPT_ADDRESS } from "../utils/script_constants";
+import { BLOBINATOR_FEE, BLOB_MINT_FEE, GAME_ADDRESS, GAME_TOKEN_ID, MIN_NANOERG_BOX_VALUE, NUM_OATMEAL_TOKEN_LOSER, NUM_OATMEAL_TOKEN_WINNER, OATMEAL_PRICE, OATMEAL_TOKEN_ID, SPICY_OATMEAL_TOKEN_ID, TX_FEE } from '../utils/constants.js';
+import { BLOBINATOR_FEE_SCRIPT_ADDRESS, BLOB_SCRIPT_ADDRESS, GAME_SCRIPT_ADDRESS, OATMEAL_RESERVE_SCRIPT_ADDRESS, OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS, RESERVE_SCRIPT_ADDRESS } from "../utils/script_constants";
 import { currentHeight, sendTx } from './explorer.js';
 import { encodeIntArray, encodeLong, ergoTreeToAddress } from './serializer.js';
 import { createTransaction, signTransaction, signTransactionMultiContext } from './wasm.js';
@@ -98,7 +98,10 @@ export async function engageFight(blob1, blob2, currentReserveBox, currentConfig
     const creationHeight = await currentHeight();
     const reserveIniWASM = (await ergolib).ErgoBox.from_json(JSONBigInt.stringify(currentReserveBox));
     const reserveIniTokenAmount = reserveIniWASM.tokens().get(0).amount().as_i64().as_num();
-    const newReserveTokenAmount = reserveIniTokenAmount - NUM_OATMEAL_TOKEN_LOSER - NUM_OATMEAL_TOKEN_WINNER;
+    const newReserveOMTokenAmount = reserveIniTokenAmount - NUM_OATMEAL_TOKEN_LOSER - NUM_OATMEAL_TOKEN_WINNER;
+    const reserveIniSpicyOMTokenAmount = reserveIniWASM.tokens().get(1).amount().as_i64().as_num();
+    const newReserveSpicyOMAmount = reserveIniSpicyOMTokenAmount - 2;
+    const newReserveSpicyOMTokenAmount = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str(newReserveSpicyOMAmount.toString()));
 
     const fightAmount = parseInt(blob1.additionalRegisters.R8.renderedValue)
     const gameTokenId = (await ergolib).TokenId.from_str(GAME_TOKEN_ID);
@@ -168,6 +171,9 @@ export async function engageFight(blob1, blob2, currentReserveBox, currentConfig
     const oatmealTokenId = (await ergolib).TokenId.from_str(OATMEAL_TOKEN_ID);
     const oatmealTokenAmount = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str((NUM_OATMEAL_TOKEN_LOSER + NUM_OATMEAL_TOKEN_WINNER).toString()));
     gameBoxBuilder.add_token(oatmealTokenId, oatmealTokenAmount);
+    const spicyOatmealTokenId = (await ergolib).TokenId.from_str(SPICY_OATMEAL_TOKEN_ID);
+    const spicyOatmealTokenAmount = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str("2"));
+    gameBoxBuilder.add_token(spicyOatmealTokenId, spicyOatmealTokenAmount);
     try {
         outputCandidates.add(gameBoxBuilder.build());
     } catch (e) {
@@ -176,13 +182,14 @@ export async function engageFight(blob1, blob2, currentReserveBox, currentConfig
     }
 
     // OATMEAL RESERVE BOX
-    const newReserveTokenAmountWASM = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str(newReserveTokenAmount.toString()));
+    const newReserveTokenAmountWASM = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str(newReserveOMTokenAmount.toString()));
     const reserveValue = (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str(MIN_NANOERG_BOX_VALUE.toString()));
     const reserveBoxBuilder = new (await ergolib).ErgoBoxCandidateBuilder(
         reserveValue,
         (await ergolib).Contract.pay_to_address((await ergolib).Address.from_base58(OATMEAL_RESERVE_SCRIPT_ADDRESS)),
         creationHeight);
     reserveBoxBuilder.add_token(oatmealTokenId, newReserveTokenAmountWASM);
+    reserveBoxBuilder.add_token(spicyOatmealTokenId, newReserveSpicyOMTokenAmount);
     try {
         outputCandidates.add(reserveBoxBuilder.build());
     } catch (e) {
@@ -208,6 +215,7 @@ export async function engageFight(blob1, blob2, currentReserveBox, currentConfig
 export async function processFightResult(blob1, blob2, gameBox, currentConfigBox) {
     console.log("FIGHT RESULT : " + blob1.boxId + " vs " + blob2.boxId)
     const gameAmount = parseInt(blob1.additionalRegisters.R8.renderedValue);
+    const blobinatorFee = Math.max(Math.round(2 * gameAmount * BLOBINATOR_FEE / 1000), MIN_NANOERG_BOX_VALUE);
     console.log("gameAmount: ", gameBox, gameAmount);
     const wallet = (await ergolib).Wallet.from_mnemonic("", "");
     const creationHeight = await currentHeight();
@@ -226,13 +234,13 @@ export async function processFightResult(blob1, blob2, gameBox, currentConfigBox
             // increase victory
             if (i === 0) {
                 console.log("P1 win");
-                blob1AmountNano = blob1.value + 2 * gameAmount - 2 * TX_FEE - 2 * MIN_NANOERG_BOX_VALUE;
+                blob1AmountNano = blob1.value + 2 * gameAmount - 2 * TX_FEE - 2 * MIN_NANOERG_BOX_VALUE - blobinatorFee;
                 p1InfoArray[3] = p1InfoArray[3] + 1;
                 p1OatmealAmount = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str((NUM_OATMEAL_TOKEN_WINNER).toString()));
                 p2OatmealAmount = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str((NUM_OATMEAL_TOKEN_LOSER).toString()));
             } else if (i === 1) {
                 console.log("P2 win");
-                blob2AmountNano = blob2.value + 2 * gameAmount - 2 * TX_FEE - 2 * MIN_NANOERG_BOX_VALUE;
+                blob2AmountNano = blob2.value + 2 * gameAmount - 2 * TX_FEE - 2 * MIN_NANOERG_BOX_VALUE - blobinatorFee;
                 p2InfoArray[3] = p2InfoArray[3] + 1;
                 p1OatmealAmount = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str((NUM_OATMEAL_TOKEN_LOSER).toString()));
                 p2OatmealAmount = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str((NUM_OATMEAL_TOKEN_WINNER).toString()));
@@ -286,6 +294,8 @@ export async function processFightResult(blob1, blob2, gameBox, currentConfigBox
             }
 
             const oatmealTokenId = (await ergolib).TokenId.from_str(OATMEAL_TOKEN_ID);
+            const spicyOatmealTokenId = (await ergolib).TokenId.from_str(SPICY_OATMEAL_TOKEN_ID);
+            const spicyOatmealTokenAmount = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str("1"));
             const oatmealBoxValue = (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str(MIN_NANOERG_BOX_VALUE.toString()));
             // P1 oatmeal box
             const p1Script = blob1BoxWASM.register_value(6).encode_to_base16();
@@ -295,6 +305,7 @@ export async function processFightResult(blob1, blob2, gameBox, currentConfigBox
                 (await ergolib).Contract.pay_to_address(p1Address),
                 creationHeight);
             oatmeal1BoxBuilder.add_token(oatmealTokenId, p1OatmealAmount);
+            oatmeal1BoxBuilder.add_token(spicyOatmealTokenId, spicyOatmealTokenAmount);
             try {
                 outputCandidates.add(oatmeal1BoxBuilder.build());
             } catch (e) {
@@ -310,8 +321,22 @@ export async function processFightResult(blob1, blob2, gameBox, currentConfigBox
                 (await ergolib).Contract.pay_to_address(p2Address),
                 creationHeight);
             oatmeal2BoxBuilder.add_token(oatmealTokenId, p2OatmealAmount);
+            oatmeal2BoxBuilder.add_token(spicyOatmealTokenId, spicyOatmealTokenAmount);
             try {
                 outputCandidates.add(oatmeal2BoxBuilder.build());
+            } catch (e) {
+                console.log(`building error: ${e}`);
+                throw e;
+            }
+
+            // Blobinator Fee
+            const blobinatorFeeBoxValue = (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str(blobinatorFee.toString()));
+            const blobinatorFeeBoxBuilder = new (await ergolib).ErgoBoxCandidateBuilder(
+                blobinatorFeeBoxValue,
+                (await ergolib).Contract.pay_to_address((await ergolib).Address.from_base58(BLOBINATOR_FEE_SCRIPT_ADDRESS)),
+                creationHeight);
+            try {
+                outputCandidates.add(blobinatorFeeBoxBuilder.build());
             } catch (e) {
                 console.log(`building error: ${e}`);
                 throw e;

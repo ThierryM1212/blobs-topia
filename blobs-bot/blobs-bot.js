@@ -1,12 +1,18 @@
-import { getCurrentConfigBox } from './src/blobs_action.js';
-import { TX_FEE } from "./src/constants.js";
-import { BLOB_REQUEST_SCRIPT_ADDRESS, BLOB_SCRIPT_ADDRESS, CONFIG_SCRIPT_ADDRESS, GAME_SCRIPT_ADDRESS, OATMEAL_BUY_REQUEST_SCRIPT_ADDRESS, OATMEAL_RESERVE_SCRIPT, OATMEAL_RESERVE_SCRIPT_ADDRESS, OATMEAL_SELL_RESERVE_SCRIPT, OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS, RESERVE_SCRIPT, RESERVE_SCRIPT_ADDRESS } from "./src/script_constants.js";
-import { getMempoolUnspentBoxesByAddresses, getUnspentBoxesByAddress } from "./src/explorer.js";
+import { getCurrentConfigBox, getCurrentConfigBox2 } from './src/blobs_action.js';
+import { BLOBINATOR_TOKEN_ID, GAME_TOKEN_ID, TX_FEE } from "./src/constants.js";
+import {
+    BLOB_REQUEST_SCRIPT_ADDRESS, BLOB_SCRIPT_ADDRESS, CONFIG_SCRIPT_ADDRESS, GAME_SCRIPT_ADDRESS, OATMEAL_BUY_REQUEST_SCRIPT_ADDRESS,
+    OATMEAL_RESERVE_SCRIPT, OATMEAL_RESERVE_SCRIPT_ADDRESS, OATMEAL_SELL_RESERVE_SCRIPT, OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS, RESERVE_SCRIPT,
+    RESERVE_SCRIPT_ADDRESS, BLOBINATOR_FEE_SCRIPT_ADDRESS, BLOBINATOR_RESERVE_SCRIPT_ADDRESS, BLOBINATOR_SCRIPT_ADDRESS
+} from "./src/script_constants.js";
+import { getMempoolUnspentBoxesByAddresses, getUnspentBoxesByAddress, searchUnspentBoxesUpdated } from "./src/explorer.js";
 import dayjs from 'dayjs';
-import { engageFight, processBlobRequest, processFightResult, processOatmealRequest } from './src/bot_wasm.js';
+import { blobinatorFightResults, engageBlobinatorFight, engageFight, processBlobinatorFee, processBlobRequest, processFightResult, processOatmealRequest } from './src/bot_wasm.js';
+import { shuffleArray } from './src/utils.js';
 
 
 var mempoolBoxes = {};
+var currentConfigBox = await getCurrentConfigBox2();
 async function fetchMempoolUnspentBoxes() {
     let today = dayjs();
     console.log(today.format());
@@ -20,12 +26,15 @@ async function fetchMempoolUnspentBoxes() {
                 OATMEAL_RESERVE_SCRIPT_ADDRESS,
                 GAME_SCRIPT_ADDRESS,
                 OATMEAL_BUY_REQUEST_SCRIPT_ADDRESS,
+                BLOBINATOR_RESERVE_SCRIPT_ADDRESS,
+                BLOBINATOR_SCRIPT_ADDRESS,
+                BLOBINATOR_FEE_SCRIPT_ADDRESS,
             ]);
         mempoolBoxes = newMempoolBoxes;
     } catch (e) {
         console.log("fetchMempoolUnspentBoxes error: " + e.toString())
     }
-
+    currentConfigBox = await getCurrentConfigBox2();
 }
 setInterval(fetchMempoolUnspentBoxes, 15000);
 
@@ -289,12 +298,109 @@ async function processOatmealBuyRequests() {
     }
 }
 
+async function processBlobinatorFees() {
+    try {
+        var currentReserveBox = {};
+        const unspentBlobinatorFees = (await getUnspentBoxesByAddress(BLOBINATOR_FEE_SCRIPT_ADDRESS)).concat(mempoolBoxes[BLOBINATOR_FEE_SCRIPT_ADDRESS]);
+        if (unspentBlobinatorFees.length === 0) {
+            console.log("processBlobinatorFees: No Blobinator fee box found")
+            return;
+        }
+        const currentConfigBox = await getCurrentConfigBox(mempoolBoxes);
+        if (currentConfigBox && !currentConfigBox.boxId) {
+            console.log("processBlobinatorFees: No config box found")
+            return;
+        }
+
+        if (mempoolBoxes[BLOBINATOR_RESERVE_SCRIPT_ADDRESS] && mempoolBoxes[BLOBINATOR_RESERVE_SCRIPT_ADDRESS].length > 0) {
+            currentReserveBox = mempoolBoxes[BLOBINATOR_RESERVE_SCRIPT_ADDRESS][0];
+        } else {
+            const allReserveBoxes = await getUnspentBoxesByAddress(BLOBINATOR_RESERVE_SCRIPT_ADDRESS);
+            if (allReserveBoxes.length === 0) {
+                console.log("processBlobinatorFees: No Reserve box found")
+                return;
+            }
+            currentReserveBox = allReserveBoxes[0];
+        }
+        const txId = await processBlobinatorFee(unspentBlobinatorFees, currentReserveBox, currentConfigBox);
+        console.log("processBlobinatorFees txId", txId);
+    } catch (e) {
+        console.log("processBlobinatorFees global: " + e.toString())
+    }
+}
+
+async function processEngageBlobinatorFigth() {
+    try {
+        const unspentBlobinators = (shuffleArray(await searchUnspentBoxesUpdated(BLOBINATOR_SCRIPT_ADDRESS, [], 'R4', '0')))
+            .filter(box => box.address === BLOBINATOR_SCRIPT_ADDRESS);
+        //const unspentBlobinators = shuffleArray(await getUnspentBoxesByAddress(BLOBINATOR_SCRIPT_ADDRESS));
+        if (unspentBlobinators.length === 0) {
+            console.log("processEngageBlobinatorFigth: No Blobinator box found")
+            return;
+        }
+        if (currentConfigBox && !currentConfigBox.boxId) {
+            console.log("processEngageBlobinatorFigth: No config box found")
+            return;
+        }
+        const blobsReadyToFight = shuffleArray(await searchUnspentBoxesUpdated(BLOB_SCRIPT_ADDRESS, [GAME_TOKEN_ID], 'R7', "4"));
+        if (blobsReadyToFight.length == 0) {
+            console.log("processEngageBlobinatorFigth: No blob waiting for Blobinator")
+            return;
+        }
+        for (let i = 0; i < Math.min(unspentBlobinators.length, blobsReadyToFight.length); i++) {
+            var txId = await engageBlobinatorFight(blobsReadyToFight[i], unspentBlobinators[i], currentConfigBox);
+            console.log("processEngageBlobinatorFigth txId", txId);
+        }
+    } catch (e) {
+        console.log("processEngageBlobinatorFigth global: " + e.toString())
+    }
+}
+
+async function processBlobinatorFigthResults() {
+    try {
+        const blobsEngagedFight = shuffleArray(await searchUnspentBoxesUpdated(BLOB_SCRIPT_ADDRESS, [GAME_TOKEN_ID], 'R7', "5"));
+        if (blobsEngagedFight.length == 0) {
+            console.log("processBlobinatorFigthResults: No blob engaged fight with Blobinator")
+            return;
+        }
+
+        const unspentBlobinators = (await searchUnspentBoxesUpdated(BLOBINATOR_SCRIPT_ADDRESS, [BLOBINATOR_TOKEN_ID], '', ''))
+            .filter(box => box.address === BLOBINATOR_SCRIPT_ADDRESS)
+            .filter(box => box.additionalRegisters.R4.renderedValue !== "0");
+
+        //console.log("unspentBlobinators", JSON.stringify(unspentBlobinators));
+        if (unspentBlobinators.length === 0) {
+            console.log("processBlobinatorFigthResults: No Blobinator box found")
+            return;
+        }
+        if (currentConfigBox && !currentConfigBox.boxId) {
+            console.log("processBlobinatorFigthResults: No config box found")
+            return;
+        }
+
+        
+        for (const blob of blobsEngagedFight) {
+            const blobId = blob.additionalRegisters.R9.renderedValue;
+            const blobBinator = unspentBlobinators.find(box => box.additionalRegisters.R4.renderedValue === blobId)
+            if (blobBinator) {
+                var txId = await blobinatorFightResults(blob, blobBinator, currentConfigBox);
+                console.log("processBlobinatorFigthResults txId", txId);
+            }
+        }
+    } catch (e) {
+        console.log("processBlobinatorFigthResults global: " + e.toString())
+    }
+}
+
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 
-setInterval(processBlobRequests, 24000);
-setInterval(processFigth, 30000);
-setInterval(processFightsResult, 20000);
-setInterval(processOatmealBuyRequests, 26000);
+//setInterval(processBlobRequests, 24000);
+//setInterval(processFigth, 30000);
+//setInterval(processFightsResult, 20000);
+//setInterval(processOatmealBuyRequests, 26000);
+//setInterval(processBlobinatorFees, 27000);
+//setInterval(processEngageBlobinatorFigth, 10000);
+setInterval(processBlobinatorFigthResults, 10000);

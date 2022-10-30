@@ -11,10 +11,12 @@
     val configBox = CONTEXT.dataInputs(0)
     val validConfigBox = configBox.tokens(0)._1 == ConfigNFTId
     val blobScriptHash = configBox.R4[Coll[Coll[Byte]]].get(0)
+    val blobinatorFeeHash = configBox.R4[Coll[Coll[Byte]]].get(4)
     val txFee = configBox.R5[Coll[Long]].get(1)
     val numOatmealLose = configBox.R5[Coll[Long]].get(2)
     val numOatmealWin = configBox.R5[Coll[Long]].get(3)
     val maxPowerDiff = configBox.R5[Coll[Long]].get(4)
+    val blobinatorFee = configBox.R5[Coll[Long]].get(6)
     val armorConf = configBox.R6[Coll[Long]].get // [armor0Price, armor0Att, armor0Def, armor1Price, armor1Att, armor1Def,... , armor3Def]
     val weaponSpecConf = configBox.R8[Coll[Int]].get // [Att00, Def00, Att10, Def10, Att11, Def11, Att12, Def12, Att13, Def13, Att20, Def20, ... Def33]
 
@@ -81,16 +83,32 @@
     val blob1Funds = INPUTS(0).value
     val blob2Funds = INPUTS(1).value
     val gameAmount = ( SELF.value + txFee ) / 2
+    val blobinatorFeeAmount = max(2 * gameAmount * blobinatorFee / 1000L, BoxMinValue)
     val validValues = anyOf(Coll(
-                        p1win && OUTPUTS(0).value == blob1Funds + 2 * gameAmount - 2 * txFee - 2 * BoxMinValue && OUTPUTS(1).value == blob2Funds,
-                        !p1win && OUTPUTS(0).value == blob1Funds && OUTPUTS(1).value == blob2Funds + 2 * gameAmount - 2 * txFee - 2 * BoxMinValue
+                        p1win                                                                                                && 
+                        OUTPUTS(0).value == blob1Funds + 2 * gameAmount - 2 * txFee - 2 * BoxMinValue - blobinatorFeeAmount  &&
+                        OUTPUTS(1).value == blob2Funds
+                        ,
+                        !p1win                                                                                               && 
+                        OUTPUTS(0).value == blob1Funds                                                                       && 
+                        OUTPUTS(1).value == blob2Funds + 2 * gameAmount - 2 * txFee - 2 * BoxMinValue - blobinatorFeeAmount
                       ))
+
+    val validBlobinatorFee = if (OUTPUTS.size > 4) {
+        blake2b256(OUTPUTS(4).propositionBytes) == blobinatorFeeHash    &&
+        OUTPUTS(4).value >= blobinatorFeeAmount                         &&
+        OUTPUTS(4).tokens.size == 0
+    } else {
+        false
+    }
                       
-    // Check Oatmeal token distribution
-    val validP1Oatmeal = if (OUTPUTS.size > 3) {
+    // Check Oatmeal tokens distribution
+    val validP1Oatmeal = if (OUTPUTS.size > 4) {
         OUTPUTS(2).propositionBytes == p1PK.propBytes       &&
-        OUTPUTS(2).tokens.size == 1                         &&
+        OUTPUTS(2).tokens.size == 2                         &&
         OUTPUTS(2).tokens(0)._1 == OatmealTokenNFTId        &&
+        OUTPUTS(2).tokens(1)._1 == SpicyOatmealNFTId        &&
+        OUTPUTS(2).tokens(1)._2 == 1                        &&
         (
           (p1win && OUTPUTS(2).tokens(0)._2 == numOatmealWin)     || 
           (!p1win && OUTPUTS(2).tokens(0)._2 == numOatmealLose)
@@ -98,10 +116,12 @@
     } else {
         false
     }
-    val validP2Oatmeal = if (OUTPUTS.size > 3) {
+    val validP2Oatmeal = if (OUTPUTS.size > 4) {
         OUTPUTS(3).propositionBytes == p2PK.propBytes       &&
-        OUTPUTS(3).tokens.size == 1                         &&
+        OUTPUTS(3).tokens.size == 2                         &&
         OUTPUTS(3).tokens(0)._1 == OatmealTokenNFTId        &&
+        OUTPUTS(3).tokens(1)._1 == SpicyOatmealNFTId        &&
+        OUTPUTS(3).tokens(1)._2 == 1                        &&
         (
           (p1win && OUTPUTS(3).tokens(0)._2 == numOatmealLose)     || 
           (!p1win && OUTPUTS(3).tokens(0)._2 == numOatmealWin)
@@ -131,42 +151,44 @@
     // check if blob1 and blob2 have their game played statistics increased properly 
     val validP1Info = if (OUTPUTS(0).R5[Coll[Int]].isDefined) {
         val outP1Info = OUTPUTS(0).R5[Coll[Int]].get
-        anyOf(Coll(
-                // P1 win increase party+1, victories+1
-                p1win && outP1Info(0) == p1Info(0) && 
-                outP1Info(1) == p1Info(1)          && 
-                outP1Info(2) == p1Info(2)+1        && 
-                outP1Info(3) == p1Info(3)+1        && 
-                outP1Info(4) == p1Info(4),
-                // P1 lose increase party+1
-                !p1win && outP1Info(0) == p1Info(0) &&
-                outP1Info(1) == p1Info(1)           && 
-                outP1Info(2) == p1Info(2)+1         && 
-                outP1Info(3) == p1Info(3)           && 
-                outP1Info(4) == p1Info(4),
-              ))
+        outP1Info(0) == p1Info(0)          &&
+        outP1Info(1) == p1Info(1)          &&
+        outP1Info(4) == p1Info(4)          &&
+        outP1Info(5) == p1Info(5)          &&
+        outP1Info(6) == p1Info(6)          &&
+        (( // p1 win
+            p1win                                && 
+            outP1Info(2) == p1Info(2)+1          &&
+            outP1Info(3) == p1Info(3)+1
+        ) 
+        ||
+        ( // p1 lose
+            !p1win                               && 
+            outP1Info(2) == p1Info(2)+1          && 
+            outP1Info(3) == p1Info(3)
+        ))
     } else {
         false
     }
     
     val validP2Info = if (OUTPUTS(1).R5[Coll[Int]].isDefined) {
         val outP2Info = OUTPUTS(1).R5[Coll[Int]].get
-        anyOf(Coll(
-                // P2 win increase party+1, victories+1
-                !p1win                              && 
-                outP2Info(0) == p2Info(0)           &&
-                outP2Info(1) == p2Info(1)           && 
-                outP2Info(2) == p2Info(2)+1         && 
-                outP2Info(3) == p2Info(3)+1         &&
-                outP2Info(4) == p2Info(4),
-                // P2 lose increase party+1
-                p1win                               &&
-                outP2Info(0) == p2Info(0)           &&
-                outP2Info(1) == p2Info(1)           && 
-                outP2Info(2) == p2Info(2)+1         && 
-                outP2Info(3) == p2Info(3)           &&
-                outP2Info(4) == p2Info(4),
-              ))
+        outP2Info(0) == p2Info(0)          &&
+        outP2Info(1) == p2Info(1)          &&
+        outP2Info(4) == p2Info(4)          &&
+        outP2Info(5) == p2Info(5)          &&
+        outP2Info(6) == p2Info(6)          &&
+        (( // p2 win
+            !p1win                              && 
+            outP2Info(2) == p2Info(2)+1         &&
+            outP2Info(3) == p2Info(3)+1
+        ) 
+        ||
+        ( // p2 lose
+            p1win                               && 
+            outP2Info(2) == p2Info(2)+1         && 
+            outP2Info(3) == p2Info(3)
+        ))
     } else {
         false
     }
@@ -183,7 +205,8 @@
                 validP1Oatmeal,
                 validP2Oatmeal,
                 validP1Info,
-                validP2Info
+                validP2Info,
+                validBlobinatorFee
               ))
               })
 

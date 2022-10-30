@@ -1,6 +1,6 @@
 import JSONBigInt from 'json-bigint';
 import { confirmAlert, errorAlert, promptErgAmount, promptUpgradeItem, promptWeaponType, waitingAlert } from "../utils/Alerts";
-import { BLOB_ERG_MIN_VALUE, BLOB_EXCHANGE_FEE, BLOB_PRICE, CONFIG_TOKEN_ID, GAME_ADDRESS, GAME_TOKEN_ID, MIN_NANOERG_BOX_VALUE, NANOERG_TO_ERG, OATMEAL_TOKEN_ID, TX_FEE } from "../utils/constants";
+import { BLOBINATOR_DEFI_TOK_NUM, BLOB_ERG_MIN_VALUE, BLOB_EXCHANGE_FEE, BLOB_PRICE, CONFIG_TOKEN_ID, GAME_ADDRESS, GAME_TOKEN_ID, MIN_NANOERG_BOX_VALUE, NANOERG_TO_ERG, OATMEAL_TOKEN_ID, SPICY_OATMEAL_TOKEN_ID, TX_FEE } from "../utils/constants";
 import { BLOB_ARMORS, WEAPONS_UPGRADE_PRICES } from '../utils/items_constants';
 import { BLOB_REQUEST_SCRIPT_ADDRESS, BLOB_SCRIPT_ADDRESS, BURN_ALL_SCRIPT_ADDRESS, OATMEAL_BUY_REQUEST_SCRIPT_ADDRESS } from "../utils/script_constants";
 import { boxByTokenId, currentHeight } from "./explorer";
@@ -51,8 +51,8 @@ export async function addWidthDrawBlob(mode, blobBoxJSON) {
     } else {
         blobOutValueNano = blobIniValueNano - amountNano;
     }
-    if (blobOutValueNano < (2 * MIN_NANOERG_BOX_VALUE + TX_FEE)) {
-        alert = errorAlert("Not enough ERG in the Blob after operation, min value " + (2 * MIN_NANOERG_BOX_VALUE + TX_FEE) + " nanoERG");
+    if (blobOutValueNano < BLOB_ERG_MIN_VALUE) {
+        alert = errorAlert("Not enough ERG in the Blob after operation, min value " + BLOB_ERG_MIN_VALUE + " nanoERG");
         return;
     }
     console.log("addWidthDraw blobOutValueNano", blobOutValueNano);
@@ -246,7 +246,7 @@ export async function setBlobStatus(mode, blobBoxJSON) {
     console.log("setBlobStatus mode", mode);
     const creationHeight = await currentHeight();
     var amountNano = 0;
-    if (mode !== 'reset') {
+    if (mode !== 'reset' && mode !== 'blobinator') {
         const amountFloat = await promptErgAmount(mode);
         amountNano = Math.round(amountFloat * NANOERG_TO_ERG);
     }
@@ -257,6 +257,13 @@ export async function setBlobStatus(mode, blobBoxJSON) {
     const walletOK = await isValidWalletAddress(address);
     if (walletOK) {
         var utxos = await getUtxos(MIN_NANOERG_BOX_VALUE + TX_FEE);
+        if (mode === 'blobinator') {
+            const utxos1 = await getTokenUtxos(BLOBINATOR_DEFI_TOK_NUM, SPICY_OATMEAL_TOKEN_ID);
+            utxos = utxos.concat(utxos1).filter((value, index, self) =>
+            index === self.findIndex((t) => (
+                t.boxId === value.boxId
+            )));;
+        }
         utxos.unshift(parseUtxo(blobBoxJSON));
         const gameTokenId = (await ergolib).TokenId.from_str(GAME_TOKEN_ID);
         const blobTokenAmount = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str("2"));
@@ -264,6 +271,8 @@ export async function setBlobStatus(mode, blobBoxJSON) {
         const dataListWASM = new (await ergolib).ErgoBoxAssetsDataList();
         const boxSelection = new (await ergolib).BoxSelection(inputsWASM, dataListWASM);
         const outputCandidates = (await ergolib).ErgoBoxCandidates.empty();
+        const spicyOatmealTokenId = (await ergolib).TokenId.from_str(SPICY_OATMEAL_TOKEN_ID);
+        const spicyOatmealTokenAmount = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str(BLOBINATOR_DEFI_TOK_NUM.toString()));
 
         // Blob Box
         var blobStatus = '0', blobStatusValue = '0';
@@ -282,6 +291,9 @@ export async function setBlobStatus(mode, blobBoxJSON) {
         } else if (mode === 'reset') {
             blobStatus = '0';
             blobStatusValue = '0';
+        } else if (mode === 'blobinator') {
+            blobStatus = '4';
+            blobStatusValue = '0';
         }
         const blobBoxInWASM = (await ergolib).ErgoBox.from_json(JSONBigInt.stringify(blobBoxJSON));
         const blobboxOutValue = (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str(blobIniValueNano.toString()));
@@ -296,6 +308,9 @@ export async function setBlobStatus(mode, blobBoxJSON) {
         blobBoxBuilder.set_register_value(8, (await encodeLong(blobStatusValue)));
         blobBoxBuilder.set_register_value(9, blobBoxInWASM.register_value(9));
         blobBoxBuilder.add_token(gameTokenId, blobTokenAmount);
+        if (mode === 'blobinator') {
+            blobBoxBuilder.add_token(spicyOatmealTokenId, spicyOatmealTokenAmount);
+        }
         try {
             outputCandidates.add(blobBoxBuilder.build());
         } catch (e) {

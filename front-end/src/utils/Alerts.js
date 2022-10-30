@@ -101,7 +101,7 @@ export function promptErgAmount(mode) {
             showCancelButton: true,
             preConfirm: () => {
                 const ergAmount = Swal.getPopup().querySelector('#ergAmount').value;
-                if (!parseFloat(ergAmount) || parseFloat(ergAmount) < 0.1) {
+                if (!parseFloat(ergAmount) || parseFloat(ergAmount) < 0.01) {
                     Swal.showValidationMessage(`The ERG amount is invalid (needs to be >= 0.1 ERG)`);
                 }
                 return { ergAmount: parseFloat(ergAmount) };

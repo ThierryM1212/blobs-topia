@@ -1,12 +1,13 @@
 import React, { Fragment } from 'react';
-import { GAME_ADDRESS, GAME_TOKEN_ID, OATMEAL_TOKEN_ID} from '../utils/constants';
-import { RESERVE_SCRIPT_ADDRESS, OATMEAL_RESERVE_SCRIPT_ADDRESS, OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS } from "../utils/script_constants";
+import { BLOBINATOR_TOKEN_ID, GAME_ADDRESS, GAME_TOKEN_ID, NANOERG_TO_ERG, OATMEAL_TOKEN_ID, SPICY_OATMEAL_TOKEN_ID} from '../utils/constants';
+import { RESERVE_SCRIPT_ADDRESS, OATMEAL_RESERVE_SCRIPT_ADDRESS, OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS, BLOBINATOR_RESERVE_SCRIPT_ADDRESS } from "../utils/script_constants";
 import {  getUnspentBoxesByAddress } from '../ergo-related/explorer';
 import ReserveItem from '../components/ReserveItem';
 import ConfigItem from '../components/ConfigItem';
 import OatmealReserveItem from '../components/OatmealReserveItem';
-import { mintGameTokenReserve, mintOatmealReserve, updateConfigurationBox } from '../ergo-related/admin_game';
+import { adminInvokeBlobinator, mintBlobinatorReserve, mintGameTokenReserve, mintOatmealReserve, updateConfigurationBox } from '../ergo-related/admin_game';
 import { getRegisterValue, getTokenAmount } from '../ergo-related/wasm';
+import { promptErgAmount } from '../utils/Alerts';
 
 
 export default class Admin extends React.Component {
@@ -18,9 +19,11 @@ export default class Admin extends React.Component {
             reserveIniIdentifier: '1',
             oatmealReserveTokenAmount: '1000',
             oatmealReserveSellTokenAmount: '100000',
+            blobinatorReserveTokenAmount: '1000',
             reserveList: [],
             oatmealReserveList: [],
             oatmealReserveSellList: [],
+            blobinatorReserveList: [],
             configList: [],
         };
         this.form = React.createRef();
@@ -33,6 +36,10 @@ export default class Admin extends React.Component {
         this.handleSubmit = this.handleSubmit.bind(this);
         this.mintReserve = this.mintReserve.bind(this);
         this.mintOatmealReserve = this.mintOReserve.bind(this);
+    }
+
+    handleChangeBlobinatorReserveTokenAmount(event) {
+        this.setState({ blobinatorReserveTokenAmount: event.target.value });
     }
 
     handleChangeReserveTokenAmount(event) {
@@ -70,17 +77,23 @@ export default class Admin extends React.Component {
         const reserveList = await getUnspentBoxesByAddress(RESERVE_SCRIPT_ADDRESS);
         const oatmealReserveList = await getUnspentBoxesByAddress(OATMEAL_RESERVE_SCRIPT_ADDRESS);
         const oatmealReserveSellList = await getUnspentBoxesByAddress(OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS);
-        console.log("reserveList", reserveList, oatmealReserveList);
+        const blobinatorReserveList = await getUnspentBoxesByAddress(BLOBINATOR_RESERVE_SCRIPT_ADDRESS);
         this.setState({
             reserveList: reserveList,
             oatmealReserveList: oatmealReserveList,
             oatmealReserveSellList: oatmealReserveSellList,
+            blobinatorReserveList: blobinatorReserveList,
         })
-
     }
 
     async updateConf() {
         return await updateConfigurationBox();
+    }
+
+    async invokeBlobinator() {
+        const ergAmountFloat = await promptErgAmount('blobinator');
+        const ergAmountNano = Math.round(ergAmountFloat * NANOERG_TO_ERG);
+        return await adminInvokeBlobinator(ergAmountNano);
     }
 
     async mintReserve(reserveName, reserveTokenAmount, reserveIniIdentifier) {
@@ -93,6 +106,10 @@ export default class Admin extends React.Component {
 
     async mintOSellReserve(oatmealReserveTokenAmount) {
         return await mintOatmealReserve(OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS, oatmealReserveTokenAmount);
+    }
+
+    async mintBlobinatorReserve_(tokenAmount) {
+        return await mintBlobinatorReserve(tokenAmount);
     }
 
     render() {
@@ -222,7 +239,10 @@ export default class Admin extends React.Component {
                                 <li key={item.boxId} className="card zonecard m-2">
                                     <OatmealReserveItem
                                         boxId={item.boxId}
+                                        tokenId={OATMEAL_TOKEN_ID}
                                         tokenAmount={getTokenAmount(item, OATMEAL_TOKEN_ID)}
+                                        tokenId2={SPICY_OATMEAL_TOKEN_ID}
+                                        tokenAmount2={getTokenAmount(item, SPICY_OATMEAL_TOKEN_ID)}
                                     />
                                 </li>
                             ))}
@@ -231,7 +251,6 @@ export default class Admin extends React.Component {
 
                     <div className="zonecard w-50">
                         <h4>Create new sell oatmeal reserve</h4>
-
                         <table>
                             <tbody>
                                 <tr>
@@ -268,7 +287,54 @@ export default class Admin extends React.Component {
                                 <li key={item.boxId} className="card zonecard m-2">
                                     <OatmealReserveItem
                                         boxId={item.boxId}
+                                        tokenId={OATMEAL_TOKEN_ID}
                                         tokenAmount={getTokenAmount(item, OATMEAL_TOKEN_ID)}
+                                    />
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    <div className="zonecard w-50">
+                        <h4>Create new blobinator reserve</h4>
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <label htmlFor="reservetokenamount">Token amount</label>
+                                    </td>
+                                    <td>
+                                        <input className="form-control"
+                                            type="text"
+                                            id="reservetokenamount"
+                                            pattern="[0-9]+"
+                                            required
+                                            value={this.state.blobinatorReserveTokenAmount}
+                                            onChange={this.handleChangeBlobinatorReserveTokenAmount}
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                    </td>
+                                    <td className="tdright">
+                                        <button className="btn btn-ultra-voilet" onClick={() => this.mintBlobinatorReserve_(this.state.blobinatorReserveTokenAmount)} >Mint blobinator reserve</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+
+                        </table>
+                    </div>
+
+                    <div className="w-50 ">
+                        <h4>Available blobinator reserves</h4>
+                        <ul >
+                            {this.state.blobinatorReserveList.map(item => (
+                                <li key={item.boxId} className="card zonecard m-2">
+                                    <OatmealReserveItem
+                                        boxId={item.boxId}
+                                        tokenId={BLOBINATOR_TOKEN_ID}
+                                        tokenAmount={getTokenAmount(item, BLOBINATOR_TOKEN_ID)}
                                     />
                                 </li>
                             ))}
@@ -287,6 +353,19 @@ export default class Admin extends React.Component {
                                 <tr>
                                     <td className="tdright">
                                         <input className="btn btn-ultra-voilet" type="submit" value="Update configuration" onClick={this.updateConf} />
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div className="card zonecard w-50 p-2 m-2 d-flex align-items-center">
+                        <h4>Invoke blobinator</h4>
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td className="tdright">
+                                        <input className="btn btn-ultra-voilet" type="submit" value="Invoke Blobinator" onClick={this.invokeBlobinator} />
                                     </td>
                                 </tr>
                             </tbody>

@@ -234,6 +234,12 @@ input{
   border-radius: 10px;
 }
 
+.btn-ultra-orange {
+  background: rgba(185, 107, 17, 0.5);  
+  font-weight: bold;
+  border-radius: 10px;
+}
+
 .btn-ultra-red {
   background: rgba(185, 17, 17, 0.5);  
   font-weight: bold;

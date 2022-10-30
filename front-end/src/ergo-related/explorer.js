@@ -1,13 +1,13 @@
 import { get, getStream } from './rest';
 import JSONBigInt from 'json-bigint';
-import { GAME_TOKEN_ID } from '../utils/constants';
+import { DEFAULT_EXPLORER_API_ADDRESS, GAME_TOKEN_ID } from '../utils/constants';
 import { BLOB_SCRIPT } from "../utils/script_constants";
 import { ergoTreeToTemplateHash } from './serializer';
 
 
 export const trueAddress = '4MQyML64GnzMxZgm'; // dummy address to get unsigned tx from node, we only care about the boxes though in this case
-export const explorerApi = 'https://api.ergoplatform.com/api/v0';
-export const explorerApiV1 = 'https://api.ergoplatform.com/api/v1';
+export const explorerApi = DEFAULT_EXPLORER_API_ADDRESS + '/api/v0';
+export const explorerApiV1 = DEFAULT_EXPLORER_API_ADDRESS + '/api/v1';
 
 async function getRequest(url) {
     return get(explorerApi + url).then(res => {
@@ -189,12 +189,9 @@ export async function getMempoolUnspentBoxesByAddresses(addresses) {
 export async function getUnspentBoxesForAddressUpdated(address) {
     try {
         const boxesTmp = await getUnspentBoxesByAddress(address);
-        //const boxesTmp = await searchBlobBoxByAddres();
-        console.log("fetchBlobs blobBoxes",boxesTmp)
         const [spentBlobs, newBlobs] = await getSpentAndUnspentBoxesFromMempool(address);
         const spentBlobBoxIds = spentBlobs.map(box => box.boxId);
         const boxes = newBlobs.concat(boxesTmp).filter(box => !spentBlobBoxIds.includes(box.boxId));
-
         return boxes;
     } catch (e) {
         console.log(e);

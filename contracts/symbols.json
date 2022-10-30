@@ -21,6 +21,16 @@
       "value":"c022e32e43fe48fc0646bb91f4979c72cace5097c5608192db788458461fdc99"
     },
     {
+      "name":"SpicyOatmealNFTId",
+      "type":"CollByte",
+      "value":"ed196b247280abe3573bc6e3dc65f7d33a46423566f5bdc637ff198719fdfad8"
+    },
+    {
+      "name":"BlobinatorNFTId",
+      "type":"CollByte",
+      "value":"0ff0d23807cec701801d0bdf222a3cd6dc2f3fb8acfe46d19f1f3b762c8808ce"
+    },
+    {
       "name":"BoxMinValue",
       "type":"Long",
       "value":"1000000"

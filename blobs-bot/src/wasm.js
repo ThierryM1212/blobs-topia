@@ -2,6 +2,7 @@ let ergolib = import('ergo-lib-wasm-nodejs');
 import JSONBigInt from 'json-bigint';
 import { TX_FEE } from './constants.js';
 import { currentHeight, getExplorerBlockHeaders, getExplorerBlockHeadersFull } from './explorer.js';
+import crypto from "crypto-js";
 
 
 export async function getErgoStateContext() {
@@ -226,12 +227,34 @@ export async function ergoTreeToAddress(ergoTree) {
     return address.to_base58();
 }
 
+export async function addressToErgotree(address) {
+    const addressWASM = (await ergolib).Address.from_base58(address);
+    return addressWASM.to_ergo_tree().to_base16_bytes();
+}
+
 export async function encodeIntArray(intArray) {
     return (await ergolib).Constant.from_i32_array(intArray);
 }
 
 export async function decodeIntArray(encodedArray) {
     return (await ergolib).Constant.decode_from_base16(encodedArray).to_i32_array()
+}
+
+export async function ergoTreeToTemplate(ergoTree) {
+    const ergoTreeWASM = (await ergolib).ErgoTree.from_base16_bytes(ergoTree);
+    return toHexString(ergoTreeWASM.template_bytes());
+}
+
+export async function ergoTreeToTemplateHash(ergoTree) {
+    const ergoTreeTemplateHex = await ergoTreeToTemplate(ergoTree);
+    //return toHexString(ergoTreeWASM.template_bytes());
+    return crypto.SHA256(crypto.enc.Hex.parse(ergoTreeTemplateHex)).toString(crypto.enc.Hex);
+}
+
+export function toHexString(byteArray) {
+    return Array.from(byteArray, function(byte) {
+        return ('0' + (byte & 0xFF).toString(16)).slice(-2);
+    }).join('')
 }
 
 export function getUtxosListValue(utxos) {

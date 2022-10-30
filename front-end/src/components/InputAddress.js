@@ -1,10 +1,11 @@
 import React from 'react';
 import { getBalance, getWalletAddressList } from '../ergo-related/wallet';
 import { promptErgAddr, promptErgAddrList } from "../utils/Alerts"
-import { OATMEAL_TOKEN_ID } from '../utils/constants';
+import { OATMEAL_TOKEN_ID, SPICY_OATMEAL_TOKEN_ID } from '../utils/constants';
 import { formatERGAmount, formatLongString } from '../utils/utils';
 import ergoLogo from "../images/ergo-erg-logo.png";
 import oatmealLogo from "../images/oatmeal.png";
+import spicyOatmealLogo from "../images/spicy_oatmeal.png";
 
 
 export default class InputAddress extends React.Component {
@@ -13,6 +14,7 @@ export default class InputAddress extends React.Component {
         this.state = {
             ergAmount: 0,
             oatmealAmount: 0,
+            spicyOatmealAmount: 0,
             ergopay: false,
         };
         this.setAddress = this.setAddress.bind(this);
@@ -47,6 +49,7 @@ export default class InputAddress extends React.Component {
 
         const nanoERGAmount = await getBalance('ERG');
         const oatmealAmount = await getBalance(OATMEAL_TOKEN_ID);
+        const spicyOatmealAmount = await getBalance(SPICY_OATMEAL_TOKEN_ID);
         var ergopay = false;
         if (typeof ergo === 'undefined') {
             ergopay = true;
@@ -55,6 +58,7 @@ export default class InputAddress extends React.Component {
         this.setState({
             ergAmount: nanoERGAmount,
             oatmealAmount: oatmealAmount,
+            spicyOatmealAmount: spicyOatmealAmount,
             ergopay: ergopay,
         });
     }
@@ -62,21 +66,23 @@ export default class InputAddress extends React.Component {
     render() {
         const address = localStorage.getItem('address') ?? '';
         return (
-            <div className="d-flex flex-row m-1 p-1">
-                <button className="btn btn-ultra-blue m-1" onClick={this.promptErgAddress}>
-                    {
-                        address === '' ?
-                            <div>Set ERG address</div>
-                            :
-                            <div>
-                                {formatLongString(address, 6)}
-                                {this.state.ergopay ?
-                                    <div>ergopay</div>
-                                    : null
-                                }
-                            </div>
-                    }
-                </button>
+            <div className="d-flex flex-row m-1 p-1 align-items-center">
+                <div className='d-flex flex-column '>
+                    <button className="btn btn-ultra-blue m-1" onClick={this.promptErgAddress}>
+                        {
+                            address === '' ?
+                                <div>Set ERG address</div>
+                                :
+                                <div>
+                                    {formatLongString(address, 6)}
+                                    {this.state.ergopay ?
+                                        <div>ergopay</div>
+                                        : null
+                                    }
+                                </div>
+                        }
+                    </button>
+                </div>
                 {
                     address === '' ?
                         null
@@ -92,6 +98,11 @@ export default class InputAddress extends React.Component {
                                 <div >{this.state.oatmealAmount}</div>
                                 &nbsp;
                                 <img src={oatmealLogo} width="20px" heigth="20px" alt="Oatmeal" />
+                            </div>
+                            <div className="w-100 d-flex flex-row justify-content-between align-items-center">
+                                <div >{this.state.spicyOatmealAmount}</div>
+                                &nbsp;
+                                <img src={spicyOatmealLogo} width="20px" heigth="20px" alt="Oatmeal" />
                             </div>
                         </div>
                 }

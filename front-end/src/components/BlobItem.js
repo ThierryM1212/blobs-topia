@@ -272,7 +272,7 @@ export default class BlobItem extends React.Component {
                                             tips='Choose a fight amount and set the blob "ready to fight".' />
                                         <BlobActionButton
                                             action={() => this.setStatus('reset', this.state.blobBoxJSON)}
-                                            isDisabled={this.state.state[0] !== '1'}
+                                            isDisabled={!(this.state.state[0] === '1' || this.state.state[0] === '4')}
                                             label="Cancel fight"
                                             tips='Remove the "ready to fight" state from this blob.' />
                                         <BlobActionButton
@@ -302,6 +302,11 @@ export default class BlobItem extends React.Component {
                                             tips={'Choose a weapon type for the blob, it will start at level 0'
                                                 + '.<br />Requires ' + WEAPONS_UPGRADE_PRICES[0]
                                                 + ' Oatmeal tokens.'} />
+                                        <BlobActionButton
+                                            action={() => this.setStatus('blobinator', this.state.blobBoxJSON)}
+                                            isDisabled={this.state.state[0] !== '0'}
+                                            label="Fight a Blobinator"
+                                            tips='Set the state to "Ready to fight the blobinator"' />
                                     </Fragment>
                                     :
                                     <Fragment>

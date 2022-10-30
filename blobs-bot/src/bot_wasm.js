@@ -1,8 +1,8 @@
 import JSONBigInt from 'json-bigint';
-import { BLOB_MINT_FEE, GAME_ADDRESS, GAME_TOKEN_ID, MIN_NANOERG_BOX_VALUE, NUM_OATMEAL_TOKEN_LOSER, NUM_OATMEAL_TOKEN_WINNER, OATMEAL_PRICE, OATMEAL_TOKEN_ID, TX_FEE } from './constants.js';
+import { BLOBINATOR_DEFI_TOK_NUM, BLOBINATOR_FEE, BLOBINATOR_MIN_VALUE, BLOBINATOR_TOKEN_ID, BLOB_MINT_FEE, GAME_ADDRESS, GAME_TOKEN_ID, MIN_NANOERG_BOX_VALUE, NUM_OATMEAL_TOKEN_LOSER, NUM_OATMEAL_TOKEN_WINNER, OATMEAL_PRICE, OATMEAL_TOKEN_ID, SPICY_OATMEAL_TOKEN_ID, TX_FEE } from './constants.js';
 import { currentHeight, sendTx } from './explorer.js';
-import { BLOB_SCRIPT_ADDRESS, GAME_SCRIPT_ADDRESS, OATMEAL_RESERVE_SCRIPT_ADDRESS, OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS, RESERVE_SCRIPT_ADDRESS } from './script_constants.js';
-import { createTransaction, encodeIntArray, encodeLong, ergoTreeToAddress, signTransaction, signTransactionMultiContext } from './wasm.js';
+import { BLOBINATOR_FEE_SCRIPT_ADDRESS, BLOBINATOR_RESERVE_SCRIPT_ADDRESS, BLOBINATOR_SCRIPT_ADDRESS, BLOB_SCRIPT_ADDRESS, BURN_ALL_SCRIPT_ADDRESS, GAME_SCRIPT_ADDRESS, OATMEAL_RESERVE_SCRIPT_ADDRESS, OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS, RESERVE_SCRIPT_ADDRESS } from './script_constants.js';
+import { createTransaction, encodeIntArray, encodeLong, ergoTreeToAddress, getUtxosListValue, signTransaction, signTransactionMultiContext } from './wasm.js';
 let ergolib = import('ergo-lib-wasm-nodejs');
 
 
@@ -95,7 +95,10 @@ export async function engageFight(blob1, blob2, currentReserveBox, currentConfig
     const creationHeight = await currentHeight();
     const reserveIniWASM = (await ergolib).ErgoBox.from_json(JSONBigInt.stringify(currentReserveBox));
     const reserveIniTokenAmount = reserveIniWASM.tokens().get(0).amount().as_i64().as_num();
-    const newReserveTokenAmount = reserveIniTokenAmount - NUM_OATMEAL_TOKEN_LOSER - NUM_OATMEAL_TOKEN_WINNER;
+    const newReserveOMTokenAmount = reserveIniTokenAmount - NUM_OATMEAL_TOKEN_LOSER - NUM_OATMEAL_TOKEN_WINNER;
+    const reserveIniSpicyOMTokenAmount = reserveIniWASM.tokens().get(1).amount().as_i64().as_num();
+    const newReserveSpicyOMAmount = reserveIniSpicyOMTokenAmount - 2;
+    const newReserveSpicyOMTokenAmount = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str(newReserveSpicyOMAmount.toString()));
 
     const fightAmount = parseInt(blob1.additionalRegisters.R8.renderedValue)
     const gameTokenId = (await ergolib).TokenId.from_str(GAME_TOKEN_ID);
@@ -165,6 +168,9 @@ export async function engageFight(blob1, blob2, currentReserveBox, currentConfig
     const oatmealTokenId = (await ergolib).TokenId.from_str(OATMEAL_TOKEN_ID);
     const oatmealTokenAmount = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str((NUM_OATMEAL_TOKEN_LOSER + NUM_OATMEAL_TOKEN_WINNER).toString()));
     gameBoxBuilder.add_token(oatmealTokenId, oatmealTokenAmount);
+    const spicyOatmealTokenId = (await ergolib).TokenId.from_str(SPICY_OATMEAL_TOKEN_ID);
+    const spicyOatmealTokenAmount = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str("2"));
+    gameBoxBuilder.add_token(spicyOatmealTokenId, spicyOatmealTokenAmount);
     try {
         outputCandidates.add(gameBoxBuilder.build());
     } catch (e) {
@@ -173,13 +179,14 @@ export async function engageFight(blob1, blob2, currentReserveBox, currentConfig
     }
 
     // OATMEAL RESERVE BOX
-    const newReserveTokenAmountWASM = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str(newReserveTokenAmount.toString()));
+    const newReserveTokenAmountWASM = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str(newReserveOMTokenAmount.toString()));
     const reserveValue = (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str(MIN_NANOERG_BOX_VALUE.toString()));
     const reserveBoxBuilder = new (await ergolib).ErgoBoxCandidateBuilder(
         reserveValue,
         (await ergolib).Contract.pay_to_address((await ergolib).Address.from_base58(OATMEAL_RESERVE_SCRIPT_ADDRESS)),
         creationHeight);
     reserveBoxBuilder.add_token(oatmealTokenId, newReserveTokenAmountWASM);
+    reserveBoxBuilder.add_token(spicyOatmealTokenId, newReserveSpicyOMTokenAmount);
     try {
         outputCandidates.add(reserveBoxBuilder.build());
     } catch (e) {
@@ -205,7 +212,8 @@ export async function engageFight(blob1, blob2, currentReserveBox, currentConfig
 export async function processFightResult(blob1, blob2, gameBox, currentConfigBox) {
     console.log("FIGHT RESULT : " + blob1.boxId + " vs " + blob2.boxId)
     const gameAmount = parseInt(blob1.additionalRegisters.R8.renderedValue);
-    console.log("gameAmount: ", gameAmount);
+    const blobinatorFee = Math.max(Math.round(2 * gameAmount * BLOBINATOR_FEE / 1000), MIN_NANOERG_BOX_VALUE);
+    //console.log("gameAmount: ", gameBox, gameAmount);
     const wallet = (await ergolib).Wallet.from_mnemonic("", "");
     const creationHeight = await currentHeight();
     const gameTokenId = (await ergolib).TokenId.from_str(GAME_TOKEN_ID);
@@ -222,13 +230,13 @@ export async function processFightResult(blob1, blob2, gameBox, currentConfigBox
             // increase victory
             if (i === 0) {
                 console.log("P1 win");
-                blob1AmountNano = blob1.value + 2 * gameAmount - 2 * TX_FEE - 2 * MIN_NANOERG_BOX_VALUE;
+                blob1AmountNano = blob1.value + 2 * gameAmount - 2 * TX_FEE - 2 * MIN_NANOERG_BOX_VALUE - blobinatorFee;
                 p1InfoArray[3] = p1InfoArray[3] + 1;
                 p1OatmealAmount = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str((NUM_OATMEAL_TOKEN_WINNER).toString()));
                 p2OatmealAmount = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str((NUM_OATMEAL_TOKEN_LOSER).toString()));
             } else if (i === 1) {
                 console.log("P2 win");
-                blob2AmountNano = blob2.value + 2 * gameAmount - 2 * TX_FEE - 2 * MIN_NANOERG_BOX_VALUE;
+                blob2AmountNano = blob2.value + 2 * gameAmount - 2 * TX_FEE - 2 * MIN_NANOERG_BOX_VALUE - blobinatorFee;
                 p2InfoArray[3] = p2InfoArray[3] + 1;
                 p1OatmealAmount = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str((NUM_OATMEAL_TOKEN_LOSER).toString()));
                 p2OatmealAmount = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str((NUM_OATMEAL_TOKEN_WINNER).toString()));
@@ -282,6 +290,8 @@ export async function processFightResult(blob1, blob2, gameBox, currentConfigBox
             }
 
             const oatmealTokenId = (await ergolib).TokenId.from_str(OATMEAL_TOKEN_ID);
+            const spicyOatmealTokenId = (await ergolib).TokenId.from_str(SPICY_OATMEAL_TOKEN_ID);
+            const spicyOatmealTokenAmount = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str("1"));
             const oatmealBoxValue = (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str(MIN_NANOERG_BOX_VALUE.toString()));
             // P1 oatmeal box
             const p1Script = blob1BoxWASM.register_value(6).encode_to_base16();
@@ -291,6 +301,7 @@ export async function processFightResult(blob1, blob2, gameBox, currentConfigBox
                 (await ergolib).Contract.pay_to_address(p1Address),
                 creationHeight);
             oatmeal1BoxBuilder.add_token(oatmealTokenId, p1OatmealAmount);
+            oatmeal1BoxBuilder.add_token(spicyOatmealTokenId, spicyOatmealTokenAmount);
             try {
                 outputCandidates.add(oatmeal1BoxBuilder.build());
             } catch (e) {
@@ -306,8 +317,22 @@ export async function processFightResult(blob1, blob2, gameBox, currentConfigBox
                 (await ergolib).Contract.pay_to_address(p2Address),
                 creationHeight);
             oatmeal2BoxBuilder.add_token(oatmealTokenId, p2OatmealAmount);
+            oatmeal2BoxBuilder.add_token(spicyOatmealTokenId, spicyOatmealTokenAmount);
             try {
                 outputCandidates.add(oatmeal2BoxBuilder.build());
+            } catch (e) {
+                console.log(`building error: ${e}`);
+                throw e;
+            }
+
+            // Blobinator Fee
+            const blobinatorFeeBoxValue = (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str(blobinatorFee.toString()));
+            const blobinatorFeeBoxBuilder = new (await ergolib).ErgoBoxCandidateBuilder(
+                blobinatorFeeBoxValue,
+                (await ergolib).Contract.pay_to_address((await ergolib).Address.from_base58(BLOBINATOR_FEE_SCRIPT_ADDRESS)),
+                creationHeight);
+            try {
+                outputCandidates.add(blobinatorFeeBoxBuilder.build());
             } catch (e) {
                 console.log(`building error: ${e}`);
                 throw e;
@@ -336,10 +361,10 @@ export async function processOatmealRequest(oatmealRequestJSON, currentReserveBo
     const wallet = (await ergolib).Wallet.from_mnemonic("", "");
     const creationHeight = await currentHeight();
     const reserveIniWASM = (await ergolib).ErgoBox.from_json(JSONBigInt.stringify(currentReserveBox));
-    const availableAmountNano = oatmealRequestJSON.value - TX_FEE -  MIN_NANOERG_BOX_VALUE;
+    const availableAmountNano = oatmealRequestJSON.value - TX_FEE - MIN_NANOERG_BOX_VALUE;
     const tokenAmount = Math.floor(availableAmountNano / OATMEAL_PRICE);
     const change = oatmealRequestJSON.value - TX_FEE - tokenAmount * OATMEAL_PRICE;
-//console.log("change", tokenAmount, availableAmountNano, oatmealRequestJSON.value ,change)
+    //console.log("change", tokenAmount, availableAmountNano, oatmealRequestJSON.value ,change)
 
     const reserveIniTokenAmount = reserveIniWASM.tokens().get(0).amount().as_i64().as_num();
     const newReserveTokenAmount = reserveIniTokenAmount - tokenAmount;
@@ -395,11 +420,266 @@ export async function processOatmealRequest(oatmealRequestJSON, currentReserveBo
         console.log(`processOatmealRequest building error: ${e}`);
         throw e;
     }
-    
+
     const tx = await createTransaction(boxSelection, outputCandidates, [currentConfigBox], ownerAddress, inputs);
     const signedTx = JSONBigInt.parse(await signTransaction(tx, inputs, [currentConfigBox], wallet));
     const txId = await sendTx(signedTx);
     console.log("processOatmealRequest txId", txId);
     return [txId, signedTx];
 
+}
+
+export async function processBlobinatorFee(blobinatorFeeJSONArray, currentBlobinatorReserve, currentConfigBox) {
+    console.log("processBlobinatorFee 0");
+    const wallet = (await ergolib).Wallet.from_mnemonic("", "");
+    const creationHeight = await currentHeight();
+    const totalInputValue = parseInt(getUtxosListValue(blobinatorFeeJSONArray));
+    var utxos = [];
+    var invokeBlobinator = false;
+    if (totalInputValue - TX_FEE > BLOBINATOR_MIN_VALUE) {
+        // Invoke blobinator
+        console.log("processBlobinatorFee Invoke blobinator for ", totalInputValue);
+        invokeBlobinator = true;
+        utxos = blobinatorFeeJSONArray.concat(currentBlobinatorReserve);
+    } else {
+        if (totalInputValue > BLOBINATOR_MIN_VALUE / 10 && blobinatorFeeJSONArray.length >= 20) {
+            // Consolidate fee
+            console.log("processBlobinatorFee Consolidate fee for ", totalInputValue);
+            utxos = blobinatorFeeJSONArray;
+        } else {
+            console.log("processBlobinatorFee nothing to do: amount", totalInputValue, "number of fee box", blobinatorFeeJSONArray.length);
+            return;
+        }
+    }
+
+    const inputsWASM = (await ergolib).ErgoBoxes.from_boxes_json(utxos);
+    const dataListWASM = new (await ergolib).ErgoBoxAssetsDataList();
+    const boxSelection = new (await ergolib).BoxSelection(inputsWASM, dataListWASM);
+
+    const outputCandidates = (await ergolib).ErgoBoxCandidates.empty();
+    if (invokeBlobinator) {
+        // blobinator box
+        const blobinatorTokenId = (await ergolib).TokenId.from_str(BLOBINATOR_TOKEN_ID);
+        const blobinatorTokenAmountWASM = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str("1"));
+        const blobinatorBoxValue = (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str((totalInputValue - TX_FEE).toString()));
+        const blobinatorBoxBuilder = new (await ergolib).ErgoBoxCandidateBuilder(
+            blobinatorBoxValue,
+            (await ergolib).Contract.pay_to_address((await ergolib).Address.from_base58(BLOBINATOR_SCRIPT_ADDRESS)),
+            creationHeight);
+        blobinatorBoxBuilder.add_token(blobinatorTokenId, blobinatorTokenAmountWASM);
+        blobinatorBoxBuilder.set_register_value(4, (await encodeLong('0')));
+        try {
+            outputCandidates.add(blobinatorBoxBuilder.build());
+        } catch (e) {
+            console.log(`processBlobinatorFee building error: ${e}`);
+            throw e;
+        }
+
+        // NEW RESERVE BOX
+        const reserveIniWASM = (await ergolib).ErgoBox.from_json(JSONBigInt.stringify(currentBlobinatorReserve));
+        const reserveIniTokenAmount = reserveIniWASM.tokens().get(0).amount().as_i64().as_num();
+        const newReserveTokenAmount = reserveIniTokenAmount - 1;
+        const newReserveTokenAmountWASM = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str(newReserveTokenAmount.toString()));
+        const reserveValue = (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str(MIN_NANOERG_BOX_VALUE.toString()));
+        const reserveBoxBuilder = new (await ergolib).ErgoBoxCandidateBuilder(
+            reserveValue,
+            (await ergolib).Contract.pay_to_address((await ergolib).Address.from_base58(BLOBINATOR_RESERVE_SCRIPT_ADDRESS)),
+            creationHeight);
+        reserveBoxBuilder.add_token(blobinatorTokenId, newReserveTokenAmountWASM);
+        try {
+            outputCandidates.add(reserveBoxBuilder.build());
+        } catch (e) {
+            console.log(`processBlobinatorFee building error: ${e}`);
+            throw e;
+        }
+    } else {
+        // Consolidated fee box
+        const blobinatorFeeBoxValue = (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str((totalInputValue - TX_FEE).toString()));
+        const blobinatorFeeBoxBuilder = new (await ergolib).ErgoBoxCandidateBuilder(
+            blobinatorFeeBoxValue,
+            (await ergolib).Contract.pay_to_address((await ergolib).Address.from_base58(BLOBINATOR_FEE_SCRIPT_ADDRESS)),
+            creationHeight);
+        try {
+            outputCandidates.add(blobinatorFeeBoxBuilder.build());
+        } catch (e) {
+            console.log(`processBlobinatorFee building error: ${e}`);
+            throw e;
+        }
+    }
+
+    const tx = await createTransaction(boxSelection, outputCandidates, [currentConfigBox], GAME_ADDRESS, utxos);
+    //console.log("processBlobinatorFee tx", JSONBigInt.stringify(tx));
+    const signedTx = JSONBigInt.parse(await signTransaction(tx, utxos, [currentConfigBox], wallet));
+    //console.log("processBlobinatorFee signedTx", JSONBigInt.stringify(signedTx));
+    const txId = await sendTx(signedTx);
+    return txId;
+}
+
+
+export async function engageBlobinatorFight(blob, blobinator, currentConfigBox) {
+    //console.log("engageBlobinatorFight",  blob, blobinator);
+    const wallet = (await ergolib).Wallet.from_mnemonic("", "");
+    const creationHeight = await currentHeight();
+    const outputCandidates = (await ergolib).ErgoBoxCandidates.empty();
+    // BLOB1 BOX
+    const blobBoxWASM = (await ergolib).ErgoBox.from_json(JSONBigInt.stringify(blob));
+    const tokenAmount = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str("1"));
+    const gameTokenId = (await ergolib).TokenId.from_str(GAME_TOKEN_ID);
+    const blob1AmountNano = blob.value - TX_FEE - MIN_NANOERG_BOX_VALUE;
+    const blob1boxValue = (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str(blob1AmountNano.toString()));
+    const blobBoxBuilder = new (await ergolib).ErgoBoxCandidateBuilder(
+        blob1boxValue,
+        (await ergolib).Contract.pay_to_address((await ergolib).Address.from_base58(BLOB_SCRIPT_ADDRESS)),
+        creationHeight);
+    blobBoxBuilder.set_register_value(4, blobBoxWASM.register_value(4))
+    blobBoxBuilder.set_register_value(5, blobBoxWASM.register_value(5))
+    blobBoxBuilder.set_register_value(6, blobBoxWASM.register_value(6))
+    blobBoxBuilder.set_register_value(7, (await encodeLong('5')))
+    blobBoxBuilder.set_register_value(8, blobBoxWASM.register_value(8))
+    blobBoxBuilder.set_register_value(9, blobBoxWASM.register_value(9))
+    blobBoxBuilder.add_token(gameTokenId, tokenAmount);
+    try {
+        outputCandidates.add(blobBoxBuilder.build());
+    } catch (e) {
+        console.log(`building error: ${e}`);
+        throw e;
+    }
+
+    // BLOBINATOR BOX
+    const blobinatorTokenId = (await ergolib).TokenId.from_str(BLOBINATOR_TOKEN_ID);
+    const blobinatorBoxValue = (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str(blobinator.value.toString()));
+    const gameBoxBuilder = new (await ergolib).ErgoBoxCandidateBuilder(
+        blobinatorBoxValue,
+        (await ergolib).Contract.pay_to_address((await ergolib).Address.from_base58(BLOBINATOR_SCRIPT_ADDRESS)),
+        creationHeight);
+    gameBoxBuilder.set_register_value(4, blobBoxWASM.register_value(9))
+    gameBoxBuilder.add_token(blobinatorTokenId, tokenAmount);
+    gameBoxBuilder.add_token(gameTokenId, tokenAmount);
+    try {
+        outputCandidates.add(gameBoxBuilder.build());
+    } catch (e) {
+        console.log(`building error: ${e}`);
+        throw e;
+    }
+
+    // BURN SPICY OATMEAL
+    const spicyOatmealTokenId = (await ergolib).TokenId.from_str(SPICY_OATMEAL_TOKEN_ID);
+    const spicyOatmealTokenAmount = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str(BLOBINATOR_DEFI_TOK_NUM.toString()));
+    const oatMealReturnBox = new (await ergolib).ErgoBoxCandidateBuilder(
+        (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str((MIN_NANOERG_BOX_VALUE).toString())),
+        (await ergolib).Contract.pay_to_address((await ergolib).Address.from_base58(BURN_ALL_SCRIPT_ADDRESS)),
+        creationHeight);
+    oatMealReturnBox.add_token(spicyOatmealTokenId, spicyOatmealTokenAmount);
+    try {
+        outputCandidates.add(oatMealReturnBox.build());
+    } catch (e) {
+        console.log(`building error: ${e}`);
+        throw e;
+    }
+
+    // prepate tx inputs
+    var inputs = [blob, blobinator];
+    const inputsWASM = (await ergolib).ErgoBoxes.from_boxes_json(inputs);
+    const dataListWASM = new (await ergolib).ErgoBoxAssetsDataList();
+    const boxSelection = new (await ergolib).BoxSelection(inputsWASM, dataListWASM);
+
+    const tx = await createTransaction(boxSelection, outputCandidates, [currentConfigBox], GAME_ADDRESS, inputs);
+    console.log("tx", JSONBigInt.stringify(tx));
+    const signedTx = JSONBigInt.parse(await signTransaction(tx, inputs, [currentConfigBox], wallet));
+    //console.log("signedTx", signedTx);
+    const txId = await sendTx(signedTx);
+    return txId;
+}
+
+export async function blobinatorFightResults(blob, blobinator, currentConfigBox) {
+    //console.log("engageBlobinatorFight",  blob, blobinator);
+    const wallet = (await ergolib).Wallet.from_mnemonic("", "");
+    const creationHeight = await currentHeight();
+
+    const gameTokenId = (await ergolib).TokenId.from_str(GAME_TOKEN_ID);
+    const blobinatorTokenId = (await ergolib).TokenId.from_str(BLOBINATOR_TOKEN_ID);
+    const tokenAmount1 = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str("1"));
+    const tokenAmount2 = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str("2"));
+
+    // prepate tx inputs
+    var inputs = [blob, blobinator];
+    const inputsWASM = (await ergolib).ErgoBoxes.from_boxes_json(inputs);
+    const dataListWASM = new (await ergolib).ErgoBoxAssetsDataList();
+    const boxSelection = new (await ergolib).BoxSelection(inputsWASM, dataListWASM);
+
+    for (let i = 0; i < 2; i++) {
+        try {
+            const outputCandidates = (await ergolib).ErgoBoxCandidates.empty();
+            // BLOB1 BOX
+            const blobBoxWASM = (await ergolib).ErgoBox.from_json(JSONBigInt.stringify(blob));
+            var blob1AmountNano = 0, blobinatorAmountNano = 0;
+            if (i === 0) {
+                blob1AmountNano = parseInt(blob.value) - TX_FEE;
+                blobinatorAmountNano = parseInt(blobinator.value);
+            } else {
+                blob1AmountNano = parseInt(blob.value) - TX_FEE + parseInt(blobinator.value) - MIN_NANOERG_BOX_VALUE;
+                blobinatorAmountNano = MIN_NANOERG_BOX_VALUE;
+            }
+            const blob1boxValue = (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str(blob1AmountNano.toString()));
+            const blobBoxBuilder = new (await ergolib).ErgoBoxCandidateBuilder(
+                blob1boxValue,
+                (await ergolib).Contract.pay_to_address((await ergolib).Address.from_base58(BLOB_SCRIPT_ADDRESS)),
+                creationHeight);
+            blobBoxBuilder.set_register_value(4, blobBoxWASM.register_value(4))
+            blobBoxBuilder.set_register_value(5, blobBoxWASM.register_value(5))
+            blobBoxBuilder.set_register_value(6, blobBoxWASM.register_value(6))
+            blobBoxBuilder.set_register_value(7, (await encodeLong('0')))
+            blobBoxBuilder.set_register_value(8, blobBoxWASM.register_value(8))
+            blobBoxBuilder.set_register_value(9, blobBoxWASM.register_value(9))
+            blobBoxBuilder.add_token(gameTokenId, tokenAmount2);
+            try {
+                outputCandidates.add(blobBoxBuilder.build());
+            } catch (e) {
+                console.log(`building error: ${e}`);
+                throw e;
+            }
+
+            if (i === 0) {
+                // BLOBINATOR BOX
+                const blobinatorBoxValue = (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str(blobinatorAmountNano.toString()));
+                const gameBoxBuilder = new (await ergolib).ErgoBoxCandidateBuilder(
+                    blobinatorBoxValue,
+                    (await ergolib).Contract.pay_to_address((await ergolib).Address.from_base58(BLOBINATOR_SCRIPT_ADDRESS)),
+                    creationHeight);
+                gameBoxBuilder.set_register_value(4, (await encodeLong('0')))
+                gameBoxBuilder.add_token(blobinatorTokenId, tokenAmount1);
+                try {
+                    outputCandidates.add(gameBoxBuilder.build());
+                } catch (e) {
+                    console.log(`building error: ${e}`);
+                    throw e;
+                }
+            } else if (i === 1) {
+                // BURN BLOBINATOR TOKEN
+                const blobinatorBurnBox = new (await ergolib).ErgoBoxCandidateBuilder(
+                    (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str((blobinatorAmountNano).toString())),
+                    (await ergolib).Contract.pay_to_address((await ergolib).Address.from_base58(BURN_ALL_SCRIPT_ADDRESS)),
+                    creationHeight);
+                    blobinatorBurnBox.set_register_value(4, blobBoxWASM.register_value(9))
+                    blobinatorBurnBox.add_token(blobinatorTokenId, tokenAmount1);
+                try {
+                    outputCandidates.add(blobinatorBurnBox.build());
+                } catch (e) {
+                    console.log(`building error: ${e}`);
+                    throw e;
+                }
+            }
+
+            const tx = await createTransaction(boxSelection, outputCandidates, [currentConfigBox], GAME_ADDRESS, inputs);
+            console.log("tx", JSONBigInt.stringify(tx));
+            const signedTx = JSONBigInt.parse(await signTransaction(tx, inputs, [currentConfigBox], wallet));
+            //console.log("signedTx", signedTx);
+            const txId = await sendTx(signedTx);
+            return txId;
+
+        } catch (e) {
+            console.log(e)
+        }
+
+    }
 }

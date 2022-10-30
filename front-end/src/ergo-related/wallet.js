@@ -46,9 +46,9 @@ export async function connectWallet() {
             const alreadyConnected = await isWalletConnected();
             console.log("connectWallet alreadyConnected", alreadyConnected);
             if (!alreadyConnected) {
-              const res = await window.ergo_request_read_access();
-              await sleep(100)
-              return res
+                await sleep(100)
+                const res = await window.ergo_request_read_access();
+                return res
             } else {
                 return true;
             }

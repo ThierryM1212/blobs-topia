@@ -2,7 +2,8 @@
  
     // inputs
     val reserveValue = SELF.value
-    val reserveTokens = SELF.tokens(0)
+    val reserveOatmealTokens = SELF.tokens(0)
+    val reserveSpicyOatmealTokens = SELF.tokens(1)
     
     // config box
     val configBox = CONTEXT.dataInputs(0)
@@ -52,9 +53,13 @@
                         
     val validGameBox =  if (OUTPUTS.size > 3 && INPUTS.size == 3) {
                             if (blake2b256(OUTPUTS(2).propositionBytes) == gameScriptHash) {
-                                OUTPUTS(2).tokens.size == 2                                              &&
+                                OUTPUTS(2).tokens.size == 3                                              &&
+                                OUTPUTS(2).tokens(0)._1 == GameTokenNFTId                                &&
+                                OUTPUTS(2).tokens(0)._2 == 2                                             &&
                                 OUTPUTS(2).tokens(1)._1 == OatmealTokenNFTId                             &&
                                 OUTPUTS(2).tokens(1)._2 == totalOatmeal                                  &&
+                                OUTPUTS(2).tokens(2)._1 == SpicyOatmealNFTId                             &&
+                                OUTPUTS(2).tokens(2)._2 == 2                                             &&
                                 OUTPUTS(0).R8[Long].get == OUTPUTS(1).R8[Long].get                       &&
                                 // blob in first position for the figth                                  
                                 OUTPUTS(2).value >= 2 * OUTPUTS(0).R8[Long].get - txFee                  &&
@@ -76,9 +81,11 @@
     val validReserve =  if (OUTPUTS.size > 3 && INPUTS.size == 3) {
                             blake2b256(OUTPUTS(3).propositionBytes) == blake2b256(SELF.propositionBytes) &&
                             OUTPUTS(3).value == reserveValue                                             &&
-                            OUTPUTS(3).tokens.size == 1                                                  &&
+                            OUTPUTS(3).tokens.size == 2                                                  &&
                             OUTPUTS(3).tokens(0)._1 == OatmealTokenNFTId                                 &&
-                            OUTPUTS(3).tokens(0)._2 == reserveTokens._2 - totalOatmeal
+                            OUTPUTS(3).tokens(0)._2 == reserveOatmealTokens._2 - totalOatmeal            &&
+                            OUTPUTS(3).tokens(1)._1 == SpicyOatmealNFTId                                 &&
+                            OUTPUTS(3).tokens(1)._2 == reserveSpicyOatmealTokens._2 - 2
                         } else {
                             false
                         }
