@@ -1,7 +1,7 @@
 import React from 'react';
 import { Rating } from 'react-simple-star-rating';
 import { WinPercent } from '../components/WinPercent';
-import { BLOB_EXCHANGE_FEE, BLOB_MINT_FEE, BLOB_PRICE, MIN_NANOERG_BOX_VALUE, NUM_OATMEAL_TOKEN_LOSER, NUM_OATMEAL_TOKEN_WINNER, RATING_RANGES, TX_FEE } from '../utils/constants';
+import { BLOBINATOR_FEE, BLOB_EXCHANGE_FEE, BLOB_MINT_FEE, BLOB_PRICE, MIN_NANOERG_BOX_VALUE, NUM_OATMEAL_TOKEN_LOSER, NUM_OATMEAL_TOKEN_WINNER, RATING_RANGES, TX_FEE } from '../utils/constants';
 import { formatERGAmount } from '../utils/utils';
 
 export default class AboutPage extends React.Component {
@@ -14,10 +14,16 @@ export default class AboutPage extends React.Component {
                     <h5>What is Blob's Topia ?</h5>
                     <p>Blob's Topia is a game on Ergo blockchain in which you can own blob fighters smart contracts.</p>
                     <p>Those blob fighters are owning an amount of ERG and can bet an amount for a fight.</p>
-                    <p>Once two blobs wait for the same bet, they can engage a fight.</p>
-                    <p>The winner get all the bets, minus the miner fees.</p>
-                    <p>Both winner and loser get some Oatmeal tokens to be able to feed their blob.</p>
-                    <p>By feeding a blob you can increase their Attack or Defense level to make them stronger and increase your winning ratio.</p>
+                    <p>PVP</p>
+                    <p> - Once two blobs wait for the same bet, they can engage a fight.</p>
+                    <p> - The winner get all the bets, minus the miner fees and the Blobinator fee.</p>
+                    <p> - Both winner and loser get some Oatmeal tokens to be able to feed their blob.</p>
+                    <p> - By feeding a blob you can increase their Attack or Defense level to make them stronger and increase your winning ratio.</p>
+                    <p> - Both winner and loser get some Spicy Oatmeal tokens to try to attract a Blobinator.</p>
+                    <p>PVE</p>
+                    <p> - A Blobinator is a kind of super blob fighter that can be invoked once enough fights occured.</p>
+                    <p> - Any blobs can fight against a Blobinator if the player has earn enough Spicy Oatmeal to attract the Blobinator.</p>
+                    <p> - The Blobinator fight is "free" for the player that just needs to pay 2 transactions fees to try to get the amount in the Blobinator.</p>
                 </div>
 
                 <div className='w-100 zoneabout d-flex flex-column align-items-start m-2 p-2'>
@@ -31,29 +37,18 @@ export default class AboutPage extends React.Component {
                 </div>
 
                 <div className='w-100 zoneabout d-flex flex-column align-items-start m-2 p-2'>
-                    <h5>What is a blob, in reality ?</h5>
-                    <p>It is a unicellular body, named Physarum polycephalum that lives in the forest, it's size can range from micron to hectare.</p>
-                    <p>It is not an animal but it can learn and share its learning.</p>
-                    <p>It is can heals it-self.</p>
-                    <p>It is can build optimized networks.</p>
-                    <p>It has 720 different gender, so two blobs have 719/720 chances to be compatible.</p>
-                    <p>More at:</p>
-                    <a className='aboutlink' href="https://en.wikipedia.org/wiki/Physarum_polycephalum" target="_blank" rel="noreferrer">
-                        https://en.wikipedia.org/wiki/Physarum_polycephalum
-                    </a>
-                    <a className='aboutlink' href="https://www.reuters.com/article/us-france-zoo-blob/paris-zoo-unveils-the-blob-an-organism-with-no-brain-but-720-sexes-idUSKBN1WV2AD" target="_blank" rel="noreferrer">
-                        https://www.reuters.com/article/us-france-zoo-blob/paris-zoo-unveils-the-blob-an-organism-with-no-brain-but-720-sexes-idUSKBN1WV2AD
-                    </a>
-                </div>
-
-                <div className='w-100 zoneabout d-flex flex-column align-items-start m-2 p-2'>
                     <h5>What can I do with my blob ?</h5>
                     <p> - deposit/widthdraw ergs</p>
                     <p> - feed the blob</p>
+                    <p> - choose a weapon</p>
+                    <p> - upgrade the weapon</p>
+                    <p> - change weapon</p>
+                    <p> - upgrade the armor</p>
                     <p> - engage fight (and cancel)</p>
                     <p> - engage sale (and cancel)</p>
-                    <p> - fight</p>
-                    <p> - sold (change owner)</p>
+                    <p> - fight another blob</p>
+                    <p> - fight a Blobinator (if invoked)</p>
+                    <p> - sell (change owner)</p>
                     <p> - kill the blob</p>
                 </div>
 
@@ -73,7 +68,6 @@ export default class AboutPage extends React.Component {
                 <div className='w-100 zoneabout d-flex flex-column align-items-start m-2 p-2'>
                     <h5>How to play on mobile ?</h5>
                     <p>You need to setup your address in the dApp and uses Ergo mobile wallet for signing transaction.</p>
-                    <p>With current Ergo wallet (1.10.2213) version you won't be able to run chained transactions and will need to wait for the transactions to be mined for the next action..</p>
                 </div>
 
                 <div className='w-100 zoneabout d-flex flex-column align-items-start m-2 p-2'>
@@ -84,8 +78,9 @@ export default class AboutPage extends React.Component {
                 <div className='w-100 zoneabout d-flex flex-column align-items-start m-2 p-2'>
                     <h5>What is the winning reward ?</h5>
                     <p>A fight is for a bet amount, engaged by each blob.</p>
-                    <p>The winner get 2 * bet amount - 2 * transaction fee.</p>
+                    <p>The winner get 2 * bet amount - 2 * transaction fee ({formatERGAmount(TX_FEE)}) - blobinator fee ({(BLOBINATOR_FEE / 10).toFixed(2)} %).</p>
                     <p>The winner get {NUM_OATMEAL_TOKEN_WINNER} oatmeal, the loser {NUM_OATMEAL_TOKEN_LOSER} oatmeal, used to feed the blob and increase its attack level and defense level.</p>
+                    <p>Both winner and loser get 1 Spicy Oatmeal to attract a Blobinator once available.</p>
                     <p>The amount of distributed oatmeal tokens is configurable and may change.</p>
                 </div>
 
@@ -97,7 +92,7 @@ export default class AboutPage extends React.Component {
                     <p> - The deposit, widthdraw and sell operations have a fee configured.</p>
                     <p>Current deposit, widthdraw or kill fee: <strong>max({BLOB_EXCHANGE_FEE / 10} %, {formatERGAmount(MIN_NANOERG_BOX_VALUE)}) ERG</strong></p>
                     <p>Current sell fee: <strong>max({ 2 * BLOB_EXCHANGE_FEE / 10} %, {formatERGAmount(MIN_NANOERG_BOX_VALUE)}) ERG</strong></p>
-                    <p> - There is no dApp fee on the fights, the miner transaction fees are taken from the figth bets.</p>
+                    <p> - There is no dApp fee on the fights, the miner transaction fees are taken from the figth bets, the Blobinator fee is given to the player winning the blobinator fight.</p>
                     <p> - Those fees are configurable and may be adjusted by the game owner.</p>
                 </div>
 
@@ -149,6 +144,22 @@ export default class AboutPage extends React.Component {
                     <p>By playing games and feeding your blob with oatmeal you are able to increase its statistics and power.</p>
                     <p>This gives a better winning chance to the strong blobs.</p>
                     <p>However, the difference in power of two blobs is caped around 60%/40% winning ratio to avoid abuses.</p>
+                </div>
+
+                <div className='w-100 zoneabout d-flex flex-column align-items-start m-2 p-2'>
+                    <h5>What is a blob, in reality ?</h5>
+                    <p>It is a unicellular body, named Physarum polycephalum that lives in the forest, it's size can range from micron to hectare.</p>
+                    <p>It is not an animal but it can learn and share its learning.</p>
+                    <p>It is can heals it-self.</p>
+                    <p>It is can build optimized networks.</p>
+                    <p>It has 720 different gender, so two blobs have 719/720 chances to be compatible.</p>
+                    <p>More at:</p>
+                    <a className='aboutlink' href="https://en.wikipedia.org/wiki/Physarum_polycephalum" target="_blank" rel="noreferrer">
+                        https://en.wikipedia.org/wiki/Physarum_polycephalum
+                    </a>
+                    <a className='aboutlink' href="https://www.reuters.com/article/us-france-zoo-blob/paris-zoo-unveils-the-blob-an-organism-with-no-brain-but-720-sexes-idUSKBN1WV2AD" target="_blank" rel="noreferrer">
+                        https://www.reuters.com/article/us-france-zoo-blob/paris-zoo-unveils-the-blob-an-organism-with-no-brain-but-720-sexes-idUSKBN1WV2AD
+                    </a>
                 </div>
 
             </div>

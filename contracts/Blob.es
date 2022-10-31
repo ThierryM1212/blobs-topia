@@ -185,27 +185,26 @@
     }
     
     // FIGTH RESULT
-    //val validFightResult = if (validBlob0 && validBlob1 && (blobStateIn == 3)) {
-    //    (
-    //        ( // blob replicated 0
-    //        basicBlob0Replicated                                          &&
-    //        // R5 checked by the Game script                              &&
-    //        OUTPUTS(0).R7[Long].get == 0
-    //        )
-    //    ||
-    //        ( // blob replicated 1
-    //        OUTPUTS(1).R4[Coll[Byte]].get == blobDescIn                   &&
-    //        // R5 checked by the Game script                              &&
-    //        OUTPUTS(1).R6[SigmaProp].get == ownerPKin                     &&
-    //        OUTPUTS(1).R7[Long].get == 0                                  &&
-    //        OUTPUTS(1).R9[Long].get == blobUniqueId                       &&
-    //        OUTPUTS(1).tokens(0)._2 == 2
-    //        )
-    //    )
-    //} else {
-    //    false
-    //}
-    val validFightResult = false
+    val validFightResult = if (validBlob0 && validBlob1 && (blobStateIn == 3)) {
+        (
+            ( // blob replicated 0
+            basicBlob0Replicated                                          &&
+            // R5 checked by the Game script                              &&
+            OUTPUTS(0).R7[Long].get == 0
+            )
+        ||
+            ( // blob replicated 1
+            OUTPUTS(1).R4[Coll[Byte]].get == blobDescIn                   &&
+            // R5 checked by the Game script                              &&
+            OUTPUTS(1).R6[SigmaProp].get == ownerPKin                     &&
+            OUTPUTS(1).R7[Long].get == 0                                  &&
+            OUTPUTS(1).R9[Long].get == blobUniqueId                       &&
+            OUTPUTS(1).tokens(0)._2 == 2
+            )
+        )
+    } else {
+        false
+    }
 
     // FEED BLOB
     // Upgrade blob armor or weapon

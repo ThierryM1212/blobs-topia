@@ -256,13 +256,14 @@ export async function setBlobStatus(mode, blobBoxJSON) {
 
     const walletOK = await isValidWalletAddress(address);
     if (walletOK) {
-        var utxos = await getUtxos(MIN_NANOERG_BOX_VALUE + TX_FEE);
+        var utxos = [];
+        utxos = await getUtxos(MIN_NANOERG_BOX_VALUE + TX_FEE);
         if (mode === 'blobinator') {
             const utxos1 = await getTokenUtxos(BLOBINATOR_DEFI_TOK_NUM, SPICY_OATMEAL_TOKEN_ID);
             utxos = utxos.concat(utxos1).filter((value, index, self) =>
-            index === self.findIndex((t) => (
-                t.boxId === value.boxId
-            )));;
+                index === self.findIndex((t) => (
+                    t.boxId === value.boxId
+                )));;
         }
         utxos.unshift(parseUtxo(blobBoxJSON));
         const gameTokenId = (await ergolib).TokenId.from_str(GAME_TOKEN_ID);
@@ -319,10 +320,15 @@ export async function setBlobStatus(mode, blobBoxJSON) {
         }
 
         const currentConfigBox = await boxByTokenId(CONFIG_TOKEN_ID);
-        var correctTx = await createTransaction(boxSelection, outputCandidates, currentConfigBox, address, utxos);
-
+        try {
+            var correctTx = await createTransaction(boxSelection, outputCandidates, currentConfigBox, address, utxos);
+        } catch (e) {
+            console.error(e)
+            errorAlert("Error updating blob status", e.toString())
+            return;
+        }
         console.log("correctTx", correctTx)
-        if (verifyTransactionIO(correctTx)) {
+        if (correctTx) {
             await walletSignTx(alert, correctTx, address);
         }
     }

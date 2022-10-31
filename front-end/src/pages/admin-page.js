@@ -1,13 +1,14 @@
 import React, { Fragment } from 'react';
-import { BLOBINATOR_TOKEN_ID, GAME_ADDRESS, GAME_TOKEN_ID, NANOERG_TO_ERG, OATMEAL_TOKEN_ID, SPICY_OATMEAL_TOKEN_ID} from '../utils/constants';
-import { RESERVE_SCRIPT_ADDRESS, OATMEAL_RESERVE_SCRIPT_ADDRESS, OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS, BLOBINATOR_RESERVE_SCRIPT_ADDRESS } from "../utils/script_constants";
-import {  getUnspentBoxesByAddress } from '../ergo-related/explorer';
+import { BLOBINATOR_TOKEN_ID, GAME_ADDRESS, GAME_TOKEN_ID, NANOERG_TO_ERG, OATMEAL_TOKEN_ID, SPICY_OATMEAL_TOKEN_ID } from '../utils/constants';
+import { RESERVE_SCRIPT_ADDRESS, OATMEAL_RESERVE_SCRIPT_ADDRESS, OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS, BLOBINATOR_RESERVE_SCRIPT_ADDRESS, BLOBINATOR_SCRIPT_ADDRESS, BURN_ALL_SCRIPT_ADDRESS } from "../utils/script_constants";
+import { getUnspentBoxesByAddress } from '../ergo-related/explorer';
 import ReserveItem from '../components/ReserveItem';
 import ConfigItem from '../components/ConfigItem';
 import OatmealReserveItem from '../components/OatmealReserveItem';
-import { adminInvokeBlobinator, mintBlobinatorReserve, mintGameTokenReserve, mintOatmealReserve, updateConfigurationBox } from '../ergo-related/admin_game';
-import { getRegisterValue, getTokenAmount } from '../ergo-related/wasm';
+import { adminCollectBurnFee, adminInvokeBlobinator, mintBlobinatorReserve, mintGameTokenReserve, mintOatmealReserve, updateConfigurationBox } from '../ergo-related/admin_game';
+import { getRegisterValue, getTokenAmount, getUtxosListValue } from '../ergo-related/wasm';
 import { promptErgAmount } from '../utils/Alerts';
+import { formatERGAmount } from '../utils/utils';
 
 
 export default class Admin extends React.Component {
@@ -24,6 +25,8 @@ export default class Admin extends React.Component {
             oatmealReserveList: [],
             oatmealReserveSellList: [],
             blobinatorReserveList: [],
+            blobinatorList: [],
+            burnFeeList: [],
             configList: [],
         };
         this.form = React.createRef();
@@ -78,11 +81,15 @@ export default class Admin extends React.Component {
         const oatmealReserveList = await getUnspentBoxesByAddress(OATMEAL_RESERVE_SCRIPT_ADDRESS);
         const oatmealReserveSellList = await getUnspentBoxesByAddress(OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS);
         const blobinatorReserveList = await getUnspentBoxesByAddress(BLOBINATOR_RESERVE_SCRIPT_ADDRESS);
+        const blobinatorList = await getUnspentBoxesByAddress(BLOBINATOR_SCRIPT_ADDRESS);
+        const burnFeeList = await getUnspentBoxesByAddress(BURN_ALL_SCRIPT_ADDRESS);
         this.setState({
             reserveList: reserveList,
             oatmealReserveList: oatmealReserveList,
             oatmealReserveSellList: oatmealReserveSellList,
             blobinatorReserveList: blobinatorReserveList,
+            blobinatorList: blobinatorList,
+            burnFeeList: burnFeeList,
         })
     }
 
@@ -110,6 +117,10 @@ export default class Admin extends React.Component {
 
     async mintBlobinatorReserve_(tokenAmount) {
         return await mintBlobinatorReserve(tokenAmount);
+    }
+
+    async collectBurnFee() {
+        return await adminCollectBurnFee();
     }
 
     render() {
@@ -365,7 +376,52 @@ export default class Admin extends React.Component {
                             <tbody>
                                 <tr>
                                     <td className="tdright">
+                                        Number of Blobinators:
+                                    </td>
+                                    <td className="tdleft">
+                                        {this.state.blobinatorList.length}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td className="tdright">
+                                        Amount in Blobinators:
+                                    </td>
+                                    <td className="tdleft">
+                                        {formatERGAmount(getUtxosListValue(this.state.blobinatorList))} ERG
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td className="tdright">
                                         <input className="btn btn-ultra-voilet" type="submit" value="Invoke Blobinator" onClick={this.invokeBlobinator} />
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div className="card zonecard w-50 p-2 m-2 d-flex align-items-center">
+                        <h4>Collect burn fee</h4>
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td className="tdright">
+                                        Number of Burn fee box:
+                                    </td>
+                                    <td className="tdleft">
+                                        {this.state.burnFeeList.length}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td className="tdright">
+                                        Amount in Burn fee boxes:
+                                    </td>
+                                    <td className="tdleft">
+                                        {formatERGAmount(getUtxosListValue(this.state.burnFeeList))} ERG
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td className="tdright">
+                                        <input className="btn btn-ultra-voilet" type="submit" value="Collect" onClick={this.collectBurnFee} />
                                     </td>
                                 </tr>
                             </tbody>

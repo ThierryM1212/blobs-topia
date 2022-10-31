@@ -192,6 +192,8 @@
     } else {
         false
     }
+
+    val isChainedTransaction = SELF.creationInfo._1 == OUTPUTS(0).creationInfo._1
     
     //proveDlog(GameFundPK) ||
     sigmaProp ({ 
@@ -199,6 +201,7 @@
                 validConfigBox,
                 validBlob0,
                 validBlob1,
+                !isChainedTransaction,
                 
                 // Game results
                 validValues,

@@ -28,11 +28,11 @@ export default class FightsPage extends React.Component {
     async fetchCurrentFights() {
         const fightBoxes = await getUnspentBoxesForAddressUpdated(GAME_SCRIPT_ADDRESS);
         var blobFights = [];
+        const blobBoxes = await getUnspentBoxesForAddressUpdated(BLOB_SCRIPT_ADDRESS);
         for (const box of fightBoxes) {
             try {
                 const blob1Id = box.additionalRegisters.R5.renderedValue;
                 const blob2Id = box.additionalRegisters.R8.renderedValue;
-                const blobBoxes = await getUnspentBoxesForAddressUpdated(BLOB_SCRIPT_ADDRESS);
                 var blob1 = undefined, blob2 = undefined;
                 for (const blob of blobBoxes) {
                     if (blob.additionalRegisters.R9.renderedValue === blob1Id) {

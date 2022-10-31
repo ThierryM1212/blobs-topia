@@ -169,9 +169,14 @@ export async function searchUnspentBoxesUpdated(address, tokens, register = '', 
     const currentBlobBoxes = await searchUnspentBoxes(address, tokens, register, registerValue);
     const [spentBlobs, newBlobs] = await getSpentAndUnspentBoxesFromMempool(address);
     const spentBlobBoxIds = spentBlobs.map(box => box.boxId);
-    const updatedBlobBoxes = newBlobs.filter(box => box.additionalRegisters[register].renderedValue === registerValue)
+    var updatedBlobBoxes = newBlobs.filter(box => box.address === address)
         .concat(currentBlobBoxes)
         .filter(box => !spentBlobBoxIds.includes(box.boxId));
+
+    if (register !== '') {
+        updatedBlobBoxes = updatedBlobBoxes.filter(box => box.additionalRegisters[register].renderedValue === registerValue)
+    }
+        
     return updatedBlobBoxes;
 }
 

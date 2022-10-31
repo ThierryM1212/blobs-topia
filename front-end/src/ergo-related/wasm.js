@@ -34,12 +34,12 @@ export async function createTransaction(boxSelection, outputCandidates, dataInpu
 
     // build the change box
     var outputJs = await boxCandidatesToJsonMin(outputCandidates);
-    console.log("createTransaction outputJs", outputJs)
+    //console.log("createTransaction outputJs", outputJs)
     const missingErgs = getMissingErg(utxos, outputJs) - BigInt(TX_FEE);
-    console.log("createTransaction missingErgs", missingErgs.toString())
+    //console.log("createTransaction missingErgs", missingErgs.toString())
     const tokens = getMissingTokens(utxos, outputJs);
-    console.log("createTransaction tokens", tokens)
-    console.log("outputCandidates.len", outputCandidates.len())
+    //console.log("createTransaction tokens", tokens)
+    //console.log("outputCandidates.len", outputCandidates.len())
     
     if (missingErgs > 0 || Object.keys(tokens) > 0) {
         console.log("build change box", changeAddress, missingErgs.toString(), tokens)
@@ -60,7 +60,7 @@ export async function createTransaction(boxSelection, outputCandidates, dataInpu
             throw e;
         }
     }
-    console.log("outputCandidates.len 2", outputCandidates.len())
+    //console.log("outputCandidates.len 2", outputCandidates.len())
 
     const txBuilder = (await ergolib).TxBuilder.new(
         boxSelection,
@@ -75,9 +75,9 @@ export async function createTransaction(boxSelection, outputCandidates, dataInpu
         dataInputsWASM.add(dataInputWASM);
     }
     txBuilder.set_data_inputs(dataInputsWASM);
-    console.log("parseUnsignedTx")
+    //console.log("parseUnsignedTx")
     const tx = parseUnsignedTx(txBuilder.build().to_json());
-    console.log("createTransaction tx", tx);
+    //console.log("createTransaction tx", tx);
 
     const unsignedTx = (await ergolib).UnsignedTransaction.from_json(JSONBigInt.stringify(tx))
     var correctTx = parseUnsignedTx(unsignedTx.to_json());
@@ -263,7 +263,7 @@ export function getMissingTokens(inputs, outputs) {
     const tokensIn = getTokenListFromUtxos(inputs);
     const tokensOut = getTokenListFromUtxos(outputs);
     var res = {};
-    console.log("getMissingTokens", tokensIn, tokensOut);
+    //console.log("getMissingTokens", tokensIn, tokensOut);
     if (tokensIn !== {}) {
         for (const token in tokensIn) {
             if (tokensOut !== {} && token in tokensOut) {
@@ -275,7 +275,7 @@ export function getMissingTokens(inputs, outputs) {
             }
         }
     }
-    console.log("getMissingTokens", tokensIn, tokensOut, res);
+    //console.log("getMissingTokens", tokensIn, tokensOut, res);
     return res;
 }
 
@@ -284,7 +284,7 @@ export async function buildBalanceBox(inputs, outputs, address) {
     const contract = await encodeContract(address);
     const tokens = buildTokenList(getMissingTokens(inputs, outputs));
     const height = await currentHeight();
-    console.log("buildBalanceBox", missingErgs, contract, tokens, height)
+    //console.log("buildBalanceBox", missingErgs, contract, tokens, height)
 
     return {
         value: missingErgs,
@@ -314,7 +314,7 @@ export function verifyTransactionIO(tx) {
     const valueIn = getUtxosListValue(tx.inputs);
     const valueOut = getUtxosListValue(tx.outputs);
     const txOK = (tokenAmountIn === tokenAmountOut && valueIn === valueOut);
-    console.log(txOK, "valueIn", valueIn, "valueOut", valueOut, "tokenAmountIn", tokenAmountIn, "tokenAmountOut", tokenAmountOut);
+    //console.log(txOK, "valueIn", valueIn, "valueOut", valueOut, "tokenAmountIn", tokenAmountIn, "tokenAmountOut", tokenAmountOut);
     if (!txOK) {
         console.log(tx);
     }

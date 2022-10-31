@@ -47,6 +47,10 @@ export async function signTransactionMultiContext(unsignedTx, inputs, dataInputs
     }
 }
 
+export async function setBoxRegisterByteArray(box, register, str_value) {
+    const value_Uint8Array = new TextEncoder().encode(str_value);
+    box.set_register_value(register, (await ergolib).Constant.from_byte_array(value_Uint8Array));
+}
 
 export async function encodeLong(num) {
     return (await ergolib).Constant.from_i64((await ergolib).I64.from_str(num));

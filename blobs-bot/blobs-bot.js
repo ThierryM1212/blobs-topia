@@ -5,7 +5,7 @@ import {
     OATMEAL_RESERVE_SCRIPT, OATMEAL_RESERVE_SCRIPT_ADDRESS, OATMEAL_SELL_RESERVE_SCRIPT, OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS, RESERVE_SCRIPT,
     RESERVE_SCRIPT_ADDRESS, BLOBINATOR_FEE_SCRIPT_ADDRESS, BLOBINATOR_RESERVE_SCRIPT_ADDRESS, BLOBINATOR_SCRIPT_ADDRESS
 } from "./src/script_constants.js";
-import { getMempoolUnspentBoxesByAddresses, getUnspentBoxesByAddress, searchUnspentBoxesUpdated } from "./src/explorer.js";
+import { getMempoolUnspentBoxesByAddresses, getUnspentBoxesByAddress, searchUnspentBoxes, searchUnspentBoxesUpdated } from "./src/explorer.js";
 import dayjs from 'dayjs';
 import { blobinatorFightResults, engageBlobinatorFight, engageFight, processBlobinatorFee, processBlobRequest, processFightResult, processOatmealRequest } from './src/bot_wasm.js';
 import { shuffleArray } from './src/utils.js';
@@ -180,7 +180,7 @@ async function processFigth() {
 
 async function processFightsResult() {
     try {
-        const gameBoxes = (await getUnspentBoxesByAddress(GAME_SCRIPT_ADDRESS)).concat(mempoolBoxes[GAME_SCRIPT_ADDRESS]);
+        const gameBoxes = await getUnspentBoxesByAddress(GAME_SCRIPT_ADDRESS); // process only confirmed fights
         if (gameBoxes.length === 0) {
             console.log("No Game found")
             return;
@@ -323,7 +323,9 @@ async function processBlobinatorFees() {
             currentReserveBox = allReserveBoxes[0];
         }
         const txId = await processBlobinatorFee(unspentBlobinatorFees, currentReserveBox, currentConfigBox);
-        console.log("processBlobinatorFees txId", txId);
+        if (txId) {
+            console.log("processBlobinatorFees txId", txId);
+        }
     } catch (e) {
         console.log("processBlobinatorFees global: " + e.toString())
     }
@@ -331,7 +333,7 @@ async function processBlobinatorFees() {
 
 async function processEngageBlobinatorFigth() {
     try {
-        const unspentBlobinators = (shuffleArray(await searchUnspentBoxesUpdated(BLOBINATOR_SCRIPT_ADDRESS, [], 'R4', '0')))
+        const unspentBlobinators = (shuffleArray(await searchUnspentBoxesUpdated(BLOBINATOR_SCRIPT_ADDRESS, [], 'R9', '0')))
             .filter(box => box.address === BLOBINATOR_SCRIPT_ADDRESS);
         //const unspentBlobinators = shuffleArray(await getUnspentBoxesByAddress(BLOBINATOR_SCRIPT_ADDRESS));
         if (unspentBlobinators.length === 0) {
@@ -358,17 +360,18 @@ async function processEngageBlobinatorFigth() {
 
 async function processBlobinatorFigthResults() {
     try {
-        const blobsEngagedFight = shuffleArray(await searchUnspentBoxesUpdated(BLOB_SCRIPT_ADDRESS, [GAME_TOKEN_ID], 'R7', "5"));
+        const blobsEngagedFight = shuffleArray(await searchUnspentBoxes(BLOB_SCRIPT_ADDRESS, [GAME_TOKEN_ID], 'R7', "5"));
         if (blobsEngagedFight.length == 0) {
             console.log("processBlobinatorFigthResults: No blob engaged fight with Blobinator")
             return;
         }
 
-        const unspentBlobinators = (await searchUnspentBoxesUpdated(BLOBINATOR_SCRIPT_ADDRESS, [BLOBINATOR_TOKEN_ID], '', ''))
+        const unspentBlobinators = (await searchUnspentBoxes(BLOBINATOR_SCRIPT_ADDRESS, [BLOBINATOR_TOKEN_ID], '', ''))
             .filter(box => box.address === BLOBINATOR_SCRIPT_ADDRESS)
-            .filter(box => box.additionalRegisters.R4.renderedValue !== "0");
+            .filter(box => box.additionalRegisters.R9.renderedValue !== "0");
 
         //console.log("unspentBlobinators", JSON.stringify(unspentBlobinators));
+        //return;
         if (unspentBlobinators.length === 0) {
             console.log("processBlobinatorFigthResults: No Blobinator box found")
             return;
@@ -378,10 +381,9 @@ async function processBlobinatorFigthResults() {
             return;
         }
 
-        
         for (const blob of blobsEngagedFight) {
             const blobId = blob.additionalRegisters.R9.renderedValue;
-            const blobBinator = unspentBlobinators.find(box => box.additionalRegisters.R4.renderedValue === blobId)
+            const blobBinator = unspentBlobinators.find(box => box.additionalRegisters.R9.renderedValue === blobId)
             if (blobBinator) {
                 var txId = await blobinatorFightResults(blob, blobBinator, currentConfigBox);
                 console.log("processBlobinatorFigthResults txId", txId);
@@ -397,10 +399,10 @@ function sleep(ms) {
 }
 
 
-//setInterval(processBlobRequests, 24000);
-//setInterval(processFigth, 30000);
-//setInterval(processFightsResult, 20000);
-//setInterval(processOatmealBuyRequests, 26000);
-//setInterval(processBlobinatorFees, 27000);
-//setInterval(processEngageBlobinatorFigth, 10000);
-setInterval(processBlobinatorFigthResults, 10000);
+setInterval(processBlobRequests, 24000);
+setInterval(processFigth, 30000);
+setInterval(processFightsResult, 20000);
+setInterval(processOatmealBuyRequests, 26000);
+setInterval(processBlobinatorFees, 27000);
+setInterval(processEngageBlobinatorFigth, 21000);
+setInterval(processBlobinatorFigthResults, 22000);

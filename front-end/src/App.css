@@ -106,7 +106,7 @@ input[type="text"], textarea {
   border: 3px;
   border-width: 3px;
   border-radius: 10px;
-  background-color: rgba(255, 255, 255, .3);
+  background-color: rgba(255, 255, 255, .2);
   color: white;
 }
 
@@ -176,7 +176,7 @@ input[type="text"], textarea {
 }
 
 .color-nav {
-  background-color: rgb(0, 0, 0, 0.5);
+  background-color: rgb(0, 0, 0, 1);
 }
 
 /* CHECKED STYLES */

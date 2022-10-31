@@ -104,8 +104,8 @@ export async function currentHeight() {
 }
 
 /////
-export async function getUnspentBoxesByAddress(address) {
-    const res = await getRequestV1(`/boxes/unspent/byAddress/${address}`);
+export async function getUnspentBoxesByAddress(address, limit = 50) {
+    const res = await getRequestV1(`/boxes/unspent/byAddress/${address}?limit=${limit}`);
     return res.data.items;
 }
 
