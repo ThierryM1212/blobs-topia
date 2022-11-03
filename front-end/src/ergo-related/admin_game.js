@@ -59,7 +59,7 @@ export async function burnGameTokenReserve(boxId) {
 }
 
 
-export async function burnOatmealReserve(boxId) {
+export async function burnReserve(boxId) {
     const address = localStorage.getItem('address');
     const alert = waitingAlert("Preparing the transaction...");
     if (await isValidWalletAddress(address)) {
@@ -67,21 +67,6 @@ export async function burnOatmealReserve(boxId) {
         const reservebox = await boxById(boxId);
         const reserveboxFixed = parseUtxo(reservebox);
         utxos.push(reserveboxFixed);
-        var tokens = new (await ergolib).Tokens();
-        const oatmealTokenId = (await ergolib).TokenId.from_str(OATMEAL_TOKEN_ID);
-        const reserveTokenAmount = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str(reserveboxFixed.assets[0].amount));
-        tokens.add(new (await ergolib).Token(
-            oatmealTokenId,
-            reserveTokenAmount)
-        );
-        if (reserveboxFixed.assets.length > 1) {
-            const reserveSpicyTokenAmount = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str(reserveboxFixed.assets[1].amount));
-            const oatmealSpicyTokenId = (await ergolib).TokenId.from_str(SPICY_OATMEAL_TOKEN_ID);
-            tokens.add(new (await ergolib).Token(
-                oatmealSpicyTokenId,
-                reserveSpicyTokenAmount)
-            );
-        }
 
         const inputsWASM = (await ergolib).ErgoBoxes.from_boxes_json(utxos);
         const dataListWASM = new (await ergolib).ErgoBoxAssetsDataList();
@@ -94,7 +79,12 @@ export async function burnOatmealReserve(boxId) {
             boxValue,
             (await ergolib).Contract.pay_to_address((await ergolib).Address.from_base58(GAME_ADDRESS)),
             creationHeight);
-        returnBoxBuilder.add_token(oatmealTokenId, reserveTokenAmount);
+        for (const asset of reserveboxFixed.assets) {
+            const tokenIdWASM = (await ergolib).TokenId.from_str(asset.tokenId);
+            const tokenAmountWASM = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str(asset.amount.toString()));
+            returnBoxBuilder.add_token(tokenIdWASM, tokenAmountWASM);
+        }
+        
         try {
             outputCandidates.add(returnBoxBuilder.build());
         } catch (e) {

@@ -15,7 +15,7 @@
                                 OUTPUTS(0).tokens(0)._1 == BlobinatorNFTId             &&
                                 OUTPUTS(0).tokens(0)._2 == 1                           &&
                                 OUTPUTS(0).tokens.size == 1                            &&
-                                OUTPUTS(0).R4[Long].get == 0L                          &&
+                                OUTPUTS(0).R9[Long].get == 0L                          &&
                                 OUTPUTS(0).value >= blobinatorMinAmount
                             } else {
                                 false

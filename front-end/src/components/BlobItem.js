@@ -11,12 +11,14 @@ import CopyIcon from '../images/outline_content_copy_black_24dp.png';
 import OpenAction from '../images/outline_keyboard_double_arrow_right_black_24dp.png';
 import CloseAction from '../images/outline_keyboard_double_arrow_left_black_24dp.png';
 import PhotoIcon from '../images/outline_photo_camera_black_24dp.png';
+import UpgradeIcon from '../images/outline_upgrade_black_24dp.png';
 import ArmorItem from './ArmorItem';
 import BlobActionButton from './BlobActionButton';
 import exportAsImage from '../utils/exportAsImage';
 import ImageButton from './ImageButton';
 import WeaponItem from './WeaponItem';
 import BlobRating from './BlobRating';
+
 
 export default class BlobItem extends React.Component {
     constructor(props) {
@@ -32,7 +34,7 @@ export default class BlobItem extends React.Component {
             info: [],
             power: 0,
             defense: 0,
-            state: [0, 0],
+            state: ['0', '0'],
             updateList: props.updateList,
             blobId: '0',
             showActions: props.showActions ?? false,
@@ -142,11 +144,30 @@ export default class BlobItem extends React.Component {
 
     render() {
         const ownBlob = (this.state.ownerAddress === localStorage.getItem('address'));
+        const currentArmorLevel = this.state.info[4];
+        var upgradeArmorTips = "Cannot be upgraded.";
+        if (currentArmorLevel < BLOB_ARMORS.length - 1) {
+            upgradeArmorTips = 'Upgrade the armor of the blob to the level ' + (currentArmorLevel + 1) + ', '
+                + BLOB_ARMORS[currentArmorLevel + 1].name
+                + '.<br />Requires ' + BLOB_ARMORS[currentArmorLevel + 1].oatmeal_price
+                + ' Oatmeal tokens.';
+        }
+        var currentWeaponType = this.state.info[5], currentWeaponLevel = this.state.info[6];
+        var upgradeWeaponTips = "Cannot be upgraded."
+        if (currentWeaponLevel < WEAPONS_UPGRADE_PRICES.length - 1) {
+            upgradeWeaponTips = 'Upgrade the weapon of the blob to the level ' + (currentWeaponLevel + 1)
+                + '.<br />Requires ' + WEAPONS_UPGRADE_PRICES[currentWeaponLevel + 1]
+                + ' Oatmeal tokens.';
+        }
+        var chooseWeaponTips = 'Choose a weapon type for the blob, it will start at level 0'
+            + '.<br />Requires ' + WEAPONS_UPGRADE_PRICES[0]
+            + ' Oatmeal tokens.';
+
         return (
             <div className="zonecard d-flex flex-row m-1 p-1 align-items-center" >
                 <div className="d-flex flex-column zoneblob " ref={this.blobRef} >
                     <div className="d-flex flex-row justify-content-between w-100">
-                        <BlobRating averagePower={(this.state.power + this.state.defense)/2} />
+                        <BlobRating averagePower={(this.state.power + this.state.defense) / 2} />
                         <div className="d-flex flex-row align-items-end">
                             <ImageButton action={() => exportAsImage(this.blobRef.current, this.state.name + "_" + (new Date().toISOString()).slice(0, -5))}
                                 alt="photo"
@@ -177,9 +198,50 @@ export default class BlobItem extends React.Component {
                     />
                     <div className="d-flex flex-row justify-content-between m-2">
                         <div></div>
-                        <ArmorItem armorLevel={this.state.info[4]} />
-                        <div></div>
-                        <WeaponItem weaponType={this.state.info[5]} weaponLevel={this.state.info[6]} />
+                        <div className="d-flex flex-row">
+                            <ArmorItem armorLevel={currentArmorLevel} />
+                            <div>
+                                {
+                                    this.state.state[0] !== '0' || currentArmorLevel >= BLOB_ARMORS.length - 1 ?
+                                        <BlobActionButton
+                                            image={UpgradeIcon}
+                                            isDisabled={this.state.state[0] !== '0' || currentArmorLevel >= BLOB_ARMORS.length - 1}
+                                            label="Upgrade armor"
+                                            tips={upgradeArmorTips} />
+                                        :
+                                        <BlobActionButton
+                                            image={UpgradeIcon}
+                                            action={() => this.upgradeArmor(this.state.blobBoxJSON)}
+                                            isDisabled={this.state.state[0] !== '0' || currentArmorLevel >= BLOB_ARMORS.length - 1}
+                                            label="Upgrade armor"
+                                            tips={upgradeArmorTips} />
+                                }
+                            </div>
+                        </div>
+                        <div>&nbsp;</div>
+                        <div className="d-flex flex-row">
+                            <WeaponItem weaponType={currentWeaponType} weaponLevel={currentWeaponLevel} />
+                            <div>
+                                {
+                                    currentWeaponType === 0 ?
+                                        <BlobActionButton
+                                            image={UpgradeIcon}
+                                            action={() => this.chooseWeapon(this.state.blobBoxJSON)}
+                                            isDisabled={this.state.state[0] !== '0'}
+                                            label="Choose weapon"
+                                            tips={chooseWeaponTips} />
+                                        :
+                                        currentWeaponLevel === 3 ? null :
+                                            <BlobActionButton
+                                                image={UpgradeIcon}
+                                                action={() => this.upgradeWeapon(this.state.blobBoxJSON)}
+                                                isDisabled={this.state.state[0] !== '0'}
+                                                label="Upgrade weapon"
+                                                tips={upgradeWeaponTips} />
+
+                                }
+                            </div>
+                        </div>
                         <div></div>
                     </div>
                     <div className="border-white d-flex flex-column align-items-center p-2" >
@@ -282,26 +344,19 @@ export default class BlobItem extends React.Component {
                                             tips='Feed the blob with Oatmeal tokens.<br />Increase its attack level and defense level.' />
                                         <BlobActionButton
                                             action={() => this.upgradeArmor(this.state.blobBoxJSON)}
-                                            isDisabled={this.state.state[0] !== '0' && this.state.info[4] < BLOB_ARMORS.length - 1}
+                                            isDisabled={this.state.state[0] !== '0' && currentArmorLevel < BLOB_ARMORS.length - 1}
                                             label="Upgrade armor"
-                                            tips={'Upgrade the armor of the blob to the level ' + (this.state.info[3] + 1) + ', '
-                                                + BLOB_ARMORS[this.state.info[4] + 1].name
-                                                + '.<br />Requires ' + BLOB_ARMORS[this.state.info[4] + 1].oatmeal_price
-                                                + ' Oatmeal tokens.'} />
+                                            tips={upgradeArmorTips} />
                                         <BlobActionButton
                                             action={() => this.upgradeWeapon(this.state.blobBoxJSON)}
-                                            isDisabled={this.state.state[0] !== '0' || this.state.info[5] === 0 || this.state.info[6] === 3}
+                                            isDisabled={this.state.state[0] !== '0' || currentWeaponType === 0 || currentWeaponLevel === 3}
                                             label="Upgrade weapon"
-                                            tips={'Upgrade the weapon of the blob to the level ' + (this.state.info[6] + 1)
-                                                + '.<br />Requires ' + WEAPONS_UPGRADE_PRICES[this.state.info[6] + 1]
-                                                + ' Oatmeal tokens.'} />
+                                            tips={upgradeWeaponTips} />
                                         <BlobActionButton
                                             action={() => this.chooseWeapon(this.state.blobBoxJSON)}
-                                            isDisabled={this.state.state[0] !== '0' }
-                                            label={this.state.info[5] === 0 ? "Choose weapon" : "Change weapon"}
-                                            tips={'Choose a weapon type for the blob, it will start at level 0'
-                                                + '.<br />Requires ' + WEAPONS_UPGRADE_PRICES[0]
-                                                + ' Oatmeal tokens.'} />
+                                            isDisabled={this.state.state[0] !== '0'}
+                                            label={currentWeaponType === 0 ? "Choose weapon" : "Change weapon"}
+                                            tips={chooseWeaponTips} />
                                         <BlobActionButton
                                             action={() => this.setStatus('blobinator', this.state.blobBoxJSON)}
                                             isDisabled={this.state.state[0] !== '0'}

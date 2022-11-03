@@ -11,21 +11,54 @@ export default class BlobActionButton extends React.Component {
             isDisabled: this.props.isDisabled,
             label: this.props.label,
             tips: this.props.tips,
+            image: this.props.image,
             id: uuid(),
         };
     }
 
+    async componentDidUpdate(prevProps, prevState) {
+        //console.log("BlobItem componentDidUpdate", prevProps, this.props)
+        if (prevProps !== this.props) {
+            this.setState({
+                action: this.props.action,
+                isDisabled: this.props.isDisabled,
+                label: this.props.label,
+                tips: this.props.tips,
+                image: this.props.image,
+                id: uuid(),
+            })
+        }
+    }
 
     render() {
+        console.log("BlobActionButton", this.state);
         return (
             <Fragment >
-                <button className="btn btn-ultra-voilet m-1"
-                    onClick={this.state.action}
-                    disabled={this.state.isDisabled}
-                    data-tip
-                    data-for={this.state.id}>
-                    {this.state.label}
-                </button>
+                {
+                    this.state.image ?
+                        <div className="weaponChooser zoneupgrade" >
+                            <input
+                                type="image"
+                                src={this.state.image}
+                                alt={this.state.label}
+                                width={24}
+                                height={24}
+                                className={this.state.isDisabled ? "btn disabled-image" : "btn transparent-image"}
+                                data-tip
+                                data-for={this.state.id}
+                                onClick={this.state.action}
+                            />
+                        </div>
+                        :
+                        <button className="btn btn-ultra-voilet m-1"
+                            onClick={this.state.action}
+                            disabled={this.state.isDisabled}
+                            data-tip
+                            data-for={this.state.id}>
+                            {this.state.label}
+                        </button>
+                }
+
                 <ReactTooltip id={this.state.id}
                     place="right"
                     effect="solid"

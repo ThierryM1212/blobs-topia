@@ -1,5 +1,5 @@
 import React, { Fragment } from 'react';
-import { burnOatmealReserve } from '../ergo-related/admin_game';
+import { burnReserve } from '../ergo-related/admin_game';
 
 
 export default class OatmealReserveItem extends React.Component {
@@ -15,7 +15,7 @@ export default class OatmealReserveItem extends React.Component {
     }
 
     async burn(boxId) {
-        return await burnOatmealReserve(boxId);
+        return await burnReserve(boxId);
     }
 
     formatLongString(str) {

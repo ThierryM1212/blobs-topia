@@ -75,6 +75,7 @@ async function getRequestV0(url) {
 export async function postTxMempool(tx) {
     try {
         const res = await postTx(DEFAULT_EXPLORER_API_ADDRESS + 'api/v1' + '/mempool/transactions/submit', tx);
+        //console.log("postTxMempool res", res);
         return res;
     } catch (err) {
         console.log("postTxMempool", err);
@@ -169,8 +170,9 @@ export async function searchUnspentBoxesUpdated(address, tokens, register = '', 
     const currentBlobBoxes = await searchUnspentBoxes(address, tokens, register, registerValue);
     const [spentBlobs, newBlobs] = await getSpentAndUnspentBoxesFromMempool(address);
     const spentBlobBoxIds = spentBlobs.map(box => box.boxId);
-    var updatedBlobBoxes = newBlobs.filter(box => box.address === address)
+    var updatedBlobBoxes = newBlobs
         .concat(currentBlobBoxes)
+        .filter(box => box.address === address)
         .filter(box => !spentBlobBoxIds.includes(box.boxId));
 
     if (register !== '') {

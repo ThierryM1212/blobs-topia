@@ -1,17 +1,17 @@
 .App {
   text-align: center;
   font-family: 'Fuzzy Bubbles', cursive;
-  background-image: url("images/sky.jpg") ;
-  background-repeat: repeat;   
+  background-image: url("images/sky.jpg");
+  background-repeat: repeat;
 
-  margin:auto;
-  padding:0;
-   
+  margin: auto;
+  padding: 0;
+
   align-items: center;
   justify-content: center;
   display: flex;
   flex-direction: column;
-  color: rgba(255,255,255,.8);
+  color: rgba(255, 255, 255, .8);
   min-height: 100vh;
 }
 
@@ -61,7 +61,7 @@ h5 {
 }
 
 /* HIDE RADIO */
-[type=radio] { 
+[type=radio] {
   position: absolute;
   opacity: 0;
   width: 0;
@@ -78,12 +78,13 @@ td {
   padding: 2px;
 }
 
-td > * {
-  vertical-align : middle;
+td>* {
+  vertical-align: middle;
 }
 
-input[type="text"], textarea {
-  background-color : rgba(255,255,255,.7);
+input[type="text"],
+textarea {
+  background-color: rgba(255, 255, 255, .7);
   border: none;
 }
 
@@ -110,6 +111,14 @@ input[type="text"], textarea {
   color: white;
 }
 
+.zoneupgrade {
+  border: 2px;
+  border-width: 2px;
+  border-radius: 3px;
+  margin: 1px;
+  background: linear-gradient(to bottom right, rgba(31, 34, 36, 0.5), rgba(48, 36, 48, 0.5));
+}
+
 .zoneabout {
   border: 3px;
   border-width: 3px;
@@ -119,6 +128,7 @@ input[type="text"], textarea {
   text-align: left;
   line-height: 1em;
 }
+
 .aboutlink {
   color: deepskyblue;
 }
@@ -130,7 +140,7 @@ input[type="text"], textarea {
   color: white;
   background-size: 100% 100%;
   background-image: url('images/versus_bg.png');
-  
+
 }
 
 .zoneprice {
@@ -149,11 +159,12 @@ input[type="text"], textarea {
   color: black;
   font-family: Arial, sans-serif;
 }
+
 .armorValue {
-  color:rgba(17, 185, 17, 0.8);
+  color: rgba(17, 185, 17, 0.8);
   font-weight: bold;
   font-size: larger;
-  
+
 }
 
 /* winning percent*/
@@ -171,8 +182,14 @@ input[type="text"], textarea {
 }
 
 .transparent-image {
-  opacity: 0.5;
+  opacity: 0.7;
   padding: 0px;
+}
+
+.disabled-image {
+  opacity: 0.3 !important;
+  padding: 0px;
+  pointer-events: none;
 }
 
 .color-nav {
@@ -180,68 +197,69 @@ input[type="text"], textarea {
 }
 
 /* CHECKED STYLES */
-input[type=radio]:checked + div {
+input[type=radio]:checked+div {
   border: 3px solid #654ea3;
-  
+
 }
 
-input{
+input {
   border-radius: 5px;
 }
 
 .weaponChooser {
   transition: 0.5s;
 }
-.weaponChooser:hover {
+
+.weaponChooser:hover:enabled {
   box-shadow: 0 0 0 2px #654ea3 inset;
   transition: 0.5s;
 }
-.weaponChooser:active {
+
+.weaponChooser:active:enabled {
   box-shadow: 0 0 0 2px rgba(17, 185, 17, 0.5) inset;
 }
 
 
-.btn:active {
+.btn:active:enabled {
   transform: translateY(4px);
 }
 
 .btn:hover:enabled {
   box-shadow: 0 0 0 2px #654ea3;
   transition: 0.7s;
-  
 }
 
 .btn-ultra-voilet {
-  background: rgba(231, 20, 231, 0.5);  
+  background: rgba(231, 20, 231, 0.5);
   font-weight: bold;
 }
 
 .btn-ultra-blue {
-  background: rgba(5, 176, 255, 0.5);  
+  background: rgba(5, 176, 255, 0.5);
   font-weight: bold;
   border-radius: 10px;
 }
 
 .btn-ultra-yellow {
-  background: rgba(221, 189, 9, 0.8);  
+  background: rgba(221, 189, 9, 0.8);
   font-weight: bold;
   border-radius: 10px;
 }
 
 .btn-ultra-green {
-  background: rgba(17, 185, 17, 0.5);  
+  background: rgba(17, 185, 17, 0.5);
   font-weight: bold;
   border-radius: 10px;
 }
 
 .btn-ultra-orange {
-  background: rgba(185, 107, 17, 0.5);  
+  background: rgba(185, 107, 17, 0.5);
   font-weight: bold;
   border-radius: 10px;
 }
 
 .btn-ultra-red {
-  background: rgba(185, 17, 17, 0.5);  
+  background: rgba(185, 17, 17, 0.5);
   font-weight: bold;
   border-radius: 10px;
 }
@@ -253,7 +271,7 @@ input{
 
 }
 
-.rotate{
+.rotate {
   animation-name: spin;
   animation-duration: 2000ms;
   animation-iteration-count: infinite;
@@ -264,6 +282,7 @@ input{
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -279,7 +298,7 @@ input[type="checkbox"] {
   background-color: var(--form-background);
   /* Not removed via appearance */
   margin: 0;
-  background-color:rgba(255, 255, 255, .5);
+  background-color: rgba(255, 255, 255, .5);
   font: inherit;
   color: currentColor;
   width: 1.15em;
@@ -323,17 +342,23 @@ input[type="checkbox"]:disabled {
 
 /* Animated arrow */
 .arrow-1 {
-  width:100px;
-  height:30px;
+  width: 100px;
+  height: 30px;
   display: flex;
 }
+
 .arrow-1:before {
   content: "";
   background: currentColor;
-  width:15px;
-  clip-path: polygon(0 10px,calc(100% - 15px) 10px,calc(100% - 15px) 0,100% 50%,calc(100% - 15px) 100%,calc(100% - 15px) calc(100% - 10px),0 calc(100% - 10px));
+  width: 15px;
+  clip-path: polygon(0 10px, calc(100% - 15px) 10px, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, calc(100% - 15px) calc(100% - 10px), 0 calc(100% - 10px));
   animation: a1 1.5s infinite linear;
 }
+
 @keyframes a1 {
-  50%,100%{flex-grow: 1}
+
+  50%,
+  100% {
+    flex-grow: 1
+  }
 }

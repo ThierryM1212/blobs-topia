@@ -151,7 +151,7 @@ export function parseUnsignedTx(str) {
     };
 }
 
-function parseUtxo(json, addExtention = true, mode = 'input') {
+export function parseUtxo(json, addExtention = true, mode = 'input') {
     if (json === undefined) {
         return {};
     }
@@ -216,6 +216,51 @@ function parseAdditionalRegisters(json) {
     return registterOut;
 }
 
+export async function getWalletForAddress (mnemonic, address) {
+    const dlogSecret = await getSecretForAddress(mnemonic, address);
+    var secretKeys = new (await ergolib).SecretKeys();
+    secretKeys.add(dlogSecret);
+    return (await ergolib).Wallet.from_secrets(secretKeys);
+}
+
+async function getSecretForAddress(mnemonic, address) {
+    const seed = (await ergolib).Mnemonic.to_seed(mnemonic, "");
+    const rootSecret = (await ergolib).ExtSecretKey.derive_master(seed);
+    const changePath = await getDerivationPathForAddress(rootSecret, address);
+    const changeSecretKey = deriveSecretKey(rootSecret, changePath);
+    const dlogSecret = (await ergolib).SecretKey.dlog_from_bytes(changeSecretKey.secret_key_bytes());
+    return dlogSecret;
+}
+
+async function getDerivationPathForAddress(rootSecret, address) {
+    let path = (await ergolib).DerivationPath.new(0, new Uint32Array([0]));
+    var subsequentsMaxes = [10, 100, 1000];
+    
+    for (const max of subsequentsMaxes) {
+        var i = 0, j = 0, found = false;
+        while (i<max && !found) {
+            j = 0;
+            while (j<max && !found) {
+                let path = (await ergolib).DerivationPath.new(i, new Uint32Array([j]));
+                //console.log("getDerivationPathForAddress", i, j, path.toString());
+                const changeSecretKey = deriveSecretKey(rootSecret, path);
+                const changePubKey = changeSecretKey.public_key();
+                const changeAddress = (await ergolib).NetworkAddress.new((await ergolib).NetworkPrefix.Mainnet, changePubKey.to_address()).to_base58();
+                if (changeAddress === address) {
+                    found = true;
+                    return (await ergolib).DerivationPath.new(i, new Uint32Array([j]));
+                }
+                j++;
+            }
+            i++;
+        }
+    }
+    return path;
+}
+
+const deriveSecretKey = (rootSecret, path) =>
+    rootSecret.derive(path); 
+
 function isDict(v) {
     return typeof v==='object' && v!==null && !(v instanceof Array) && !(v instanceof Date);
 }
@@ -260,6 +305,8 @@ export function toHexString(byteArray) {
         return ('0' + (byte & 0xFF).toString(16)).slice(-2);
     }).join('')
 }
+
+
 
 export function getUtxosListValue(utxos) {
     return utxos.reduce((acc, utxo) => acc += BigInt(utxo.value), BigInt(0));

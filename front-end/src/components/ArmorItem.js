@@ -4,6 +4,7 @@ import ReactTooltip from "react-tooltip";
 import { uuid } from 'uuidv4';
 
 
+
 export default class ArmorItem extends React.Component {
     constructor(props) {
         super(props);
@@ -27,7 +28,7 @@ export default class ArmorItem extends React.Component {
         return (
 
             <Fragment >
-                <div className="d-flex flex-column align-items-center">
+                <div className="d-flex flex-row align-items-start ">
                     <img className="armor"
                         src={BLOB_ARMORS[armorLevel].image}
                         alt={BLOB_ARMORS[armorLevel].name}
@@ -58,6 +59,7 @@ export default class ArmorItem extends React.Component {
                             </div>
                         </div>
                     </ReactTooltip>
+                    
                 </div>
             </Fragment>
         )

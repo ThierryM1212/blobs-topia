@@ -32,7 +32,7 @@ export const OATMEAL_PRICE = 1000000;
 export const BLOBINATOR_FEE = 30; // per mille
 export const BLOBINATOR_MIN_VALUE = 100000000; 
 export const BLOBINATOR_DEFI_TOK_NUM = 2;
-export const BLOBINATOR_DEFI_MODULO_WIN = 5; // planned 50, 5 for test
+export const BLOBINATOR_DEFI_MODULO_WIN = 3; // planned 50, 5 for test
 
 export const RATING_RANGES = [250, 1000, 3000, 6000, 9000];
 

@@ -8,7 +8,7 @@ import {
 import { getMempoolUnspentBoxesByAddresses, getUnspentBoxesByAddress, searchUnspentBoxes, searchUnspentBoxesUpdated } from "./src/explorer.js";
 import dayjs from 'dayjs';
 import { blobinatorFightResults, engageBlobinatorFight, engageFight, processBlobinatorFee, processBlobRequest, processFightResult, processOatmealRequest } from './src/bot_wasm.js';
-import { shuffleArray } from './src/utils.js';
+import { shuffleArray, sleep } from './src/utils.js';
 
 
 var mempoolBoxes = {};
@@ -301,7 +301,7 @@ async function processOatmealBuyRequests() {
 async function processBlobinatorFees() {
     try {
         var currentReserveBox = {};
-        const unspentBlobinatorFees = (await getUnspentBoxesByAddress(BLOBINATOR_FEE_SCRIPT_ADDRESS)).concat(mempoolBoxes[BLOBINATOR_FEE_SCRIPT_ADDRESS]);
+        const unspentBlobinatorFees = await getUnspentBoxesByAddress(BLOBINATOR_FEE_SCRIPT_ADDRESS);
         if (unspentBlobinatorFees.length === 0) {
             console.log("processBlobinatorFees: No Blobinator fee box found")
             return;
@@ -394,15 +394,11 @@ async function processBlobinatorFigthResults() {
     }
 }
 
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 
 setInterval(processBlobRequests, 24000);
 setInterval(processFigth, 30000);
 setInterval(processFightsResult, 20000);
 setInterval(processOatmealBuyRequests, 26000);
-setInterval(processBlobinatorFees, 27000);
+setInterval(processBlobinatorFees, 10000);
 setInterval(processEngageBlobinatorFigth, 21000);
 setInterval(processBlobinatorFigthResults, 22000);

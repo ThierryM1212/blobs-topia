@@ -430,12 +430,14 @@ export async function processOatmealRequest(oatmealRequestJSON, currentReserveBo
 }
 
 export async function processBlobinatorFee(blobinatorFeeJSONArray, currentBlobinatorReserve, currentConfigBox) {
-    console.log("processBlobinatorFee 0");
+    //console.log("processBlobinatorFee 0");
     const wallet = (await ergolib).Wallet.from_mnemonic("", "");
     const creationHeight = await currentHeight();
+    //console.log("processBlobinatorFee blobinatorFeeJSONArray ", blobinatorFeeJSONArray);
     const totalInputValue = parseInt(getUtxosListValue(blobinatorFeeJSONArray));
     var utxos = [];
     var invokeBlobinator = false;
+    
     if (totalInputValue - TX_FEE > BLOBINATOR_MIN_VALUE) {
         // Invoke blobinator
         console.log("processBlobinatorFee Invoke blobinator for ", totalInputValue);
@@ -467,7 +469,7 @@ export async function processBlobinatorFee(blobinatorFeeJSONArray, currentBlobin
             (await ergolib).Contract.pay_to_address((await ergolib).Address.from_base58(BLOBINATOR_SCRIPT_ADDRESS)),
             creationHeight);
         blobinatorBoxBuilder.add_token(blobinatorTokenId, blobinatorTokenAmountWASM);
-        await setBoxRegisterByteArray(blobinatorBoxBuilder, 4, "");
+        await setBoxRegisterByteArray(blobinatorBoxBuilder, 4, await encodeLong("0"));
         blobinatorBoxBuilder.set_register_value(5, await encodeIntArray([0]));
         const dummySigmaProp = (await ergolib).Constant.from_ecpoint_bytes(
             (await ergolib).Address.from_base58(GAME_ADDRESS).to_bytes(0x00).subarray(1, 34)
@@ -516,7 +518,7 @@ export async function processBlobinatorFee(blobinatorFeeJSONArray, currentBlobin
     }
 
     const tx = await createTransaction(boxSelection, outputCandidates, [currentConfigBox], GAME_ADDRESS, utxos);
-    //console.log("processBlobinatorFee tx", JSONBigInt.stringify(tx));
+    console.log("processBlobinatorFee tx", JSONBigInt.stringify(tx));
     const signedTx = JSONBigInt.parse(await signTransaction(tx, utxos, [currentConfigBox], wallet));
     //console.log("processBlobinatorFee signedTx", JSONBigInt.stringify(signedTx));
     const txId = await sendTx(signedTx);

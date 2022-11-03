@@ -15,3 +15,7 @@ export function shuffleArray(array) {
 
     return array;
 }
+
+export function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
