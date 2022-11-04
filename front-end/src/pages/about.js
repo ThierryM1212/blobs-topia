@@ -97,11 +97,6 @@ export default class AboutPage extends React.Component {
                 </div>
 
                 <div className='w-100 zoneabout d-flex flex-column align-items-start m-2 p-2'>
-                    <h5>Why the miner fee is so high ({formatERGAmount(TX_FEE)} ERG) ?</h5>
-                    <p>Because we love the miners that allows ERG and that game to exist.</p>
-                </div>
-
-                <div className='w-100 zoneabout d-flex flex-column align-items-start m-2 p-2'>
                     <h5>How the match making is done ?</h5>
                     <p>Once two blobs are waiting for a fight for a given bet, anyone can pick them and engage the fight, the transaction does not require to be signed.</p>
                     <p> - Using the match making screen you can pick two blobs waiting for a fight for the same bet and try to proceed the match making.</p>

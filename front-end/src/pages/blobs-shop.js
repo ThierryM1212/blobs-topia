@@ -29,7 +29,7 @@ export default class BlobsShopPage extends React.Component {
         const blobBoxesTmp = await searchBlobUnspentBoxes('R7', '2');
         const [spentBoxes, newBoxes] = await getSpentAndUnspentBoxesFromMempool(BLOB_SCRIPT_ADDRESS);
         const spentBoxIds = spentBoxes.map(box => box.boxId);
-        var blobBoxes = blobBoxesTmp.filter(box => !spentBoxIds.includes(box.boxId));
+        var blobBoxes = blobBoxesTmp.concat(newBoxes).filter(box => !spentBoxIds.includes(box.boxId));
         var blobList = [];
         for (const box of blobBoxes) {
             try {

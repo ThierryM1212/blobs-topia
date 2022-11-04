@@ -11,7 +11,14 @@ import CopyIcon from '../images/outline_content_copy_black_24dp.png';
 import OpenAction from '../images/outline_keyboard_double_arrow_right_black_24dp.png';
 import CloseAction from '../images/outline_keyboard_double_arrow_left_black_24dp.png';
 import PhotoIcon from '../images/outline_photo_camera_black_24dp.png';
-import UpgradeIcon from '../images/outline_upgrade_black_24dp.png';
+import UpgradeIcon from '../images/outline_upgrade_white_24dp.png';
+import SwordsIcon from '../images/swords.png';
+import FeedIcon from '../images/outline_restaurant_white_24dp.png';
+import BlobinatorIcon from '../images/blobinator_icone.png';
+import AddERGIcon from '../images/Add_ERG.png';
+import WithdrawERGIcon from '../images/withdraw_ERG.png';
+import CancelIcon from '../images/outline_close_white_24dp.png';
+import BuyIcon from '../images/outline_shopping_cart_white_24dp.png';
 import ArmorItem from './ArmorItem';
 import BlobActionButton from './BlobActionButton';
 import exportAsImage from '../utils/exportAsImage';
@@ -162,6 +169,11 @@ export default class BlobItem extends React.Component {
         var chooseWeaponTips = 'Choose a weapon type for the blob, it will start at level 0'
             + '.<br />Requires ' + WEAPONS_UPGRADE_PRICES[0]
             + ' Oatmeal tokens.';
+        const fightTips = 'Choose a fight amount and set the blob "ready to fight".';
+        const feedTips = 'Feed the blob with Oatmeal tokens.<br />Increase its attack level and defense level.';
+        const blobinatorTips = 'Set the state to "Ready to fight the blobinator"';
+        const depositTips = 'Add ERGs to the blob to play with.';
+        const withdrawTips = "Widthdraw ERGs from the blob to the owner address.";
 
         return (
             <div className="zonecard d-flex flex-row m-1 p-1 align-items-center" >
@@ -196,54 +208,122 @@ export default class BlobItem extends React.Component {
                         mouth_type={this.state.mouth_type}
                         name={this.state.name}
                     />
+                    {
+                        this.state.disableActions ? null :
+                            <div className="w-100 d-flex flex-row justify-content-center p-1" >
+                                {
+                                    ownBlob ?
+                                        <Fragment>
+
+                                            <BlobActionButton
+                                                image={SwordsIcon}
+                                                action={() => this.setStatus('fight', this.state.blobBoxJSON)}
+                                                isDisabled={this.state.state[0] !== '0'}
+                                                label="Upgrade weapon"
+                                                tips={fightTips} />
+                                            <BlobActionButton
+                                                image={BlobinatorIcon}
+                                                action={() => this.setStatus('blobinator', this.state.blobBoxJSON)}
+                                                isDisabled={this.state.state[0] !== '0'}
+                                                label="Fight the Blobinator"
+                                                tips={blobinatorTips} />
+                                            <BlobActionButton
+                                                image={FeedIcon}
+                                                action={() => this.feed(this.state.blobBoxJSON)}
+                                                isDisabled={this.state.state[0] !== '0'}
+                                                label="Feed"
+                                                tips={feedTips} />
+                                            <BlobActionButton
+                                                image={AddERGIcon}
+                                                action={() => this.addWidthDraw('add', this.state.blobBoxJSON)}
+                                                isDisabled={this.state.state[0] !== '0'}
+                                                label="Deposit"
+                                                tips={depositTips} />
+                                            <BlobActionButton
+                                                image={WithdrawERGIcon}
+                                                action={() => this.addWidthDraw('widthdraw', this.state.blobBoxJSON)}
+                                                isDisabled={this.state.state[0] !== '0'}
+                                                label="Withdraw"
+                                                tips={withdrawTips} />
+                                            <BlobActionButton
+                                                image={CancelIcon}
+                                                action={() => this.setStatus('reset', this.state.blobBoxJSON)}
+                                                isDisabled={!(this.state.state[0] === '1' || this.state.state[0] === '4' || this.state.state[0] === '2')}
+                                                label="Cancel state"
+                                                tips="Set the blob back to Quiet state, cancel the current state." />
+                                        </Fragment>
+                                        :
+                                        <Fragment>
+                                            <BlobActionButton
+                                                image={BuyIcon}
+                                                action={() => this.buy(this.state.blobBoxJSON)}
+                                                isDisabled={this.state.state[0] !== '2'}
+                                                label="Buy"
+                                                tips={'Buy this blob for ' + formatERGAmount(this.state.state[1]) + ' ERG'}
+                                            />
+                                        </Fragment>
+                                }
+                            </div>
+                            
+                    }
+
                     <div className="d-flex flex-row justify-content-between m-2">
                         <div></div>
                         <div className="d-flex flex-row">
                             <ArmorItem armorLevel={currentArmorLevel} />
-                            <div>
-                                {
-                                    this.state.state[0] !== '0' || currentArmorLevel >= BLOB_ARMORS.length - 1 ?
-                                        <BlobActionButton
-                                            image={UpgradeIcon}
-                                            isDisabled={this.state.state[0] !== '0' || currentArmorLevel >= BLOB_ARMORS.length - 1}
-                                            label="Upgrade armor"
-                                            tips={upgradeArmorTips} />
-                                        :
-                                        <BlobActionButton
-                                            image={UpgradeIcon}
-                                            action={() => this.upgradeArmor(this.state.blobBoxJSON)}
-                                            isDisabled={this.state.state[0] !== '0' || currentArmorLevel >= BLOB_ARMORS.length - 1}
-                                            label="Upgrade armor"
-                                            tips={upgradeArmorTips} />
-                                }
-                            </div>
+                            {
+                                this.state.disableActions ? null :
+                                    <div>
+                                        {
+                                            this.state.state[0] !== '0' || currentArmorLevel >= BLOB_ARMORS.length - 1 ?
+                                                <BlobActionButton
+                                                    image={UpgradeIcon}
+                                                    isDisabled={this.state.state[0] !== '0' || currentArmorLevel >= BLOB_ARMORS.length - 1}
+                                                    label="Upgrade armor"
+                                                    tips={upgradeArmorTips} />
+                                                :
+                                                <BlobActionButton
+                                                    image={UpgradeIcon}
+                                                    action={() => this.upgradeArmor(this.state.blobBoxJSON)}
+                                                    isDisabled={this.state.state[0] !== '0' || currentArmorLevel >= BLOB_ARMORS.length - 1}
+                                                    label="Upgrade armor"
+                                                    tips={upgradeArmorTips} />
+                                        }
+                                    </div>
+                                    
+                            }
                         </div>
                         <div>&nbsp;</div>
                         <div className="d-flex flex-row">
                             <WeaponItem weaponType={currentWeaponType} weaponLevel={currentWeaponLevel} />
-                            <div>
-                                {
-                                    currentWeaponType === 0 ?
-                                        <BlobActionButton
-                                            image={UpgradeIcon}
-                                            action={() => this.chooseWeapon(this.state.blobBoxJSON)}
-                                            isDisabled={this.state.state[0] !== '0'}
-                                            label="Choose weapon"
-                                            tips={chooseWeaponTips} />
-                                        :
-                                        currentWeaponLevel === 3 ? null :
-                                            <BlobActionButton
-                                                image={UpgradeIcon}
-                                                action={() => this.upgradeWeapon(this.state.blobBoxJSON)}
-                                                isDisabled={this.state.state[0] !== '0'}
-                                                label="Upgrade weapon"
-                                                tips={upgradeWeaponTips} />
+                            {
+                                this.state.disableActions ? null :
+                                    <div>
+                                        {
+                                            currentWeaponType === 0 ?
+                                                <BlobActionButton
+                                                    image={UpgradeIcon}
+                                                    action={() => this.chooseWeapon(this.state.blobBoxJSON)}
+                                                    isDisabled={this.state.state[0] !== '0'}
+                                                    label="Choose weapon"
+                                                    tips={chooseWeaponTips} />
+                                                :
+                                                currentWeaponLevel === 3 ? null :
+                                                    <BlobActionButton
+                                                        image={UpgradeIcon}
+                                                        action={() => this.upgradeWeapon(this.state.blobBoxJSON)}
+                                                        isDisabled={this.state.state[0] !== '0'}
+                                                        label="Upgrade weapon"
+                                                        tips={upgradeWeaponTips} />
 
-                                }
-                            </div>
+                                        }
+                                    </div>
+                                   
+                            }
                         </div>
                         <div></div>
                     </div>
+
                     <div className="border-white d-flex flex-column align-items-center p-2" >
                         <div className="d-flex flex-row justify-content-between w-100">
                             <div><strong>Value</strong></div>
@@ -292,31 +372,27 @@ export default class BlobItem extends React.Component {
                                 </div>
                                 : null
                         }
-
-
                     </div>
+
                 </div>
+
                 {
                     this.state.showActions ?
                         <div className="d-flex flex-column " >
                             {
                                 ownBlob ?
                                     <Fragment>
-                                        <BlobActionButton
-                                            action={() => this.kill(this.state.blobBoxJSON)}
-                                            isDisabled={this.state.state[0] !== '0'}
-                                            label="Kill Blob"
-                                            tips="Destroy the blob and returns its value to the owner. <br /> Cannot be undone." />
+
                                         <BlobActionButton
                                             action={() => this.addWidthDraw('add', this.state.blobBoxJSON)}
                                             isDisabled={this.state.state[0] !== '0'}
                                             label="Deposit"
-                                            tips="Add ERGs to the blob to play with." />
+                                            tips={depositTips} />
                                         <BlobActionButton
                                             action={() => this.addWidthDraw('widthdraw', this.state.blobBoxJSON)}
                                             isDisabled={this.state.state[0] !== '0'}
                                             label="Widthdraw"
-                                            tips="Widthdraw ERGs from the blob to the owner address." />
+                                            tips={withdrawTips} />
                                         <BlobActionButton
                                             action={() => this.setStatus('sell', this.state.blobBoxJSON)}
                                             isDisabled={this.state.state[0] !== '0'}
@@ -331,7 +407,7 @@ export default class BlobItem extends React.Component {
                                             action={() => this.setStatus('fight', this.state.blobBoxJSON)}
                                             isDisabled={this.state.state[0] !== '0'}
                                             label="Fight"
-                                            tips='Choose a fight amount and set the blob "ready to fight".' />
+                                            tips={fightTips} />
                                         <BlobActionButton
                                             action={() => this.setStatus('reset', this.state.blobBoxJSON)}
                                             isDisabled={!(this.state.state[0] === '1' || this.state.state[0] === '4')}
@@ -341,7 +417,7 @@ export default class BlobItem extends React.Component {
                                             action={() => this.feed(this.state.blobBoxJSON)}
                                             isDisabled={this.state.state[0] !== '0'}
                                             label="Feed"
-                                            tips='Feed the blob with Oatmeal tokens.<br />Increase its attack level and defense level.' />
+                                            tips={feedTips} />
                                         <BlobActionButton
                                             action={() => this.upgradeArmor(this.state.blobBoxJSON)}
                                             isDisabled={this.state.state[0] !== '0' && currentArmorLevel < BLOB_ARMORS.length - 1}
@@ -361,7 +437,12 @@ export default class BlobItem extends React.Component {
                                             action={() => this.setStatus('blobinator', this.state.blobBoxJSON)}
                                             isDisabled={this.state.state[0] !== '0'}
                                             label="Fight a Blobinator"
-                                            tips='Set the state to "Ready to fight the blobinator"' />
+                                            tips={blobinatorTips} />
+                                        <BlobActionButton
+                                            action={() => this.kill(this.state.blobBoxJSON)}
+                                            isDisabled={this.state.state[0] !== '0'}
+                                            label="Kill the Blob"
+                                            tips="Destroy the blob and returns its value to the owner. <br /> Cannot be undone." />
                                     </Fragment>
                                     :
                                     <Fragment>

@@ -219,6 +219,16 @@ input {
   box-shadow: 0 0 0 2px rgba(17, 185, 17, 0.5) inset;
 }
 
+.blob-action-button {
+  transition: 0s !important;
+}
+.blob-action-button:hover:enabled {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8) !important;
+}
+.blob-action-button:active:enabled {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8) !important;
+}
+
 
 .btn:active:enabled {
   transform: translateY(4px);

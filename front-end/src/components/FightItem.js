@@ -3,7 +3,7 @@ import { computeP1WinningChance } from '../utils/utils';
 import BlobItem from './BlobItem';
 import { WinPercent } from './WinPercent';
 import { processFightResult } from '../ergo-related/bot_wasm';
-import { waitingAlert } from '../utils/Alerts';
+import { errorAlert, waitingAlert } from '../utils/Alerts';
 import { boxByTokenId } from '../ergo-related/explorer';
 import { CONFIG_TOKEN_ID } from '../utils/constants';
 import { TransactionId } from './TransactionId';
@@ -47,6 +47,10 @@ export default class FightItem extends React.Component {
         //console.log("processFight", this.state, currentConfigBox);
         const [p1WinTxId, p2WinTxId] = await processFightResult(this.state.blob1, this.state.blob2, this.state.gameBox, currentConfigBox[0]);
         console.log("processFight", p1WinTxId, p2WinTxId)
+        if (p1WinTxId[1] === -1 && p2WinTxId[1] === -1) {
+            alert = errorAlert("Cannot process the fight yet", "The fight need at least 1 confirmation.");
+            return;
+        }
         this.setState({
             p1WinTxId: p1WinTxId[0],
             p1Winindex: p1WinTxId[1],

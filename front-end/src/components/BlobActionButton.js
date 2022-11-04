@@ -31,19 +31,19 @@ export default class BlobActionButton extends React.Component {
     }
 
     render() {
-        console.log("BlobActionButton", this.state);
+        //console.log("BlobActionButton", this.state);
         return (
             <Fragment >
                 {
                     this.state.image ?
-                        <div className="weaponChooser zoneupgrade" >
+                        <div className="zoneupgrade" >
                             <input
                                 type="image"
                                 src={this.state.image}
                                 alt={this.state.label}
                                 width={24}
                                 height={24}
-                                className={this.state.isDisabled ? "btn disabled-image" : "btn transparent-image"}
+                                className={this.state.isDisabled ? "btn blob-action-button disabled-image" : "btn blob-action-button transparent-image"}
                                 data-tip
                                 data-for={this.state.id}
                                 onClick={this.state.action}

@@ -102,14 +102,14 @@ export default class MyBlobsPage extends React.Component {
         return (
             <Fragment >
                 <br />
-                <div className='w-75 d-flex flex-row justify-content-between align-items-center'>
-                    <div></div>
+                <div className='w-75 d-flex flex-row justify-content-center align-items-end p-2'>
                     <h5>
-                        Blob fighters
+                        My Blob fighters &nbsp;
+
                     </h5>
                     <button className='btn btn-ultra-blue' onClick={() => {
                         window.open("/create", '_self').focus();
-                    }} > Mint new blob</button>
+                    }} >Create a new blob</button>
                 </div>
                 <div className="w-75 d-flex flex-wrap">
                     {this.state.blobList.map(item => (
