@@ -26,8 +26,13 @@ function hasConnectorInjected() {
 export async function isWalletConnected() {
     if (hasExtensionConnector()) {
         try {
-            const res = await window.ergo_check_read_access();
-            console.log("isWalletConnected", res)
+            var res = await window.ergo_check_read_access();
+            //console.log("isWalletConnected", res)
+            if(!res) {
+                await sleep(100);
+                res = await window.ergo_check_read_access();
+            }
+            //console.log("isWalletConnected", res)
             return Promise.resolve(res);
         } catch (e) {
             console.error("isWalletConnected error", e);
@@ -44,7 +49,7 @@ export async function connectWallet() {
     if (hasExtensionConnector()) {
         try {
             const alreadyConnected = await isWalletConnected();
-            console.log("connectWallet alreadyConnected", alreadyConnected);
+            //console.log("connectWallet alreadyConnected", alreadyConnected);
             if (!alreadyConnected) {
                 await sleep(100)
                 const res = await window.ergo_request_read_access();

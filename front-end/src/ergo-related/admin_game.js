@@ -1,7 +1,7 @@
-import { errorAlert, waitingAlert } from '../utils/Alerts';
+import { errorAlert, promptErgAmount, waitingAlert } from '../utils/Alerts';
 import { BLOBINATOR_DEFI_MODULO_WIN, BLOBINATOR_DEFI_TOK_NUM, BLOBINATOR_FEE, BLOBINATOR_MIN_VALUE, BLOBINATOR_TOKEN_ID, BLOB_EXCHANGE_FEE, BLOB_MINT_FEE, BLOB_PRICE, CONFIG_TOKEN_ID, GAME_ADDRESS, GAME_TOKEN_ID, INI_BLOB_ARMOR_LVL, INI_BLOB_ATT_LEVEL, INI_BLOB_DEF_LEVEL, INI_BLOB_GAME, INI_BLOB_VICTORY, INI_BLOB_WEAPON_LVL, INI_BLOB_WEAPON_TYPE, MAX_POWER_DIFF, MIN_NANOERG_BOX_VALUE, NANOERG_TO_ERG, NUM_OATMEAL_TOKEN_LOSER, NUM_OATMEAL_TOKEN_WINNER, OATMEAL_PRICE, OATMEAL_TOKEN_ID, SPICY_OATMEAL_TOKEN_ID, TX_FEE } from '../utils/constants';
 import { BLOB_ARMORS, BLOB_WEAPONS, WEAPONS_UPGRADE_PRICES } from '../utils/items_constants';
-import { BLOBINATOR_FEE_SCRIPT_HASH, BLOBINATOR_RESERVE_SCRIPT_ADDRESS, BLOBINATOR_RESERVE_SCRIPT_HASH, BLOBINATOR_SCRIPT_ADDRESS, BLOBINATOR_SCRIPT_HASH, BLOB_SCRIPT_HASH, BURN_ALL_SCRIPT_ADDRESS, BURN_ALL_SCRIPT_HASH, CONFIG_SCRIPT_ADDRESS, GAME_SCRIPT_HASH, OATMEAL_RESERVE_SCRIPT_ADDRESS, OATMEAL_RESERVE_SCRIPT_HASH, RESERVE_SCRIPT_ADDRESS } from "../utils/script_constants";
+import { BLOBINATOR_FEE_SCRIPT_ADDRESS, BLOBINATOR_FEE_SCRIPT_HASH, BLOBINATOR_RESERVE_SCRIPT_ADDRESS, BLOBINATOR_RESERVE_SCRIPT_HASH, BLOBINATOR_SCRIPT_ADDRESS, BLOBINATOR_SCRIPT_HASH, BLOB_SCRIPT_HASH, BURN_ALL_SCRIPT_ADDRESS, BURN_ALL_SCRIPT_HASH, CONFIG_SCRIPT_ADDRESS, GAME_SCRIPT_HASH, OATMEAL_RESERVE_SCRIPT_ADDRESS, OATMEAL_RESERVE_SCRIPT_HASH, RESERVE_SCRIPT_ADDRESS } from "../utils/script_constants";
 import { boxById, boxByTokenId, currentHeight, getUnspentBoxesForAddressUpdated } from './explorer';
 import { encodeIntArray, encodeLong, encodeLongArray } from './serializer';
 import { createTransaction, parseUtxo, setBoxRegisterByteArray, verifyTransactionIO } from './wasm';
@@ -84,7 +84,7 @@ export async function burnReserve(boxId) {
             const tokenAmountWASM = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str(asset.amount.toString()));
             returnBoxBuilder.add_token(tokenIdWASM, tokenAmountWASM);
         }
-        
+
         try {
             outputCandidates.add(returnBoxBuilder.build());
         } catch (e) {
@@ -95,9 +95,7 @@ export async function burnReserve(boxId) {
         var correctTx = await createTransaction(boxSelection, outputCandidates, currentConfigBox, GAME_ADDRESS, utxos);
 
         console.log("correctTx", correctTx);
-        if (verifyTransactionIO(correctTx)) {
-            await walletSignTx(alert, correctTx, address);
-        }
+        await walletSignTx(alert, correctTx, address);
     } else {
         errorAlert("Incorrect address", "The address provided does not match the address connected to Yoroi wallet")
     }
@@ -462,9 +460,48 @@ export async function adminCollectBurnFee() {
         correctTx.outputs[0].assets = [];
         console.log("final transaction", correctTx)
 
-        if (verifyTransactionIO(correctTx)) {
-            await walletSignTx(alert, correctTx, GAME_ADDRESS);
+        await walletSignTx(alert, correctTx, GAME_ADDRESS);
+
+    } else {
+        errorAlert("Incorrect address", "The address provided does not match the address connected to the wallet")
+    }
+    return null;
+}
+
+
+
+export async function donateBlobinatorFee() {
+    const amountFloat = await promptErgAmount("Donate for the Blobinator", "Give ERG for the Blobinator to be invoked", "Donate", 0.01);
+    const amountNano = Math.round(amountFloat * NANOERG_TO_ERG)
+    const alert = waitingAlert("Preparing the transaction...");
+    const address = localStorage.getItem("address") ?? "";
+
+    if (await isValidWalletAddress(address)) {
+        var utxos = await getUtxos(TX_FEE + amountNano);
+        const inputsWASM = (await ergolib).ErgoBoxes.from_boxes_json(utxos);
+        const dataListWASM = new (await ergolib).ErgoBoxAssetsDataList();
+        const boxSelection = new (await ergolib).BoxSelection(inputsWASM, dataListWASM);
+
+        // prepare the donation output box
+        const creationHeight = await currentHeight();
+        const outputCandidates = (await ergolib).ErgoBoxCandidates.empty();
+        const boxValue = (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str(amountNano.toString()));
+        const donateBoxBuilder = new (await ergolib).ErgoBoxCandidateBuilder(
+            boxValue,
+            (await ergolib).Contract.pay_to_address((await ergolib).Address.from_base58(BLOBINATOR_FEE_SCRIPT_ADDRESS)),
+            creationHeight);
+        try {
+            outputCandidates.add(donateBoxBuilder.build());
+        } catch (e) {
+            console.log(`building error: ${e}`);
+            throw e;
         }
+        // Create the transaction
+        console.log("address", address)
+        const correctTx = await createTransaction(boxSelection, outputCandidates, [], address, utxos);
+
+        console.log("final transaction", correctTx)
+        await walletSignTx(alert, correctTx, address);
     } else {
         errorAlert("Incorrect address", "The address provided does not match the address connected to the wallet")
     }

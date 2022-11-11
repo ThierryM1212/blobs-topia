@@ -18,9 +18,10 @@
         OUTPUTS(1).tokens.size == 2                                              &&
         OUTPUTS(1).value == SELF.value                                           &&
         OUTPUTS(1).tokens(0)._1 == BlobinatorNFTId                               &&
-        OUTPUTS(1).tokens(0)._2 == 1L                                             &&
+        OUTPUTS(1).tokens(0)._2 == 1L                                            &&
         OUTPUTS(1).tokens(1)._1 == GameTokenNFTId                                &&
-        OUTPUTS(1).tokens(1)._2 == 1L                                             &&
+        OUTPUTS(1).tokens(1)._2 == 1L                                            &&
+        OUTPUTS(1).R8[Long].get == SELF.R8[Long].get                             &&
         OUTPUTS(1).R9[Long].get == OUTPUTS(0).R9[Long].get                       &&
         // burn Spicy Oatmeal
         blake2b256(OUTPUTS(2).propositionBytes) == burnAllScriptHash             &&
@@ -66,7 +67,8 @@
         OUTPUTS(1).tokens.size == 1                                 &&
         OUTPUTS(1).tokens(0)._1 == BlobinatorNFTId                  &&
         OUTPUTS(1).tokens(0)._2 == 1                                &&
-        OUTPUTS(1).R9[Long].get == 0
+        OUTPUTS(1).R9[Long].get == 0                                &&
+        OUTPUTS(1).R8[Long].get == SELF.R8[Long].get + 1L
     } else {
         false
     }

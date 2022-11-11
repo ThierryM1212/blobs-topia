@@ -151,23 +151,22 @@ export async function getMempoolUnspentBoxesByAddresses(addresses) {
     return res;
 }
 
-export async function searchUnspentBoxes(address, tokens, register = '', registerValue = '') {
+export async function searchUnspentBoxes(address, tokens, registers = {}) {
     const ergoT = await addressToErgotree(address);
     var searchParam = { "ergoTreeTemplateHash": await ergoTreeToTemplateHash(ergoT) }
     if (tokens.length > 0) {
         searchParam["assets"] = tokens;
     }
-    if (register !== '' && registerValue !== '') {
-        var reg = {};
-        reg[register] = registerValue;
-        searchParam['registers'] = reg;
+    if (Object.keys(registers).length > 0) {
+        searchParam['registers'] = registers;
     }
     const res = await post(DEFAULT_EXPLORER_API_ADDRESS + 'api/v1' + '/boxes/unspent/search', searchParam);
+    //console.log("res", res)
     return res.data.items;
 }
 
-export async function searchUnspentBoxesUpdated(address, tokens, register = '', registerValue = '') {
-    const currentBlobBoxes = await searchUnspentBoxes(address, tokens, register, registerValue);
+export async function searchUnspentBoxesUpdated(address, tokens, registers = {}) {
+    const currentBlobBoxes = await searchUnspentBoxes(address, tokens, registers);
     const [spentBlobs, newBlobs] = await getSpentAndUnspentBoxesFromMempool(address);
     const spentBlobBoxIds = spentBlobs.map(box => box.boxId);
     var updatedBlobBoxes = newBlobs
@@ -175,10 +174,9 @@ export async function searchUnspentBoxesUpdated(address, tokens, register = '', 
         .filter(box => box.address === address)
         .filter(box => !spentBlobBoxIds.includes(box.boxId));
 
-    if (register !== '') {
-        updatedBlobBoxes = updatedBlobBoxes.filter(box => box.additionalRegisters[register].renderedValue === registerValue)
+    for (const register of Object.keys(registers)) {
+        updatedBlobBoxes = updatedBlobBoxes.filter(box => box.additionalRegisters[register].renderedValue === registers[register])
     }
-        
     return updatedBlobBoxes;
 }
 

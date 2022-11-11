@@ -17,6 +17,12 @@
 
 @import '@sweetalert2/theme-dark/dark.css';
 
+@media (max-width: 600px) {
+  .hidden-mobile {
+    display: none;
+  }
+}
+
 .App-logo {
   height: 40vmin;
   pointer-events: none;
@@ -103,6 +109,17 @@ textarea {
   color: black;
 }
 
+.zoneblobinator {
+  border: 0px solid rgb(0, 0, 0);
+  border-radius: 10px;
+  background: linear-gradient(to bottom right, rgba(5, 176, 255, 0.5), rgba(231, 20, 231, 0.5));
+  min-width: 14rem;
+  max-width: 18rem;
+  padding: 2px;
+  height: 100%;
+  color: black;
+}
+
 .zonecard {
   border: 3px;
   border-width: 3px;
@@ -181,10 +198,24 @@ textarea {
   transform: translate(-50%, -50%);
 }
 
+.big-img {
+  padding: 0;
+  display: block;
+  margin: 0 auto;
+  max-height: 100%;
+  max-width: 100%;
+}
+
 .transparent-image {
   opacity: 0.7;
   padding: 0px;
 }
+
+.rounded-image {
+  border-radius: 5%;
+}
+
+
 
 .disabled-image {
   opacity: 0.3 !important;

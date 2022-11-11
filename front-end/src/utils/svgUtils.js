@@ -53,7 +53,7 @@ export function generateShapeProps() {
         edges: edges,
         seed: null
     }).path
-    console.log(path);
+    //console.log(path);
     return path;
 }
 

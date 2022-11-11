@@ -15,6 +15,7 @@ import RequestBotPage from './pages/request-bot';
 import AboutPage from './pages/about';
 import OatmealShopPage from './pages/oatmeal-shop';
 import { EditorPage } from './pages/editor-page';
+import BlobinatorPage from './pages/blobinators';
 
 
 export default class App extends React.Component {
@@ -29,6 +30,7 @@ export default class App extends React.Component {
             <Route path={ "/create"} element={<EditorPage />} />
             <Route path={ "/myblobs"} element={<MyBlobsPage />} />
             <Route path={ "/blobsshop"} element={<BlobsShopPage />} />
+            <Route path={ "/blobinator"} element={<BlobinatorPage />} />
             <Route path={ "/oatmealshop"} element={<OatmealShopPage />} />
             <Route path={ "/matchmaking"} element={<MatchMakingPage />} />
             <Route path={ "/request-bot"} element={<RequestBotPage />} />

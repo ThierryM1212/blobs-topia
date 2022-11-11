@@ -1,6 +1,5 @@
 import React, { Fragment } from 'react';
 import { MIN_NANOERG_BOX_VALUE, OATMEAL_PRICE, TX_FEE } from '../utils/constants';
-import oatmealLogo from "../images/oatmeal.png";
 import { formatERGAmount } from '../utils/utils';
 import OatmealBuyRequestList from '../components/OatmealBuyRequestList';
 import { createOatmealBuyRequest } from '../ergo-related/blob';

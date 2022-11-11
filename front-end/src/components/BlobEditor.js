@@ -52,14 +52,14 @@ class BlobEditor extends React.Component {
         this.setState({
             color1: color.hex
         });
-        console.log("onChange1");
+        //console.log("onChange1");
     };
 
     onChange2 = (color) => {
         this.setState({
             color2: color.hex
         });
-        console.log("onChange2");
+        //console.log("onChange2");
     };
 
     onChangeEyes = (e) => {
@@ -72,14 +72,14 @@ class BlobEditor extends React.Component {
         this.setState({
             mouth_type: e.target.value
         });
-        console.log("onChangeMouth", e);
+        //console.log("onChangeMouth", e);
     };
 
     onChangeName = (e) => {
         this.setState({
             name: e.target.value
         });
-        console.log("onChangeName", e);
+        //console.log("onChangeName", e);
     };
 
     async mintBlob(name, color1, color2, eyes_pos, mouth_type, svgPath) {
@@ -129,7 +129,7 @@ class BlobEditor extends React.Component {
                 <br />
 
                 <div className="row w-100 justify-content-center">
-                    <div className="container-sm w-25 m-2 p-2" >
+                    <div className="m-2 p-2" >
                         <ErgBlob
                             color1={this.state.color1}
                             color2={this.state.color2}

@@ -8,27 +8,27 @@
     {
       "name":"GameTokenNFTId",
       "type":"CollByte",
-      "value":"27906e87b1bcd90d040136898c74e3aa56455504881e3cf75ae859bbedd085c9"
+      "value":"b10b0001e2a3d38d91b082f153e009e6f5ecf1b326474d11c4bac0c9a55daafb"
     },
     {
       "name":"ConfigNFTId",
       "type":"CollByte",
-      "value":"839aeda1a589b18355eee8da3fe3f3d4b4a91e774f303baaf85010aa9c4b9ec7"
+      "value":"b10b0000e4d4aeb3808ea19c6a17039095b8be8706f98867885add59d8dc7b8c"
     },
     {
       "name":"OatmealTokenNFTId",
       "type":"CollByte",
-      "value":"c022e32e43fe48fc0646bb91f4979c72cace5097c5608192db788458461fdc99"
+      "value":"b10b0004004ddb5b036ca1016471fc099f8d996cb023bdac59ea78072db46242"
     },
     {
       "name":"SpicyOatmealNFTId",
       "type":"CollByte",
-      "value":"ed196b247280abe3573bc6e3dc65f7d33a46423566f5bdc637ff198719fdfad8"
+      "value":"b10b000335049957b39273834f5f93aaf81bc1913c4d93401b34c78eca427243"
     },
     {
       "name":"BlobinatorNFTId",
       "type":"CollByte",
-      "value":"0ff0d23807cec701801d0bdf222a3cd6dc2f3fb8acfe46d19f1f3b762c8808ce"
+      "value":"b10b0002fd880b8f3f8b5e5b2450c8eebda4c85052c54a6ff2bbb9918bebab24"
     },
     {
       "name":"BoxMinValue",

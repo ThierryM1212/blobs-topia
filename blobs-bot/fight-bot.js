@@ -16,7 +16,7 @@ console.log(USER_ADDRESS, USER_BLOB_ID);
 async function engageBlobFights() {
     try {
         for (const blobId of USER_BLOB_ID) {
-            const blob = await searchUnspentBoxesUpdated(BLOB_SCRIPT_ADDRESS, [], 'R9', blobId.toString());
+            const blob = await searchUnspentBoxesUpdated(BLOB_SCRIPT_ADDRESS, [], { "R9": blobId.toString() });
             if (blob.length > 0) {
                 if (blob[0].additionalRegisters.R7.renderedValue === "0") {
                     console.log("engageBlobFights blobId", blobId);

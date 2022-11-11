@@ -333,7 +333,7 @@ async function processBlobinatorFees() {
 
 async function processEngageBlobinatorFigth() {
     try {
-        const unspentBlobinators = (shuffleArray(await searchUnspentBoxesUpdated(BLOBINATOR_SCRIPT_ADDRESS, [], 'R9', '0')))
+        const unspentBlobinators = (shuffleArray(await searchUnspentBoxesUpdated(BLOBINATOR_SCRIPT_ADDRESS, [], { "R9": '0' })))
             .filter(box => box.address === BLOBINATOR_SCRIPT_ADDRESS);
         //const unspentBlobinators = shuffleArray(await getUnspentBoxesByAddress(BLOBINATOR_SCRIPT_ADDRESS));
         if (unspentBlobinators.length === 0) {
@@ -344,7 +344,7 @@ async function processEngageBlobinatorFigth() {
             console.log("processEngageBlobinatorFigth: No config box found")
             return;
         }
-        const blobsReadyToFight = shuffleArray(await searchUnspentBoxesUpdated(BLOB_SCRIPT_ADDRESS, [GAME_TOKEN_ID], 'R7', "4"));
+        const blobsReadyToFight = shuffleArray(await searchUnspentBoxesUpdated(BLOB_SCRIPT_ADDRESS, [GAME_TOKEN_ID], { "R7": "4" }));
         if (blobsReadyToFight.length == 0) {
             console.log("processEngageBlobinatorFigth: No blob waiting for Blobinator")
             return;
@@ -360,13 +360,13 @@ async function processEngageBlobinatorFigth() {
 
 async function processBlobinatorFigthResults() {
     try {
-        const blobsEngagedFight = shuffleArray(await searchUnspentBoxes(BLOB_SCRIPT_ADDRESS, [GAME_TOKEN_ID], 'R7', "5"));
+        const blobsEngagedFight = shuffleArray(await searchUnspentBoxes(BLOB_SCRIPT_ADDRESS, [GAME_TOKEN_ID], { "R7": "5" }));
         if (blobsEngagedFight.length == 0) {
             console.log("processBlobinatorFigthResults: No blob engaged fight with Blobinator")
             return;
         }
 
-        const unspentBlobinators = (await searchUnspentBoxes(BLOBINATOR_SCRIPT_ADDRESS, [BLOBINATOR_TOKEN_ID], '', ''))
+        const unspentBlobinators = (await searchUnspentBoxes(BLOBINATOR_SCRIPT_ADDRESS, [BLOBINATOR_TOKEN_ID], {}))
             .filter(box => box.address === BLOBINATOR_SCRIPT_ADDRESS)
             .filter(box => box.additionalRegisters.R9.renderedValue !== "0");
 

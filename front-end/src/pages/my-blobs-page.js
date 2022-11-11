@@ -71,6 +71,7 @@ export default class MyBlobsPage extends React.Component {
         ).sigma_serialize_bytes());
         const blobBoxesTmp = await searchBlobUnspentBoxes('R6', addressSigmaPropHex.slice(4));
         //console.log("fetchBlobs blobBoxesTmp", blobBoxesTmp)
+        // eslint-disable-next-line no-unused-vars
         var [spentBoxes1, newBoxes1] = await getSpentAndUnspentBoxesFromMempool(localStorage.getItem('address'));
         var spentBoxIds = spentBoxes1.map(box => box.boxId);
         var blobBoxes = blobBoxesTmp.filter(box => !spentBoxIds.includes(box.boxId));

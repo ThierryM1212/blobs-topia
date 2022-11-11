@@ -98,7 +98,7 @@ export default class Admin extends React.Component {
     }
 
     async invokeBlobinator() {
-        const ergAmountFloat = await promptErgAmount('blobinator');
+        const ergAmountFloat = await promptErgAmount('blobinator', 'amount for the blobinator', 'invoke', 0.01);
         const ergAmountNano = Math.round(ergAmountFloat * NANOERG_TO_ERG);
         return await adminInvokeBlobinator(ergAmountNano);
     }
@@ -133,7 +133,10 @@ export default class Admin extends React.Component {
                 }
                 <div className="w-100 content d-flex align-items-center flex-md-column p-2 m-2">
 
-                    <div className="card zonecard w-50 p-2 d-flex align-items-center">
+
+
+
+                    <div className="card zonecard w-50 d-flex align-items-center">
                         <h4>Create new BLOB token reserve</h4>
                         <form ref={this.form} onSubmit={this.handleSubmit}  >
                             <table>
@@ -194,60 +197,58 @@ export default class Admin extends React.Component {
                     </div>
                     <br />
 
-                    <div className="w-50 ">
+                    <div className="w-50 d-flex flex-column m-2 ">
                         <h4>Available game token reserves</h4>
-                        <ul >
-                            {this.state.reserveList.map(item => (
-                                <li key={item.boxId} className="card zonecard m-2">
-                                    <ReserveItem
-                                        boxId={item.boxId}
-                                        name={getRegisterValue(item, "R4")}
-                                        tokenAmount={getTokenAmount(item, GAME_TOKEN_ID)}
-                                        value={item.value}
-                                        identifier={getRegisterValue(item, "R7")}
-                                        blobPriceAndFee={getRegisterValue(item, "R6")}
-                                    />
-                                </li>
-                            ))}
-                        </ul>
+                        {this.state.reserveList.map(item => (
+                            <div key={item.boxId} className="card zonecard">
+                                <ReserveItem
+                                    boxId={item.boxId}
+                                    name={getRegisterValue(item, "R4")}
+                                    tokenAmount={getTokenAmount(item, GAME_TOKEN_ID)}
+                                    value={item.value}
+                                    identifier={getRegisterValue(item, "R7")}
+                                    blobPriceAndFee={getRegisterValue(item, "R6")}
+                                />
+                            </div>
+                        ))}
                     </div>
-
-                    <div className="zonecard w-50">
+                    <br />
+                    <div className="zonecard w-50 m-2 d-flex flex-column align-items-center">
                         <h4>Create new game oatmeal reserve</h4>
-                        <table>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <label htmlFor="reservetokenamount">Token amount</label>
-                                    </td>
-                                    <td>
-                                        <input className="form-control"
-                                            type="text"
-                                            id="reservetokenamount"
-                                            pattern="[0-9]+"
-                                            required
-                                            value={this.state.oatmealReserveTokenAmount}
-                                            onChange={this.handleChangeOatmealReserveTokenAmount}
-                                        />
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                    </td>
-                                    <td className="tdright">
-                                        <button className="btn btn-ultra-voilet" onClick={() => this.mintOReserve(this.state.oatmealReserveTokenAmount)} >Mint oatmeal reserve</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-
-                        </table>
+                        <table><tbody>
+                            <tr>
+                                <td>
+                                    <label htmlFor="reservetokenamount">Token amount</label>
+                                </td>
+                                <td>
+                                    <input className="form-control"
+                                        type="text"
+                                        id="reservetokenamount"
+                                        pattern="[0-9]+"
+                                        required
+                                        value={this.state.oatmealReserveTokenAmount}
+                                        onChange={this.handleChangeOatmealReserveTokenAmount}
+                                    />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td className="tdright">
+                                    <button className="btn btn-ultra-voilet"
+                                        onClick={() => this.mintOReserve(this.state.oatmealReserveTokenAmount)} >
+                                        Mint oatmeal reserve
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody></table>
                     </div>
 
-                    <div className="w-50 ">
-                        <h4>Available game oatmeal reserves</h4>
-                        <ul >
+                    <div className="w-50 m-2">
+                        <div >
+                            <h4>Available game oatmeal reserves</h4>
                             {this.state.oatmealReserveList.map(item => (
-                                <li key={item.boxId} className="card zonecard m-2">
+
+                                <div key={item.boxId} className="card zonecard">
                                     <OatmealReserveItem
                                         boxId={item.boxId}
                                         tokenId={OATMEAL_TOKEN_ID}
@@ -255,12 +256,12 @@ export default class Admin extends React.Component {
                                         tokenId2={SPICY_OATMEAL_TOKEN_ID}
                                         tokenAmount2={getTokenAmount(item, SPICY_OATMEAL_TOKEN_ID)}
                                     />
-                                </li>
+                                </div>
                             ))}
-                        </ul>
+                        </div>
                     </div>
 
-                    <div className="zonecard w-50">
+                    <div className="zonecard w-50 d-flex flex-column align-items-center">
                         <h4>Create new sell oatmeal reserve</h4>
                         <table>
                             <tbody>
@@ -291,22 +292,20 @@ export default class Admin extends React.Component {
                         </table>
                     </div>
 
-                    <div className="w-50 ">
+                    <div className="w-50 m-2">
                         <h4>Available sell oatmeal reserves</h4>
-                        <ul >
-                            {this.state.oatmealReserveSellList.map(item => (
-                                <li key={item.boxId} className="card zonecard m-2">
-                                    <OatmealReserveItem
-                                        boxId={item.boxId}
-                                        tokenId={OATMEAL_TOKEN_ID}
-                                        tokenAmount={getTokenAmount(item, OATMEAL_TOKEN_ID)}
-                                    />
-                                </li>
-                            ))}
-                        </ul>
+                        {this.state.oatmealReserveSellList.map(item => (
+                            <div key={item.boxId} className="card zonecard">
+                                <OatmealReserveItem
+                                    boxId={item.boxId}
+                                    tokenId={OATMEAL_TOKEN_ID}
+                                    tokenAmount={getTokenAmount(item, OATMEAL_TOKEN_ID)}
+                                />
+                            </div>
+                        ))}
                     </div>
 
-                    <div className="zonecard w-50">
+                    <div className="zonecard w-50 d-flex flex-column align-items-center">
                         <h4>Create new blobinator reserve</h4>
                         <table>
                             <tbody>
@@ -337,41 +336,23 @@ export default class Admin extends React.Component {
                         </table>
                     </div>
 
-                    <div className="w-50 ">
+                    <div className="w-50 m-2">
                         <h4>Available blobinator reserves</h4>
-                        <ul >
+                        <div >
                             {this.state.blobinatorReserveList.map(item => (
-                                <li key={item.boxId} className="card zonecard m-2">
+                                <div key={item.boxId} className="card zonecard">
                                     <OatmealReserveItem
                                         boxId={item.boxId}
                                         tokenId={BLOBINATOR_TOKEN_ID}
                                         tokenAmount={getTokenAmount(item, BLOBINATOR_TOKEN_ID)}
                                     />
-                                </li>
+                                </div>
                             ))}
-                        </ul>
-                    </div>
-
-                    <div className="card zonecard p-2 d-flex align-items-center">
-                        <h4>Current game configuration</h4>
-                        <ConfigItem />
+                        </div>
                     </div>
 
                     <div className="card zonecard w-50 p-2 m-2 d-flex align-items-center">
-                        <h4>Update configuration</h4>
-                        <table>
-                            <tbody>
-                                <tr>
-                                    <td className="tdright">
-                                        <input className="btn btn-ultra-voilet" type="submit" value="Update configuration" onClick={this.updateConf} />
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div className="card zonecard w-50 p-2 m-2 d-flex align-items-center">
-                        <h4>Invoke blobinator</h4>
+                        <h4>Admin invoke blobinator</h4>
                         <table>
                             <tbody>
                                 <tr>
@@ -393,6 +374,24 @@ export default class Admin extends React.Component {
                                 <tr>
                                     <td className="tdright">
                                         <input className="btn btn-ultra-voilet" type="submit" value="Invoke Blobinator" onClick={this.invokeBlobinator} />
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div className="card zonecard p-2 d-flex align-items-center">
+                        <h4>Current game configuration</h4>
+                        <ConfigItem />
+                    </div>
+
+                    <div className="card zonecard w-50 p-2 m-2 d-flex align-items-center">
+                        <h4>Update configuration</h4>
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td className="tdright">
+                                        <input className="btn btn-ultra-voilet" type="submit" value="Update configuration" onClick={this.updateConf} />
                                     </td>
                                 </tr>
                             </tbody>

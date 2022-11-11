@@ -1,11 +1,11 @@
 import Swal from 'sweetalert2/src/sweetalert2.js';
 import withReactContent from 'sweetalert2-react-content';
 import BlobWaitAnim from '../components/BlobWaitAnim';
-import { encodeContract, ergoTreeToAddress } from '../ergo-related/serializer';
-import { formatLongString, getKeyByValue } from './utils';
+import { encodeContract } from '../ergo-related/serializer';
+import { formatLongString } from './utils';
 import WeaponItem from '../components/WeaponItem';
 import { Fragment } from 'react';
-import { BLOB_ARMORS, BLOB_WEAPONS, WEAPONS_TYPES, WEAPONS_UPGRADE_PRICES } from './items_constants';
+import { BLOB_ARMORS, WEAPONS_TYPES, WEAPONS_UPGRADE_PRICES } from './items_constants';
 import oatmealLogo from "../images/oatmeal.png";
 import ArmorItem from '../components/ArmorItem';
 
@@ -91,18 +91,18 @@ export function copySuccess() {
     })
 }
 
-export function promptErgAmount(mode) {
+export function promptErgAmount(title, text, buttonText, minAmountFloat) {
     return new Promise(function (resolve, reject) {
         Swal.fire({
-            title: "ERG amount to " + mode,
-            html: `<div><input type="text" id="ergAmount" class="swal2-input" placeholder="ERG amount" autocomplete="off"></div>`,
-            confirmButtonText: mode,
+            title: title,
+            html: `<div><div>${text}</div><input type="text" id="ergAmount" class="swal2-input" placeholder="ERG amount" autocomplete="off"></div>`,
+            confirmButtonText: buttonText,
             focusConfirm: false,
             showCancelButton: true,
             preConfirm: () => {
                 const ergAmount = Swal.getPopup().querySelector('#ergAmount').value;
-                if (!parseFloat(ergAmount) || parseFloat(ergAmount) < 0.01) {
-                    Swal.showValidationMessage(`The ERG amount is invalid (needs to be >= 0.1 ERG)`);
+                if (!parseFloat(ergAmount) || parseFloat(ergAmount) < minAmountFloat) {
+                    Swal.showValidationMessage(`The ERG amount is invalid (needs to be >= ${minAmountFloat.toFixed(4)} ERG)`);
                 }
                 return { ergAmount: parseFloat(ergAmount) };
             }

@@ -1,8 +1,8 @@
 import { get, getStream } from './rest';
 import JSONBigInt from 'json-bigint';
 import { DEFAULT_EXPLORER_API_ADDRESS, GAME_TOKEN_ID } from '../utils/constants';
-import { BLOB_SCRIPT } from "../utils/script_constants";
-import { ergoTreeToTemplateHash } from './serializer';
+import { BLOB_SCRIPT, BLOB_SCRIPT_ADDRESS } from "../utils/script_constants";
+import { addressToErgoTree, ergoTreeToTemplateHash } from './serializer';
 
 
 export const trueAddress = '4MQyML64GnzMxZgm'; // dummy address to get unsigned tx from node, we only care about the boxes though in this case
@@ -109,7 +109,7 @@ export async function getUnspentBoxesByAddress(address, limit = 50) {
     return res.data.items;
 }
 
-export async function getBoxesByAddress(address, limit = 100) {
+export async function getBoxesByAddress(address, limit = 500) {
     const res = await getRequestV1(`/boxes/byAddress/${address}?limit=${limit}`);
     return res.data.items;
 }
@@ -206,6 +206,10 @@ export async function getExplorerBlockHeadersFull() {
     return (await getRequestV1(`/blocks/headers`)).data.items;
 }
 
+export async function getTransactionByID(txId) {
+    return (await getRequestV1(`/transactions/${txId}`)).data;
+}
+
 export async function searchBlobUnspentBoxes(register = '', registerValue = '') {
     var searchParam = {
         "ergoTreeTemplateHash": await ergoTreeToTemplateHash(BLOB_SCRIPT),
@@ -219,7 +223,7 @@ export async function searchBlobUnspentBoxes(register = '', registerValue = '') 
         searchParam['registers'] = reg;
     }
     const res = await post(explorerApiV1 + '/boxes/unspent/search', searchParam);
-    return res.data.items;
+    return res.data.items.filter(box => box.address === BLOB_SCRIPT_ADDRESS);
 }
 
 
@@ -227,4 +231,44 @@ export async function getBalanceForAddress(addr) {
     const res = await getRequestV1(`/addresses/${addr}/balance/total`);
     console.log("getBalanceUnconfirmedForAddress", res)
     return res.data;
+}
+
+export async function searchUnspentBoxes(address, tokens, registers = {}, limit = 50) {
+    const ergoT = await addressToErgoTree(address);
+    var searchParam = { "ergoTreeTemplateHash": await ergoTreeToTemplateHash(ergoT) }
+    if (tokens.length > 0) {
+        searchParam["assets"] = tokens;
+    }
+    if (Object.keys(registers).length > 0) {
+        searchParam['registers'] = registers;
+    }
+    const res = await post(explorerApiV1 + `/boxes/unspent/search?limit=${limit}`, searchParam);
+    return res.data.items;
+}
+
+export async function searchBoxes(address, tokens, registers = {}, limit = 50) {
+    const ergoT = await addressToErgoTree(address);
+    var searchParam = { "ergoTreeTemplateHash": await ergoTreeToTemplateHash(ergoT) }
+    if (tokens.length > 0) {
+        searchParam["assets"] = tokens;
+    }
+    if (Object.keys(registers).length > 0) {
+        searchParam['registers'] = registers;
+    }
+    const res = await post(explorerApiV1 + `/boxes/search?limit=${limit}`, searchParam);
+    return res.data.items;
+}
+
+export async function searchUnspentBoxesUpdated(address, tokens, registers = {}) {
+    const currentBlobBoxes = await searchUnspentBoxes(address, tokens, registers);
+    const [spentBlobs, newBlobs] = await getSpentAndUnspentBoxesFromMempool(address);
+    const spentBlobBoxIds = spentBlobs.map(box => box.boxId);
+    var updatedBlobBoxes = newBlobs
+        .concat(currentBlobBoxes)
+        .filter(box => box.address === address)
+        .filter(box => !spentBlobBoxIds.includes(box.boxId));
+    for (const register of Object.keys(registers)) {
+        updatedBlobBoxes = updatedBlobBoxes.filter(box => box.additionalRegisters[register].renderedValue === registers[register])
+    }
+    return updatedBlobBoxes;
 }

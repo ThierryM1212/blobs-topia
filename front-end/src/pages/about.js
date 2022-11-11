@@ -1,8 +1,11 @@
 import React from 'react';
 import { Rating } from 'react-simple-star-rating';
 import { WinPercent } from '../components/WinPercent';
-import { BLOBINATOR_FEE, BLOB_EXCHANGE_FEE, BLOB_MINT_FEE, BLOB_PRICE, MIN_NANOERG_BOX_VALUE, NUM_OATMEAL_TOKEN_LOSER, NUM_OATMEAL_TOKEN_WINNER, RATING_RANGES, TX_FEE } from '../utils/constants';
+import { BLOBINATOR_DEFI_MODULO_WIN, BLOBINATOR_FEE, BLOBINATOR_MIN_VALUE, BLOB_EXCHANGE_FEE, BLOB_MINT_FEE, BLOB_PRICE, MIN_NANOERG_BOX_VALUE, NUM_OATMEAL_TOKEN_LOSER, NUM_OATMEAL_TOKEN_WINNER, RATING_RANGES, TX_FEE } from '../utils/constants';
 import { formatERGAmount } from '../utils/utils';
+import oatmealLogo from "../images/oatmeal.png";
+import spicyOatmealLogo from "../images/spicy_oatmeal.png";
+import BlobinatorImage from "../images/blobinator_sans_fond.png";
 
 export default class AboutPage extends React.Component {
 
@@ -17,12 +20,12 @@ export default class AboutPage extends React.Component {
                     <p>PVP</p>
                     <p> - Once two blobs wait for the same bet, they can engage a fight.</p>
                     <p> - The winner get all the bets, minus the miner fees and the Blobinator fee.</p>
-                    <p> - Both winner and loser get some Oatmeal tokens to be able to feed their blob.</p>
+                    <p> - Both winner and loser get some Oatmeal <img src={oatmealLogo} alt="Oatmeal" width={24} /> tokens to be able to feed their blob.</p>
                     <p> - By feeding a blob you can increase their Attack or Defense level to make them stronger and increase your winning ratio.</p>
-                    <p> - Both winner and loser get some Spicy Oatmeal tokens to try to attract a Blobinator.</p>
+                    <p> - Both winner and loser get some Spicy Oatmeal <img src={spicyOatmealLogo} alt="Spicy Oatmeal" width={24} /> tokens to try to attract a Blobinator.</p>
                     <p>PVE</p>
                     <p> - A Blobinator is a kind of super blob fighter that can be invoked once enough fights occured.</p>
-                    <p> - Any blobs can fight against a Blobinator if the player has earn enough Spicy Oatmeal to attract the Blobinator.</p>
+                    <p> - Any blobs can fight against a Blobinator if the player has earn enough Spicy Oatmeal <img src={spicyOatmealLogo} alt="Spicy Oatmeal" width={24} /> to attract the Blobinator.</p>
                     <p> - The Blobinator fight is "free" for the player that just needs to pay 2 transactions fees to try to get the amount in the Blobinator.</p>
                 </div>
 
@@ -38,23 +41,36 @@ export default class AboutPage extends React.Component {
 
                 <div className='w-100 zoneabout d-flex flex-column align-items-start m-2 p-2'>
                     <h5>What can I do with my blob ?</h5>
-                    <p> - deposit/widthdraw ergs</p>
-                    <p> - feed the blob</p>
-                    <p> - choose a weapon</p>
-                    <p> - upgrade the weapon</p>
-                    <p> - change weapon</p>
-                    <p> - upgrade the armor</p>
-                    <p> - engage fight (and cancel)</p>
-                    <p> - engage sale (and cancel)</p>
+                    <p> - ready to fight (and cancel)</p>
+                    <p><small>Set the Blob ready to fight for an amount of ERG (min 0.1).</small></p>
                     <p> - fight another blob</p>
+                    <p><small>Engage the fight with a Blob waiting for the same amount.</small></p>
+                    <p> - bait the Blobinator (and cancel)</p>
+                    <p><small>Wait for a Blobinator and try to fight it.</small></p>
                     <p> - fight a Blobinator (if invoked)</p>
+                    <p><small>Fight the Blobinator.</small></p>
+                    <p> - engage sale (and cancel)</p>
+                    <p><small>Set the Blob on sale for an amount of ERG (min 0.1).</small></p>
                     <p> - sell (change owner)</p>
+                    <p><small>Sell the Blob to another player (address).</small></p>
+                    <p> - deposit/widthdraw ergs</p>
+                    <p><small>Add or remove ERGs from the Blob, minimum 0.1 ERG.</small></p>
+                    <p> - feed the blob</p>
+                    <p><small>Increase the attack and defense level of the Blob by feeding him with Oatmeal tokens earned as fight reward.</small></p>
+                    <p> - choose a weapon</p>
+                    <p><small>Choose a type of weapon for a Blob (Sword, Axe or Mace).</small></p>
+                    <p> - upgrade the weapon</p>
+                    <p><small>Upgrade the weapon of the Blob to the next level.</small></p>
+                    <p> - change weapon</p>
+                    <p><small>Change the kind of weapon for the Blob (restart at level 0).</small></p>
+                    <p> - upgrade the armor</p>
+                    <p><small>Upgrade the armor of the Blob to the next level.</small></p>
                     <p> - kill the blob</p>
+                    <p><small>Destroy the Blob and returns the ERG content to the owner.</small></p>
                 </div>
 
                 <div className='w-100 zoneabout d-flex flex-column align-items-start m-2 p-2'>
                     <h5>What is required to play ?</h5>
-                    <p>Nothing, even without ERG address nor wallet you can play the "bot", and process manually the blob requests, the match making or the fight results.</p>
                     <p>To own a blob you need a compatible ergo wallet: </p>
                     <p>  Recommended setting: <strong>Nautilus or SAFEW on desktop Chrome browser</strong></p>
                     <p>This will allow you to run chained transactions to make the interaction with your blob faster.</p>
@@ -79,9 +95,22 @@ export default class AboutPage extends React.Component {
                     <h5>What is the winning reward ?</h5>
                     <p>A fight is for a bet amount, engaged by each blob.</p>
                     <p>The winner get 2 * bet amount - 2 * transaction fee ({formatERGAmount(TX_FEE)}) - blobinator fee ({(BLOBINATOR_FEE / 10).toFixed(2)} %).</p>
-                    <p>The winner get {NUM_OATMEAL_TOKEN_WINNER} oatmeal, the loser {NUM_OATMEAL_TOKEN_LOSER} oatmeal, used to feed the blob and increase its attack level and defense level.</p>
-                    <p>Both winner and loser get 1 Spicy Oatmeal to attract a Blobinator once available.</p>
-                    <p>The amount of distributed oatmeal tokens is configurable and may change.</p>
+                    <p>The winner get {NUM_OATMEAL_TOKEN_WINNER} Oatmeal <img src={oatmealLogo} alt="Oatmeal" width={24} />, the loser {NUM_OATMEAL_TOKEN_LOSER} Oatmeal <img src={oatmealLogo} alt="Oatmeal" width={24} />, used to feed the blob and increase its attack level and defense level.</p>
+                    <p>Both winner and loser get 1 Spicy Oatmeal <img src={spicyOatmealLogo} alt="Spicy Oatmeal" width={24} /> to attract a Blobinator once available.</p>
+                    <p>The amount of distributed Oatmeal <img src={oatmealLogo} alt="Oatmeal" width={24} /> tokens is configurable and may change.</p>
+                </div>
+
+                <div className='w-100 zoneabout d-flex flex-column align-items-start m-2 p-2'>
+                    <h5>What is the Blobinator ? <img src={BlobinatorImage} alt="Spicy Oatmeal" width={100} /></h5>
+                    <p>The Blobinator is a super blob that is created once enough ERG have been played between blobs.</p>
+                    <p>To fight a Blobinator it needs to be bait with Spicy Oatmeal <img src={spicyOatmealLogo} alt="Spicy Oatmeal" width={24} />.</p>
+                    <p>The blobs have a fixed winning ratio against the Blobinator but the cost of the fight is low and without risk.</p>
+                    <p></p>
+                    <p>For each fight, {(BLOBINATOR_FEE / 10).toFixed(2)} % of the fight amount goes to a blobinator fee.</p>
+                    <p>The Blobinators are invoked automatically when enough blobinator fees are generated by the fights ({formatERGAmount(BLOBINATOR_MIN_VALUE)} ERG).</p>
+                    <p>For each fight, each player get a Spicy Oatmeal <img src={spicyOatmealLogo} alt="Spicy Oatmeal" width={24} /> token, they are used to bait the Blobinator once it is available.</p>
+                    <p>Two Spicy Oatmeal <img src={spicyOatmealLogo} alt="Spicy Oatmeal" width={24} /> are required to try to fight the Blobinator and get its content.</p>
+                    <p>The cost for the player is 2 * {formatERGAmount(TX_FEE)} ERG, for a winning ratio of (1/{BLOBINATOR_DEFI_MODULO_WIN}).</p>
                 </div>
 
                 <div className='w-100 zoneabout d-flex flex-column align-items-start m-2 p-2'>
@@ -91,7 +120,7 @@ export default class AboutPage extends React.Component {
                     <p>Current blob mint fee: <strong>{formatERGAmount(BLOB_MINT_FEE)} ERG</strong></p>
                     <p> - The deposit, widthdraw and sell operations have a fee configured.</p>
                     <p>Current deposit, widthdraw or kill fee: <strong>max({BLOB_EXCHANGE_FEE / 10} %, {formatERGAmount(MIN_NANOERG_BOX_VALUE)}) ERG</strong></p>
-                    <p>Current sell fee: <strong>max({ 2 * BLOB_EXCHANGE_FEE / 10} %, {formatERGAmount(MIN_NANOERG_BOX_VALUE)}) ERG</strong></p>
+                    <p>Current sell fee: <strong>max({2 * BLOB_EXCHANGE_FEE / 10} %, {formatERGAmount(MIN_NANOERG_BOX_VALUE)}) ERG</strong></p>
                     <p> - There is no dApp fee on the fights, the miner transaction fees are taken from the figth bets, the Blobinator fee is given to the player winning the blobinator fight.</p>
                     <p> - Those fees are configurable and may be adjusted by the game owner.</p>
                 </div>
@@ -136,7 +165,7 @@ export default class AboutPage extends React.Component {
 
                 <div className='w-100 zoneabout d-flex flex-column align-items-start m-2 p-2'>
                     <h5>Is the game fair ?</h5>
-                    <p>By playing games and feeding your blob with oatmeal you are able to increase its statistics and power.</p>
+                    <p>By playing games and feeding your blob with Oatmeal <img src={oatmealLogo} alt="Oatmeal" width={24} /> you are able to increase its statistics and power.</p>
                     <p>This gives a better winning chance to the strong blobs.</p>
                     <p>However, the difference in power of two blobs is caped around 60%/40% winning ratio to avoid abuses.</p>
                 </div>

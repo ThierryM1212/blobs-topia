@@ -16,6 +16,7 @@
                                 OUTPUTS(0).tokens(0)._2 == 1                           &&
                                 OUTPUTS(0).tokens.size == 1                            &&
                                 OUTPUTS(0).R9[Long].get == 0L                          &&
+                                OUTPUTS(0).R8[Long].get == 0L                          &&
                                 OUTPUTS(0).value >= blobinatorMinAmount
                             } else {
                                 false

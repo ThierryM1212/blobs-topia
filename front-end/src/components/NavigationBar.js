@@ -6,7 +6,7 @@ function NavigationBar(props) {
     return (
         <Navbar expand="lg" variant="dark" className="sticky-top w-100 color-nav">
             <Navbar.Brand href="/">
-                <img src={Logo} alt="logo" />
+                <img src={Logo} alt="logo" className="hidden-mobile" />
             </Navbar.Brand>
 
             <Navbar.Toggle aria-controls="basic-navbar-nav" />
@@ -18,10 +18,11 @@ function NavigationBar(props) {
                     <Nav.Link href={"/fights"}>Figths</Nav.Link>
                     <Nav.Link href={"/blobsshop"}>Blobs shop</Nav.Link>
                     <Nav.Link href={"/oatmealshop"}>Oatmeal shop</Nav.Link>
-                    <Nav.Link href={"/about"}>About</Nav.Link>
+                    <Nav.Link href={"/blobinator"}>Blobinators</Nav.Link>
                     <NavDropdown title="More" id="basic-nav-dropdown" variant="dark">
                         <NavDropdown.Item href={"/request-bot"}>Requests bot</NavDropdown.Item>
                         <NavDropdown.Item href={"/halloffame"}>Hall of fame</NavDropdown.Item>
+                        <NavDropdown.Item href={"/about"}>About</NavDropdown.Item>
                         <NavDropdown.Item href={"/admin"}>Admin</NavDropdown.Item>
                     </NavDropdown>
                 </Nav>

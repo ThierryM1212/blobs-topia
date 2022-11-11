@@ -518,7 +518,7 @@ export async function processBlobinatorFee(blobinatorFeeJSONArray, currentBlobin
     }
 
     const tx = await createTransaction(boxSelection, outputCandidates, [currentConfigBox], GAME_ADDRESS, utxos);
-    console.log("processBlobinatorFee tx", JSONBigInt.stringify(tx));
+    //console.log("processBlobinatorFee tx", JSONBigInt.stringify(tx));
     const signedTx = JSONBigInt.parse(await signTransaction(tx, utxos, [currentConfigBox], wallet));
     //console.log("processBlobinatorFee signedTx", JSONBigInt.stringify(signedTx));
     const txId = await sendTx(signedTx);
@@ -556,6 +556,7 @@ export async function engageBlobinatorFight(blob, blobinator, currentConfigBox) 
     }
 
     // BLOBINATOR BOX
+    const blobinatorWASM = (await ergolib).ErgoBox.from_json(JSONBigInt.stringify(blobinator));
     const blobinatorTokenId = (await ergolib).TokenId.from_str(BLOBINATOR_TOKEN_ID);
     const blobinatorBoxValue = (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str(blobinator.value.toString()));
     const gameBoxBuilder = new (await ergolib).ErgoBoxCandidateBuilder(
@@ -569,7 +570,7 @@ export async function engageBlobinatorFight(blob, blobinator, currentConfigBox) 
     );
     gameBoxBuilder.set_register_value(6, dummySigmaProp);
     gameBoxBuilder.set_register_value(7, (await encodeLong("0")));
-    gameBoxBuilder.set_register_value(8, (await encodeLong("0")));
+    gameBoxBuilder.set_register_value(8, blobinatorWASM.register_value(8));
     gameBoxBuilder.set_register_value(9, blobBoxWASM.register_value(9))
     gameBoxBuilder.add_token(blobinatorTokenId, tokenAmount);
     gameBoxBuilder.add_token(gameTokenId, tokenAmount);
@@ -659,6 +660,7 @@ export async function blobinatorFightResults(blob, blobinator, currentConfigBox)
 
             if (i === 0) {
                 // BLOBINATOR BOX
+                const blobinatorIniVictories = parseInt(blobinator.additionalRegisters.R8.renderedValue);
                 const blobinatorBoxValue = (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str(blobinatorAmountNano.toString()));
                 const gameBoxBuilder = new (await ergolib).ErgoBoxCandidateBuilder(
                     blobinatorBoxValue,
@@ -671,7 +673,7 @@ export async function blobinatorFightResults(blob, blobinator, currentConfigBox)
                 );
                 gameBoxBuilder.set_register_value(6, dummySigmaProp);
                 gameBoxBuilder.set_register_value(7, (await encodeLong("0")));
-                gameBoxBuilder.set_register_value(8, (await encodeLong("0")));
+                gameBoxBuilder.set_register_value(8, (await encodeLong((blobinatorIniVictories + 1).toString())));
                 gameBoxBuilder.set_register_value(9, (await encodeLong("0")))
                 gameBoxBuilder.add_token(blobinatorTokenId, tokenAmount1);
                 try {

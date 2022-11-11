@@ -1,5 +1,5 @@
 import JSONBigInt from 'json-bigint';
-import { confirmAlert, errorAlert, promptErgAmount, promptUpgradeItem, promptWeaponType, waitingAlert } from "../utils/Alerts";
+import { errorAlert, promptErgAmount, promptUpgradeItem, promptWeaponType, waitingAlert } from "../utils/Alerts";
 import { BLOBINATOR_DEFI_TOK_NUM, BLOB_ERG_MIN_VALUE, BLOB_EXCHANGE_FEE, BLOB_PRICE, CONFIG_TOKEN_ID, GAME_ADDRESS, GAME_TOKEN_ID, MIN_NANOERG_BOX_VALUE, NANOERG_TO_ERG, OATMEAL_TOKEN_ID, SPICY_OATMEAL_TOKEN_ID, TX_FEE } from "../utils/constants";
 import { BLOB_ARMORS, WEAPONS_UPGRADE_PRICES } from '../utils/items_constants';
 import { BLOB_REQUEST_SCRIPT_ADDRESS, BLOB_SCRIPT_ADDRESS, BURN_ALL_SCRIPT_ADDRESS, OATMEAL_BUY_REQUEST_SCRIPT_ADDRESS } from "../utils/script_constants";
@@ -38,7 +38,13 @@ export async function refundRequest(blobRequestBoxJSON) {
 export async function addWidthDrawBlob(mode, blobBoxJSON) {
     console.log("addWidthDraw mode", mode);
     const creationHeight = await currentHeight();
-    const amountFloat = await promptErgAmount(mode);
+    var amountFloat = 0.0;
+    if (mode === "add") {
+        amountFloat = await promptErgAmount("Deposit", "Amount to deposit in the blob.", "Deposit", 0.01);
+    } else {
+        amountFloat = await promptErgAmount("Withdraw", "Amount to withdraw from the blob.", "Withdraw", 0.01);
+    }
+
     const amountNano = Math.round(amountFloat * NANOERG_TO_ERG);
     console.log("addWidthDraw amountFloat", amountFloat);
     const address = localStorage.getItem('address');
@@ -246,10 +252,14 @@ export async function setBlobStatus(mode, blobBoxJSON) {
     console.log("setBlobStatus mode", mode);
     const creationHeight = await currentHeight();
     var amountNano = 0;
-    if (mode !== 'reset' && mode !== 'blobinator') {
-        const amountFloat = await promptErgAmount(mode);
+    if (mode === 'fight') { 
+        const amountFloat = await promptErgAmount('Fight a blob', "Choose an amount for the fight bet, both blob fighting needs to have the same bet.", "Fight", 0.1);
+        amountNano = Math.round(amountFloat * NANOERG_TO_ERG);
+    } else if (mode === 'sell') {
+        const amountFloat = await promptErgAmount('Sell the blob', "Choose an amount to sell the blob and its content.", "Sell", 0.01);
         amountNano = Math.round(amountFloat * NANOERG_TO_ERG);
     }
+
     const blobIniValueNano = blobBoxJSON.value;
     const address = localStorage.getItem('address');
     var alert = waitingAlert("Preparing the transaction...");

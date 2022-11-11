@@ -29,6 +29,7 @@ export default class OatmealBuyRequestList extends React.Component {
 
     async fetchOatmealBuyRequests() {
         const oatmealBuyRequestBoxesTmp = await getUnspentBoxesForAddressUpdated(OATMEAL_BUY_REQUEST_SCRIPT_ADDRESS);
+        // eslint-disable-next-line no-unused-vars
         const [spentBoxes, newBoxes] = await getSpentAndUnspentBoxesFromMempool(OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS);
         const spentBoxIds = spentBoxes.map(box => box.boxId);
         var oatmealBuyRequestBoxes = oatmealBuyRequestBoxesTmp.filter(box => !spentBoxIds.includes(box.boxId));

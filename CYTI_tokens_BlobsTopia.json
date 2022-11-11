@@ -1,0 +1,57 @@
+[
+    {
+        "name": "Blob's Topia config",
+        "type": "Standard",
+        "desc": "Token to find the configuration box for Blob's Topia game \nhttps://www.blobs-topia.fun/",
+        "amount": "1",
+        "decimals": "0",
+        "mediaURL": "",
+        "mediaHash": "",
+        "idPattern": "b10b0000",
+        "CYTIFee": "0.0042"
+    },
+    {
+        "name": "Blob",
+        "type": "Standard",
+        "desc": "Soul of a Blob \nFor Blob's Topia game \nhttps://www.blobs-topia.fun/",
+        "amount": "1000000000",
+        "decimals": "0",
+        "mediaURL": "",
+        "mediaHash": "",
+        "idPattern": "b10b0001",
+        "CYTIFee": "0.0042"
+    },
+    {
+        "name": "Blobinator",
+        "type": "Standard",
+        "desc": "Soul of a Blobinator \nFor Blob's Topia game \nhttps://www.blobs-topia.fun/",
+        "amount": "1000000000",
+        "decimals": "0",
+        "mediaURL": "",
+        "mediaHash": "",
+        "idPattern": "b10b0002",
+        "CYTIFee": "0.0042"
+    },
+    {
+        "name": "Spicy Oatmeal",
+        "type": "Picture",
+        "desc": "Blob's Topia token Spicy Oatmeal can be used to bait a Blobinator and try to defeat him \nFor Blob's Topia game \nhttps://www.blobs-topia.fun/",
+        "amount": "10000000000",
+        "decimals": "0",
+        "mediaURL": "https://bafkreiha47bcidanr3eggnrjfoi7hrdrhpifg2di7nsb3rerbxwvumnfye.ipfs.nftstorage.link/",
+        "mediaHash": "",
+        "idPattern": "b10b0003",
+        "CYTIFee": "0.0042"
+    },
+    {
+        "name": "Oatmeal",
+        "type": "Picture",
+        "desc": "Blob's staple food. Use Oatmeal token to feed your blob and increase its power. \nFor Blob's Topia game \nhttps://www.blobs-topia.fun/",
+        "amount": "10000000000",
+        "decimals": "0",
+        "mediaURL": "https://bafkreib34wx4qwczh4obxmj4abuf6wk444dbzfjqd3welnw5wuhunvr74a.ipfs.nftstorage.link/",
+        "mediaHash": "",
+        "idPattern": "b10b0004",
+        "CYTIFee": "0.0042"
+    }
+]

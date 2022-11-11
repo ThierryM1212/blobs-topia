@@ -27,6 +27,7 @@
         OUTPUTS(0).tokens(0)._1 == BlobinatorNFTId                                 &&
         OUTPUTS(0).tokens(0)._2 == 1                                               &&
         OUTPUTS(0).R9[Long].get == 0L                                              &&  // blobinator state quiet
+        OUTPUTS(0).R8[Long].get == 0L                                              &&  // blobinator 0 victory
         blake2b256(OUTPUTS(1).propositionBytes) == blobinatorReserveScriptHash     &&
         OUTPUTS(2).value == txFee
     } else {

@@ -6,6 +6,7 @@ import { formatERGAmount, formatLongString } from '../utils/utils';
 import ergoLogo from "../images/ergo-erg-logo.png";
 import oatmealLogo from "../images/oatmeal.png";
 import spicyOatmealLogo from "../images/spicy_oatmeal.png";
+import ReactTooltip from 'react-tooltip';
 
 
 export default class InputAddress extends React.Component {
@@ -89,20 +90,57 @@ export default class InputAddress extends React.Component {
                         :
                         <div className="zonecard d-flex flex-column m-1 p-1 w-100">
                             <div className="w-100 d-flex flex-row justify-content-between align-items-center">
-                                <div>{formatERGAmount(this.state.ergAmount)} </div>
+                                <div >{formatERGAmount(this.state.ergAmount)} </div>
                                 &nbsp;
-                                <img src={ergoLogo} width="20px" heigth="20px" alt="ERG" />
-
+                                <div data-tip data-for="ERG balance">
+                                    <img src={ergoLogo} width="20px" heigth="20px" alt="ERG" />
+                                </div>
+                                <ReactTooltip id="ERG balance"
+                                    place="bottom"
+                                    effect="solid"
+                                    data-html={true}
+                                    delayShow={300}
+                                    delayHide={300}>
+                                    <div className="d-flex flex-column">
+                                        ERG balance
+                                    </div>
+                                </ReactTooltip>
                             </div>
                             <div className="w-100 d-flex flex-row justify-content-between align-items-center">
-                                <div >{this.state.oatmealAmount}</div>
+                                <div ><small>{this.state.oatmealAmount}</small></div>
                                 &nbsp;
-                                <img src={oatmealLogo} width="20px" heigth="20px" alt="Oatmeal" />
+                                <div data-tip data-for="Oatmeal">
+                                <img src={oatmealLogo} width="16px" heigth="16px" alt="Oatmeal" />
+                                </div>
+                                <ReactTooltip id="Oatmeal"
+                                    place="bottom"
+                                    effect="solid"
+                                    data-html={true}
+                                    delayShow={300}
+                                    delayHide={300}>
+                                    <div className="d-flex flex-column">
+                                        <div>Oatmeal tokens</div>
+                                        <div>Feed your blob and upgrade its armor</div>
+                                    </div>
+                                </ReactTooltip>
                             </div>
                             <div className="w-100 d-flex flex-row justify-content-between align-items-center">
-                                <div >{this.state.spicyOatmealAmount}</div>
+                                <div ><small>{this.state.spicyOatmealAmount}</small></div>
                                 &nbsp;
-                                <img src={spicyOatmealLogo} width="20px" heigth="20px" alt="Oatmeal" />
+                                <div data-tip data-for="Spicy Oatmeal">
+                                <img src={spicyOatmealLogo} width="16px" heigth="16px" alt="Oatmeal" />
+                                </div>
+                                <ReactTooltip id="Spicy Oatmeal"
+                                    place="bottom"
+                                    effect="solid"
+                                    data-html={true}
+                                    delayShow={300}
+                                    delayHide={300}>
+                                    <div className="d-flex flex-column">
+                                        <div>Spicy Oatmeal tokens</div>
+                                        <div>Used to fight the Blobinator once invocated.</div>
+                                    </div>
+                                </ReactTooltip>
                             </div>
                         </div>
                 }

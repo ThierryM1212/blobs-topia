@@ -1,8 +1,8 @@
 import React, { Fragment } from 'react';
 import ErgBlob from './ErgBlob';
 import { confirmAlert, copySuccess, promptFeedAmount } from '../utils/Alerts';
-import { NANOERG_TO_ERG, RATING_RANGES } from '../utils/constants';
-import { BLOB_ARMORS, BLOB_WEAPONS, WEAPONS_UPGRADE_PRICES } from '../utils/items_constants';
+import { NANOERG_TO_ERG } from '../utils/constants';
+import { BLOB_ARMORS, WEAPONS_UPGRADE_PRICES } from '../utils/items_constants';
 import { decodeString, ergoTreeToAddress } from '../ergo-related/serializer';
 import { addWidthDrawBlob, buyBlob, feedBlob, killBlob, setBlobStatus } from '../ergo-related/blob';
 import { BlobState } from './BlobState';
@@ -14,7 +14,7 @@ import PhotoIcon from '../images/outline_photo_camera_black_24dp.png';
 import UpgradeIcon from '../images/outline_upgrade_white_24dp.png';
 import SwordsIcon from '../images/swords.png';
 import FeedIcon from '../images/outline_restaurant_white_24dp.png';
-import BlobinatorIcon from '../images/blobinator_icone.png';
+import BlobinatorIcon from '../images/outline_sports_mma_white_24dp.png';
 import AddERGIcon from '../images/Add_ERG.png';
 import WithdrawERGIcon from '../images/withdraw_ERG.png';
 import CancelIcon from '../images/outline_close_white_24dp.png';
@@ -169,7 +169,7 @@ export default class BlobItem extends React.Component {
         var chooseWeaponTips = 'Choose a weapon type for the blob, it will start at level 0'
             + '.<br />Requires ' + WEAPONS_UPGRADE_PRICES[0]
             + ' Oatmeal tokens.';
-        const fightTips = 'Choose a fight amount and set the blob "ready to fight".';
+        const fightTips = 'Choose a fight bet amount (min 0.1 ERG) and set the blob in the state "Ready to fight" another Blob.';
         const feedTips = 'Feed the blob with Oatmeal tokens.<br />Increase its attack level and defense level.';
         const blobinatorTips = 'Set the state to "Ready to fight the blobinator"';
         const depositTips = 'Add ERGs to the blob to play with.';
@@ -264,7 +264,7 @@ export default class BlobItem extends React.Component {
                                         </Fragment>
                                 }
                             </div>
-                            
+
                     }
 
                     <div className="d-flex flex-row justify-content-between m-2">
@@ -290,7 +290,7 @@ export default class BlobItem extends React.Component {
                                                     tips={upgradeArmorTips} />
                                         }
                                     </div>
-                                    
+
                             }
                         </div>
                         <div>&nbsp;</div>
@@ -308,17 +308,14 @@ export default class BlobItem extends React.Component {
                                                     label="Choose weapon"
                                                     tips={chooseWeaponTips} />
                                                 :
-                                                currentWeaponLevel === 3 ? null :
-                                                    <BlobActionButton
-                                                        image={UpgradeIcon}
-                                                        action={() => this.upgradeWeapon(this.state.blobBoxJSON)}
-                                                        isDisabled={this.state.state[0] !== '0'}
-                                                        label="Upgrade weapon"
-                                                        tips={upgradeWeaponTips} />
-
+                                                <BlobActionButton
+                                                    image={UpgradeIcon}
+                                                    action={() => this.upgradeWeapon(this.state.blobBoxJSON)}
+                                                    isDisabled={this.state.state[0] !== '0' || currentWeaponLevel === 3}
+                                                    label="Upgrade weapon"
+                                                    tips={upgradeWeaponTips} />
                                         }
                                     </div>
-                                   
                             }
                         </div>
                         <div></div>

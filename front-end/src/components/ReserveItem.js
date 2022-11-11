@@ -1,7 +1,8 @@
 import React from 'react';
 import { decodeLong, decodeLongArray, decodeString } from '../ergo-related/serializer';
 import { NANOERG_TO_ERG } from '../utils/constants';
-import { burnGameTokenReserve } from '../ergo-related/admin_game';
+import { burnReserve } from '../ergo-related/admin_game';
+import { formatLongString } from '../utils/utils';
 
 
 export default class ReserveItem extends React.Component {
@@ -62,15 +63,7 @@ export default class ReserveItem extends React.Component {
     }
 
     async burn(boxId) {
-        return await burnGameTokenReserve(boxId);
-    }
-
-    formatLongString(str) {
-        if (str.length > 30) {
-            return str.substring(0, 10) + "..." + str.substring(str.length - 10, str.length);
-        } else {
-            return str;
-        }
+        return await burnReserve(boxId);
     }
 
     render() {
@@ -92,7 +85,7 @@ export default class ReserveItem extends React.Component {
                             Box id:
                         </td>
                         <td>
-                            {this.formatLongString(this.state.boxId)}
+                            {formatLongString(this.state.boxId, 10)}
                         </td>
                     </tr>
                     <tr>

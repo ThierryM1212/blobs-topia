@@ -11,7 +11,7 @@ export default function EyesPickerItem(props) {
             <div className="card m-1" >
                 <input type="radio" name="eyes-item" value={props.value} checked={props.selected} onChange={props.onChange} />
                 <div className="shape">
-                    <svg width="70px" height="50px" viewBox="0 0 70 50" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink">
+                    <svg width="50px" height="40px" viewBox="0 0 70 50" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink">
                         <BlobEyes eyes_pos={props.value}
                             pos_eyes_x={pos_eyes_x}
                             pos_eyes_y={pos_eyes_y}
