@@ -1,13 +1,13 @@
 import React, { Fragment } from 'react';
 import { BLOB_REQUEST_SCRIPT_ADDRESS, BLOB_SCRIPT_ADDRESS } from "../utils/script_constants";
-import { getSpentAndUnspentBoxesFromMempool, getUnspentBoxesForAddressUpdated, searchBlobUnspentBoxes } from '../ergo-related/explorer';
+import { getSpentAndUnspentBoxesFromMempool, getUnspentBoxesForAddressUpdated, searchBlobUnspentBoxes, searchUnspentBoxesUpdated } from '../ergo-related/explorer';
 import BlobItem from '../components/BlobItem';
 import { toHexString } from '../ergo-related/serializer';
 import BlobRequestItem from '../components/BlobRequestItem';
 import { errorAlert, waitingAlert } from '../utils/Alerts';
 import { filterBlobList } from '../utils/utils';
+import { GAME_TOKEN_ID, UPGRADEABLE_BLOB_SCRIPT_ADDRESSES } from '../utils/constants';
 let ergolib = import('ergo-lib-wasm-browser');
-
 
 
 export default class MyBlobsPage extends React.Component {
@@ -16,10 +16,12 @@ export default class MyBlobsPage extends React.Component {
         this.state = {
             blobList: [],
             blobRequestList: [],
+            upgradeableBlobList: [],
         };
         this.handleChangeBlobList = this.handleChangeBlobList.bind(this);
         this.fetchBlobs = this.fetchBlobs.bind(this);
         this.fetchBlobRequests = this.fetchBlobRequests.bind(this);
+        this.fetchUpgradebleBlobs = this.fetchUpgradeableBlobs.bind(this);
     }
 
     handleChangeBlobList(event) {
@@ -35,6 +37,7 @@ export default class MyBlobsPage extends React.Component {
             await this.fetchBlobs();
             alert.close();
             this.fetchBlobRequests();
+            this.fetchUpgradeableBlobs();
         }
     }
 
@@ -98,6 +101,20 @@ export default class MyBlobsPage extends React.Component {
         })
     }
 
+    async fetchUpgradeableBlobs() {
+        const addressSigmaPropHex = toHexString((await ergolib).Constant.from_ecpoint_bytes(
+            (await ergolib).Address.from_base58(localStorage.getItem('address')).to_bytes(0x00).subarray(1, 34)
+        ).sigma_serialize_bytes()).slice(4);
+        const upgradeableBlobList = (await Promise.all(UPGRADEABLE_BLOB_SCRIPT_ADDRESSES.map(async (upgradeableBlobAddress) => {
+            const boxes = await searchUnspentBoxesUpdated(upgradeableBlobAddress, [GAME_TOKEN_ID], { "R6": addressSigmaPropHex });
+            console.log("boxes",boxes);
+            return boxes;
+        }))).flat();
+        this.setState({
+            upgradeableBlobList: upgradeableBlobList,
+        })
+    }
+
     render() {
         //console.log("render blob list", this.state.blobList);
         return (
@@ -134,6 +151,27 @@ export default class MyBlobsPage extends React.Component {
                                         key={item.boxId}
                                         full={item}
                                         updateList={this.fetchBlobRequests}
+                                    />
+                                )}
+                            </div>
+                        </Fragment>
+                        : null
+                }
+                <br />
+                {
+                    this.state.upgradeableBlobList.length > 0 ?
+                        <Fragment >
+                            <h5>
+                                Upgradeable Blobs
+                            </h5>
+                            <div className="w-75 d-flex flex-wrap">
+                                {this.state.upgradeableBlobList.map(item =>
+                                    <BlobItem
+                                        key={item.boxId}
+                                        blobBoxJSON={item}
+                                        updateList={this.fetchUpgradeableBlobs}
+                                        upgradeable={true}
+                                        disableActions={true}
                                     />
                                 )}
                             </div>

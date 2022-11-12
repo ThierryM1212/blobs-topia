@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react';
 import { BLOBINATOR_TOKEN_ID, GAME_ADDRESS, GAME_TOKEN_ID, NANOERG_TO_ERG, OATMEAL_TOKEN_ID, SPICY_OATMEAL_TOKEN_ID } from '../utils/constants';
-import { RESERVE_SCRIPT_ADDRESS, OATMEAL_RESERVE_SCRIPT_ADDRESS, OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS, BLOBINATOR_RESERVE_SCRIPT_ADDRESS, BLOBINATOR_SCRIPT_ADDRESS, BURN_ALL_SCRIPT_ADDRESS } from "../utils/script_constants";
+import { RESERVE_SCRIPT_ADDRESS, OATMEAL_RESERVE_SCRIPT_ADDRESS, OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS, BLOBINATOR_RESERVE_SCRIPT_ADDRESS, BLOBINATOR_SCRIPT_ADDRESS, BURN_ALL_SCRIPT_ADDRESS, CONFIG_SCRIPT_ADDRESS, BLOB_SCRIPT_ADDRESS, BLOBINATOR_FEE_SCRIPT_ADDRESS, BLOB_REQUEST_SCRIPT_ADDRESS, OATMEAL_BUY_REQUEST_SCRIPT_ADDRESS, GAME_SCRIPT_ADDRESS } from "../utils/script_constants";
 import { getUnspentBoxesByAddress } from '../ergo-related/explorer';
 import ReserveItem from '../components/ReserveItem';
 import ConfigItem from '../components/ConfigItem';
@@ -9,6 +9,7 @@ import { adminCollectBurnFee, adminInvokeBlobinator, mintBlobinatorReserve, mint
 import { getRegisterValue, getTokenAmount, getUtxosListValue } from '../ergo-related/wasm';
 import { promptErgAmount } from '../utils/Alerts';
 import { formatERGAmount } from '../utils/utils';
+import { ExplorerLink } from '../components/ExplorerLink';
 
 
 export default class Admin extends React.Component {
@@ -132,9 +133,23 @@ export default class Admin extends React.Component {
                         <h4>This page is usable only by {GAME_ADDRESS}</h4>
                 }
                 <div className="w-100 content d-flex align-items-center flex-md-column p-2 m-2">
-
-
-
+                    <div className="card zonecard w-50 d-flex align-items-center p-2 m-2">
+                        <h4>Explorer links</h4>
+                        <div className="d-flex flex-wrap ">
+                            <ExplorerLink address={BLOB_SCRIPT_ADDRESS} label="Blob" />
+                            <ExplorerLink address={GAME_SCRIPT_ADDRESS} label="Blob fights" />
+                            <ExplorerLink address={BLOBINATOR_SCRIPT_ADDRESS} label="Blobinator" />
+                            <ExplorerLink address={BLOB_REQUEST_SCRIPT_ADDRESS} label="Blob requests" />
+                            <ExplorerLink address={OATMEAL_BUY_REQUEST_SCRIPT_ADDRESS} label="Oatmeal buy requests" />
+                            <ExplorerLink address={BLOBINATOR_RESERVE_SCRIPT_ADDRESS} label="Blobinator token reserves" />
+                            <ExplorerLink address={OATMEAL_RESERVE_SCRIPT_ADDRESS} label="Oatmeal reserves" />
+                            <ExplorerLink address={OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS} label="Oatmeal sell reserves" />
+                            <ExplorerLink address={RESERVE_SCRIPT_ADDRESS} label="Fight token reserves" />
+                            <ExplorerLink address={BLOBINATOR_FEE_SCRIPT_ADDRESS} label="Blobinator fees" />
+                            <ExplorerLink address={BURN_ALL_SCRIPT_ADDRESS} label="Burn fee" />
+                            <ExplorerLink address={CONFIG_SCRIPT_ADDRESS} label="Config" />
+                        </div>
+                    </div>
 
                     <div className="card zonecard w-50 d-flex align-items-center">
                         <h4>Create new BLOB token reserve</h4>

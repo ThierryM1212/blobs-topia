@@ -20,6 +20,8 @@ export default function Footer() {
                 <a href="https://en.wikipedia.org/wiki/Physarum_polycephalum" target="_blank" rel="noreferrer">
                     <img src={wikipediaLogo} width="20" height="20" className="d-inline-block align-top" alt="wikipedia" />
                 </a>
+                &nbsp;-
+                Original drawings by Wato
             </div>
         </div>
     )

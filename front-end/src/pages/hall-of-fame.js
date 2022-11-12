@@ -29,13 +29,14 @@ export default class HallOfFamePage extends React.Component {
         const filteredBlobBoxes = filterBlobList(blobBoxes);
         //console.log("fetchBlobs blobBoxes", blobBoxes)
         const blobListByVictories = filteredBlobBoxes.sort(function (a, b) {
-            return getBlobVictories(b.additionalRegisters.R5.renderedValue) - getBlobVictories(a.additionalRegisters.R5.renderedValue);
+            console.log("fetchBlobs getBlobVictories", getBlobVictories(b.additionalRegisters.R5.renderedValue) , getBlobVictories(a.additionalRegisters.R5.renderedValue))
+            return (getBlobVictories(a.additionalRegisters.R5.renderedValue) < getBlobVictories(b.additionalRegisters.R5.renderedValue))  ? 1 : -1;
         }).slice(0, 10);
         const blobListByAttPower = filteredBlobBoxes.sort(function (a, b) {
-            return getBlobPowers(b.additionalRegisters.R5.renderedValue)[0] - getBlobPowers(a.additionalRegisters.R5.renderedValue)[0]
+            return (getBlobPowers(a.additionalRegisters.R5.renderedValue)[0] < getBlobPowers(b.additionalRegisters.R5.renderedValue)[0])  ? 1 : -1;
         }).slice(0, 10);
         const blobListByDefPower = filteredBlobBoxes.sort(function (a, b) {
-            return getBlobPowers(b.additionalRegisters.R5.renderedValue)[1] - getBlobPowers(a.additionalRegisters.R5.renderedValue)[1]
+            return (getBlobPowers(a.additionalRegisters.R5.renderedValue)[1] < getBlobPowers(b.additionalRegisters.R5.renderedValue)[1])  ? 1 : -1;
         }).slice(0, 10);
 
         //console.log("blobList sorted trimmed", blobListByVictories);

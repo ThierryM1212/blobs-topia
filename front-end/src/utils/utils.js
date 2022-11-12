@@ -46,6 +46,7 @@ export function getBlobGames(blobInfo) {
     return blobInfo[2];
 }
 export function getBlobVictories(blobInfo) {
+    //console.log("getBlobVictories",blobInfo[3]);
     return blobInfo[3];
 }
 export function getBlobArmorDefPower(blobInfo) {

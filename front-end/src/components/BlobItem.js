@@ -50,6 +50,7 @@ export default class BlobItem extends React.Component {
             disableActions: props.disableActions ?? false,
             showStatus: props.showStatus ?? true,
             showOwner: props.showOwner ?? false,
+            upgradeable: props.upgradeable ?? false,
         };
         this.toggleActions = this.toggleActions.bind(this);
         this.blobRef = React.createRef();
@@ -140,6 +141,11 @@ export default class BlobItem extends React.Component {
 
     async upgradeWeapon(blobBoxJSON) {
         await feedBlob(blobBoxJSON, 'upgrade weapon');
+        await this.state.updateList();
+    }
+
+    async upgradeBlob(blobBoxJSON) {
+        await this.setStatus('reset', blobBoxJSON);
         await this.state.updateList();
     }
 
@@ -264,6 +270,20 @@ export default class BlobItem extends React.Component {
                                         </Fragment>
                                 }
                             </div>
+
+                    }
+                    {
+                        this.state.upgradeable ?
+
+                            <Fragment>
+                                <BlobActionButton
+                                    image={UpgradeIcon}
+                                    action={() => this.upgradeBlob(this.state.blobBoxJSON)}
+                                    label="Upgrade"
+                                    tips={'Upgrade this blob to the new version'}
+                                />
+                            </Fragment>
+                            : null
 
                     }
 

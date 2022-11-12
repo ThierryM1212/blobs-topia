@@ -123,7 +123,8 @@
         basicBlob0Replicated                                          &&
         OUTPUTS(0).R5[Coll[Int]].get == SELF.R5[Coll[Int]].get        &&
         OUTPUTS(0).tokens.size == 1                                   &&
-        OUTPUTS(0).R7[Long].get == 0
+        OUTPUTS(0).R7[Long].get == 0                                  &&
+        OUTPUTS(0).R8[Long].get == 0
     } else {
         false
     }

@@ -96,6 +96,7 @@ textarea {
 
 .ergblob {
   background: linear-gradient(to bottom right, rgb(46, 13, 124, 0.5), rgb(0, 0, 0, 0.5));
+  min-width: 12rem;
 }
 
 .zoneblob {
