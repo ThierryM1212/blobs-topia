@@ -2,7 +2,7 @@ import React, { Fragment } from 'react';
 import { BLOBINATOR_SCRIPT_ADDRESS, BLOB_SCRIPT_ADDRESS, GAME_SCRIPT_ADDRESS } from "../utils/script_constants";
 import { getTransactionByID, getUnspentBoxesForAddressUpdated, searchBoxes, searchUnspentBoxesUpdated } from '../ergo-related/explorer';
 import FightItem from '../components/FightItem';
-import { waitingAlert } from '../utils/Alerts';
+import { errorAlert, waitingAlert } from '../utils/Alerts';
 import { GAME_TOKEN_ID } from '../utils/constants';
 import { toHexString } from '../ergo-related/serializer';
 import BlobinatorFightItem from '../components/BlobinatorFightItem';
@@ -92,70 +92,76 @@ export default class FightsPage extends React.Component {
     }
 
     async fetchOldFights() {
-        const addressSigmaPropHex = toHexString((await ergolib).Constant.from_ecpoint_bytes(
-            (await ergolib).Address.from_base58(localStorage.getItem('address')).to_bytes(0x00).subarray(1, 34)
-        ).sigma_serialize_bytes()).slice(4);
-        const userFightList1 = await searchBoxes(GAME_SCRIPT_ADDRESS, [GAME_TOKEN_ID], { R4: addressSigmaPropHex });
-        const userFightList2 = await searchBoxes(GAME_SCRIPT_ADDRESS, [GAME_TOKEN_ID], { R7: addressSigmaPropHex });
-        const userBlobinatorFightList = await searchBoxes(BLOB_SCRIPT_ADDRESS, [GAME_TOKEN_ID], { R6: addressSigmaPropHex, R7: "5" });
-        console.log("userBlobinatorFightList", userBlobinatorFightList);
-        var userFightList = userFightList1.concat(userFightList2).concat(userBlobinatorFightList);
+        const address = localStorage.getItem('address') ?? "";
+        if (address !== "") {
+            const addressSigmaPropHex = toHexString((await ergolib).Constant.from_ecpoint_bytes(
+                (await ergolib).Address.from_base58()).to_bytes(0x00).subarray(1, 34)
+            ).sigma_serialize_bytes(address).slice(4);
+            const userFightList1 = await searchBoxes(GAME_SCRIPT_ADDRESS, [GAME_TOKEN_ID], { R4: addressSigmaPropHex });
+            const userFightList2 = await searchBoxes(GAME_SCRIPT_ADDRESS, [GAME_TOKEN_ID], { R7: addressSigmaPropHex });
+            const userBlobinatorFightList = await searchBoxes(BLOB_SCRIPT_ADDRESS, [GAME_TOKEN_ID], { R6: addressSigmaPropHex, R7: "5" });
+            console.log("userBlobinatorFightList", userBlobinatorFightList);
+            var userFightList = userFightList1.concat(userFightList2).concat(userBlobinatorFightList);
 
-        userFightList = userFightList.filter((box, index) => userFightList.findIndex(obj => obj.boxId === box.boxId) === index)
-            .sort((a, b) => a.settlementHeight < b.settlementHeight);
-        //console.log("userFightList", userFightList);
-        const userTransactionIDList = userFightList.map(box => box.spentTransactionId).slice(30);
-        var fightTransactions = await Promise.all(userTransactionIDList.map(async (txId) => {
-            const tx = await getTransactionByID(txId);
-            return tx;
-        }));
-        fightTransactions = fightTransactions.sort((a, b) => (a.numConfirmations > b.numConfirmations) ? 1 : -1);
-        console.log("fightTransactions", fightTransactions);
-        //const fightTransactions = await getTransactionsByAddress(GAME_SCRIPT_ADDRESS);
-        var blobFights = [];
-        for (const tx of fightTransactions) {
-            try {
-                var blob1 = {};
-                if (tx.inputs.length === 3) {
-                    blob1 = tx.inputs[0];
-                    var blob2 = tx.inputs[1];
-                    var gameBox = tx.inputs[2];
-                    if (blob1.additionalRegisters.R7.renderedValue === '3') {
-                        //console.log("gamebox", gameBox)
-                        if (blob1 && blob2 && gameBox) {
-                            blobFights.push({
-                                blob1: blob1,
-                                blob2: blob2,
-                                gameBox: gameBox,
-                                gameBoxId: gameBox.boxId,
-                                winningTx: { ...tx },
-                            })
+            userFightList = userFightList.filter((box, index) => userFightList.findIndex(obj => obj.boxId === box.boxId) === index)
+                .sort((a, b) => a.settlementHeight < b.settlementHeight);
+            //console.log("userFightList", userFightList);
+            const userTransactionIDList = userFightList.map(box => box.spentTransactionId).slice(30);
+            var fightTransactions = await Promise.all(userTransactionIDList.map(async (txId) => {
+                const tx = await getTransactionByID(txId);
+                return tx;
+            }));
+            fightTransactions = fightTransactions.sort((a, b) => (a.numConfirmations > b.numConfirmations) ? 1 : -1);
+            console.log("fightTransactions", fightTransactions);
+            //const fightTransactions = await getTransactionsByAddress(GAME_SCRIPT_ADDRESS);
+            var blobFights = [];
+            for (const tx of fightTransactions) {
+                try {
+                    var blob1 = {};
+                    if (tx.inputs.length === 3) {
+                        blob1 = tx.inputs[0];
+                        var blob2 = tx.inputs[1];
+                        var gameBox = tx.inputs[2];
+                        if (blob1.additionalRegisters.R7.renderedValue === '3') {
+                            //console.log("gamebox", gameBox)
+                            if (blob1 && blob2 && gameBox) {
+                                blobFights.push({
+                                    blob1: blob1,
+                                    blob2: blob2,
+                                    gameBox: gameBox,
+                                    gameBoxId: gameBox.boxId,
+                                    winningTx: { ...tx },
+                                })
+                            }
+                        }
+                    } else {
+                        blob1 = tx.inputs[0];
+                        var blobinator = tx.inputs[1];
+                        if (blob1.additionalRegisters.R7.renderedValue === '5') {
+                            if (blob1 && blobinator) {
+                                blobFights.push({
+                                    blob1: blob1,
+                                    blobinator: blobinator,
+                                    gameBoxId: blobinator.boxId,
+                                    winningTx: { ...tx },
+                                })
+                            }
                         }
                     }
-                } else {
-                    blob1 = tx.inputs[0];
-                    var blobinator = tx.inputs[1];
-                    if (blob1.additionalRegisters.R7.renderedValue === '5') {
-                        if (blob1 && blobinator) {
-                            blobFights.push({
-                                blob1: blob1,
-                                blobinator: blobinator,
-                                gameBoxId: blobinator.boxId,
-                                winningTx: { ...tx },
-                            })
-                        }
-                    }
+
+                } catch (e) {
+                    console.log("fetchBlobs", e)
                 }
 
-            } catch (e) {
-                console.log("fetchBlobs", e)
             }
-
+            console.log("blobFights ", blobFights)
+            this.setState({
+                previousFights: blobFights,
+            })
+        } else {
+            errorAlert("Set an ERG address")
         }
-        console.log("blobFights ", blobFights)
-        this.setState({
-            previousFights: blobFights,
-        })
+
     }
 
 
@@ -172,17 +178,17 @@ export default class FightsPage extends React.Component {
                             {
                                 this.state.currentFights.map(fight =>
                                     fight.blob2 ?
-                                    <FightItem blob1={fight.blob1}
-                                        blob2={fight.blob2}
-                                        gameBox={fight.gameBox}
-                                        updateList={this.fetchCurrentFights}
-                                        key={fight.gameBoxId} />
-                                    :
-                                    <BlobinatorFightItem
-                                        blob1={fight.blob1}
-                                        blobinator={fight.blobinator}
-                                        updateList={this.fetchCurrentFights}
-                                        key={fight.gameBoxId}
+                                        <FightItem blob1={fight.blob1}
+                                            blob2={fight.blob2}
+                                            gameBox={fight.gameBox}
+                                            updateList={this.fetchCurrentFights}
+                                            key={fight.gameBoxId} />
+                                        :
+                                        <BlobinatorFightItem
+                                            blob1={fight.blob1}
+                                            blobinator={fight.blobinator}
+                                            updateList={this.fetchCurrentFights}
+                                            key={fight.gameBoxId}
                                         />
                                 )
                             }
