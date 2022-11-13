@@ -1,6 +1,6 @@
 import React from 'react';
 import BlobItem from '../components/BlobItem';
-import { filterBlobList, getBlobPowers, getBlobVictories } from '../utils/utils';
+import { filterBlobList, getBlobPowers, getBlobVictories, getBlobVictoriesFromStr } from '../utils/utils';
 import { BLOB_SCRIPT_ADDRESS } from "../utils/script_constants";
 import { getUnspentBoxesForAddressUpdated } from '../ergo-related/explorer';
 import { waitingAlert } from '../utils/Alerts';
@@ -27,10 +27,9 @@ export default class HallOfFamePage extends React.Component {
     async fetchBlobs() {
         const blobBoxes = await getUnspentBoxesForAddressUpdated(BLOB_SCRIPT_ADDRESS);
         const filteredBlobBoxes = filterBlobList(blobBoxes);
-        //console.log("fetchBlobs blobBoxes", blobBoxes)
+
         const blobListByVictories = filteredBlobBoxes.sort(function (a, b) {
-            console.log("fetchBlobs getBlobVictories", getBlobVictories(b.additionalRegisters.R5.renderedValue) , getBlobVictories(a.additionalRegisters.R5.renderedValue))
-            return (getBlobVictories(a.additionalRegisters.R5.renderedValue) < getBlobVictories(b.additionalRegisters.R5.renderedValue))  ? 1 : -1;
+            return (getBlobVictoriesFromStr(a.additionalRegisters.R5.renderedValue) < getBlobVictoriesFromStr(b.additionalRegisters.R5.renderedValue))  ? 1 : -1;
         }).slice(0, 10);
         const blobListByAttPower = filteredBlobBoxes.sort(function (a, b) {
             return (getBlobPowers(a.additionalRegisters.R5.renderedValue)[0] < getBlobPowers(b.additionalRegisters.R5.renderedValue)[0])  ? 1 : -1;

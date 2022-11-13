@@ -49,6 +49,10 @@ export function getBlobVictories(blobInfo) {
     //console.log("getBlobVictories",blobInfo[3]);
     return blobInfo[3];
 }
+export function getBlobVictoriesFromStr(blobInfoStr) {
+    const blobInfo = JSONBigInt.parse(blobInfoStr);
+    return blobInfo[3];
+}
 export function getBlobArmorDefPower(blobInfo) {
     return BLOB_ARMORS[blobInfo[4]].defense_power;
 }
