@@ -6,7 +6,9 @@ import { formatERGAmount, formatLongString } from '../utils/utils';
 import ergoLogo from "../images/ergo-erg-logo.png";
 import oatmealLogo from "../images/oatmeal.png";
 import spicyOatmealLogo from "../images/spicy_oatmeal.png";
+import infoLogo from "../images/outline_info_white_24dp.png";
 import ReactTooltip from 'react-tooltip';
+import AppStatistics from './AppStatistics';
 
 
 export default class InputAddress extends React.Component {
@@ -68,7 +70,7 @@ export default class InputAddress extends React.Component {
         const address = localStorage.getItem('address') ?? '';
         return (
             <div className="d-flex flex-row m-1 p-1 align-items-center">
-                <div className='d-flex flex-column '>
+                <div className='d-flex flex-column align-items-start'>
                     <button className="btn btn-ultra-blue m-1" onClick={this.promptErgAddress}>
                         {
                             address === '' ?
@@ -83,6 +85,18 @@ export default class InputAddress extends React.Component {
                                 </div>
                         }
                     </button>
+                    <div data-tip data-for="Game info" className='m-1'>
+                        <img src={infoLogo} alt="Game info" width={20} className='transparent-image'/>
+                    </div>
+                    <ReactTooltip id="Game info"
+                        place="bottom"
+                        effect="solid"
+                        data-html={true}
+                        delayShow={300}
+                        delayHide={300}
+                        >
+                        <AppStatistics />
+                    </ReactTooltip>
                 </div>
                 {
                     address === '' ?
@@ -95,22 +109,13 @@ export default class InputAddress extends React.Component {
                                 <div data-tip data-for="ERG balance">
                                     <img src={ergoLogo} width="20px" heigth="20px" alt="ERG" />
                                 </div>
-                                <ReactTooltip id="ERG balance"
-                                    place="bottom"
-                                    effect="solid"
-                                    data-html={true}
-                                    delayShow={300}
-                                    delayHide={300}>
-                                    <div className="d-flex flex-column">
-                                        ERG balance
-                                    </div>
-                                </ReactTooltip>
+
                             </div>
                             <div className="w-100 d-flex flex-row justify-content-between align-items-center">
                                 <div ><small>{this.state.oatmealAmount}</small></div>
                                 &nbsp;
                                 <div data-tip data-for="Oatmeal">
-                                <img src={oatmealLogo} width="16px" heigth="16px" alt="Oatmeal" />
+                                    <img src={oatmealLogo} width="16px" heigth="16px" alt="Oatmeal" />
                                 </div>
                                 <ReactTooltip id="Oatmeal"
                                     place="bottom"
@@ -128,7 +133,7 @@ export default class InputAddress extends React.Component {
                                 <div ><small>{this.state.spicyOatmealAmount}</small></div>
                                 &nbsp;
                                 <div data-tip data-for="Spicy Oatmeal">
-                                <img src={spicyOatmealLogo} width="16px" heigth="16px" alt="Oatmeal" />
+                                    <img src={spicyOatmealLogo} width="16px" heigth="16px" alt="Oatmeal" />
                                 </div>
                                 <ReactTooltip id="Spicy Oatmeal"
                                     place="bottom"

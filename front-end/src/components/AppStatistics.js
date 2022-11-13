@@ -35,25 +35,25 @@ export default class AppStatistics extends React.Component {
 
     render() {
         return (
-            <div className="d-flex flex-column zonecard m-1 p-1">
+            <div className="d-flex flex-column p-1">
                 <h5>Game statistics</h5>
-                <div className="w-100 d-flex flex-row justify-content-between m-1 p-1">
-                    <h6>Number of living blobs: </h6> <strong>{this.state.numberOfBlobs}</strong>
+                <div className="w-100 d-flex flex-row justify-content-between ">
+                    <h6 >Number of blobs:&nbsp;</h6> <strong>{this.state.numberOfBlobs}</strong>
                 </div>
-                <div className="w-100 d-flex flex-row justify-content-between m-1 p-1">
-                    <h6>Amount of ERG in the blobs: </h6> <strong>{formatERGAmount(this.state.ergAmount)} ERG</strong>
+                <div className="w-100 d-flex flex-row justify-content-between">
+                    <h6>ERGs in the blobs:&nbsp;</h6> <strong>{formatERGAmount(this.state.ergAmount)} ERG</strong>
                 </div>
-                <div className="w-100 d-flex flex-row justify-content-between m-1 p-1">
-                    <h6>Number of fights processed: </h6> <strong>{this.state.numberofFights}</strong>
+                <div className="w-100 d-flex flex-row justify-content-between ">
+                    <h6>Number of fights:&nbsp;</h6> <strong>{this.state.numberofFights}</strong>
                 </div>
-                <div className="w-100 d-flex flex-row justify-content-between m-1 p-1">
-                    <h6>Erg amount played: </h6> <strong>{formatERGAmount(this.state.fightAmount)} ERG</strong>
+                <div className="w-100 d-flex flex-row justify-content-between ">
+                    <h6>Amount played:&nbsp;</h6> <strong>{formatERGAmount(this.state.fightAmount)} ERG</strong>
                 </div>
-                <div className="w-100 d-flex flex-row justify-content-between m-1 p-1">
-                    <h6>Number of living Blobinators: </h6> <strong>{this.state.numberOfBlobinators}</strong>
+                <div className="w-100 d-flex flex-row justify-content-between ">
+                    <h6>Living Blobinators:&nbsp;</h6> <strong>{this.state.numberOfBlobinators}</strong>
                 </div>
-                <div className="w-100 d-flex flex-row justify-content-between m-1 p-1">
-                    <h6>Blobinators total value: </h6> <strong>{formatERGAmount(this.state.blobinatorAmount)} ERG</strong>
+                <div className="w-100 d-flex flex-row justify-content-between">
+                    <h6>Blobinators value:&nbsp;</h6> <strong>{formatERGAmount(this.state.blobinatorAmount)} ERG</strong>
                 </div>
             </div>
         )
