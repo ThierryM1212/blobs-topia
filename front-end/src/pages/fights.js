@@ -2,7 +2,7 @@ import React, { Fragment } from 'react';
 import { BLOBINATOR_SCRIPT_ADDRESS, BLOB_SCRIPT_ADDRESS, GAME_SCRIPT_ADDRESS } from "../utils/script_constants";
 import { getTransactionByID, getUnspentBoxesForAddressUpdated, searchBoxes, searchUnspentBoxesUpdated } from '../ergo-related/explorer';
 import FightItem from '../components/FightItem';
-import { errorAlert, waitingAlert } from '../utils/Alerts';
+import { waitingAlert } from '../utils/Alerts';
 import { GAME_TOKEN_ID } from '../utils/constants';
 import { toHexString } from '../ergo-related/serializer';
 import BlobinatorFightItem from '../components/BlobinatorFightItem';
@@ -28,9 +28,7 @@ export default class FightsPage extends React.Component {
         this.fetchOldFights();
     }
 
-
     async fetchCurrentFights() {
-
         const fightBoxes = await getUnspentBoxesForAddressUpdated(GAME_SCRIPT_ADDRESS);
         const blobinatorFightBoxes = (await getUnspentBoxesForAddressUpdated(BLOBINATOR_SCRIPT_ADDRESS))
             .filter(box => box.additionalRegisters.R9.renderedValue !== "0");
@@ -95,8 +93,8 @@ export default class FightsPage extends React.Component {
         const address = localStorage.getItem('address') ?? "";
         if (address !== "") {
             const addressSigmaPropHex = toHexString((await ergolib).Constant.from_ecpoint_bytes(
-                (await ergolib).Address.from_base58()).to_bytes(0x00).subarray(1, 34)
-            ).sigma_serialize_bytes(address).slice(4);
+                (await ergolib).Address.from_base58(localStorage.getItem('address')).to_bytes(0x00).subarray(1, 34)
+            ).sigma_serialize_bytes()).slice(4);
             const userFightList1 = await searchBoxes(GAME_SCRIPT_ADDRESS, [GAME_TOKEN_ID], { R4: addressSigmaPropHex });
             const userFightList2 = await searchBoxes(GAME_SCRIPT_ADDRESS, [GAME_TOKEN_ID], { R7: addressSigmaPropHex });
             const userBlobinatorFightList = await searchBoxes(BLOB_SCRIPT_ADDRESS, [GAME_TOKEN_ID], { R6: addressSigmaPropHex, R7: "5" });
@@ -158,13 +156,8 @@ export default class FightsPage extends React.Component {
             this.setState({
                 previousFights: blobFights,
             })
-        } else {
-            errorAlert("Set an ERG address")
         }
-
     }
-
-
 
     render() {
         console.log("FightsPage", this.state.currentFights)
@@ -193,35 +186,36 @@ export default class FightsPage extends React.Component {
                                 )
                             }
                         </div>
-                        : <div>No figth found currently</div>
+                        : <div>No figth found</div>
                     }
                     <br />
-                    <h4>Fights history</h4>
-                    <div className="w-75 d-flex flex-wrap m-2">
-                        {
-                            this.state.previousFights.map(fight =>
-                                fight.blob2 ?
-                                    <FightItem
-                                        blob1={fight.blob1}
-                                        blob2={fight.blob2}
-                                        gameBox={fight.gameBox}
-                                        updateList={this.fetchCurrentFights}
-                                        key={fight.gameBoxId}
-                                        winningTx={fight.winningTx}
-                                    />
-                                    : <BlobinatorFightItem
-                                        blob1={fight.blob1}
-                                        blobinator={fight.blobinator}
-                                        updateList={this.fetchCurrentFights}
-                                        key={fight.gameBoxId}
-                                        winningTx={fight.winningTx}
-                                    />
-
-
-                            )
-                        }
-                    </div>
-
+                    <h4>My fights history</h4>
+                    {
+                        this.state.currentFights.length > 0 ?
+                            <div className="w-75 d-flex flex-wrap m-2">
+                                {
+                                    this.state.previousFights.map(fight =>
+                                        fight.blob2 ?
+                                            <FightItem
+                                                blob1={fight.blob1}
+                                                blob2={fight.blob2}
+                                                gameBox={fight.gameBox}
+                                                updateList={this.fetchCurrentFights}
+                                                key={fight.gameBoxId}
+                                                winningTx={fight.winningTx}
+                                            />
+                                            : <BlobinatorFightItem
+                                                blob1={fight.blob1}
+                                                blobinator={fight.blobinator}
+                                                updateList={this.fetchCurrentFights}
+                                                key={fight.gameBoxId}
+                                                winningTx={fight.winningTx}
+                                            />
+                                    )
+                                }
+                            </div>
+                            : <div>No figth found</div>
+                    }
                 </div>
             </Fragment>
         )
