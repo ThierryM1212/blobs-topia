@@ -30,7 +30,7 @@ export const MAX_POWER_DIFF = 3300;
 export const OATMEAL_PRICE = 100000000; 
 
 export const BLOBINATOR_FEE = 30; // per mille
-export const BLOBINATOR_MIN_VALUE = 100000000; 
+export const BLOBINATOR_MIN_VALUE = 1000000000; 
 export const BLOBINATOR_DEFI_TOK_NUM = 2;
 export const BLOBINATOR_DEFI_MODULO_WIN = 30; 
 
