@@ -19,6 +19,10 @@ Yes, most of the actions for a blob are only doable by the address set in that b
 - engage fight (and cancel)
 - engage sale (and cancel)
 - fight
+- fight a Blobinator
+- Change weapon type
+- Upgrade weapon
+- Upgrade armor
 - sell (change owner)
 - kill the blob
 
