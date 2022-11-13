@@ -84,7 +84,7 @@ class BlobEditor extends React.Component {
 
     async mintBlob(name, color1, color2, eyes_pos, mouth_type, svgPath) {
         await createBlobRequest(name, color1, color2, eyes_pos, mouth_type, svgPath);
-        window.open("/myblobs", "_self");
+        //window.open("/myblobs", "_self");
     }
 
     render() {

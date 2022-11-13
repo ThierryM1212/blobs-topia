@@ -62,7 +62,7 @@ export default class BlobinatorPage extends React.Component {
                         this.state.blobinatorFeeList.length > 0 ?
                             <div className="w-100 d-flex flex-column align-items-center">
                                 <h4>Blobinator fee boxes</h4>
-                                <div className='w-50 d-flex flex-column zonecard m-2 p-2'>
+                                <div className='d-flex flex-column zonecard m-2 p-2'>
                                     <div className='w-100 d-flex flex-row justify-content-between '>
                                         <div>Amount</div><div>{formatERGAmount(totalBlobinatorFeeValue)} ERG</div>
                                     </div>
@@ -84,7 +84,8 @@ export default class BlobinatorPage extends React.Component {
                                         <button className='btn btn-ultra-blue' onClick={this.donateToBlobinator} >
                                             Donate for the blobinator
                                         </button>
-                                        <div>You can contribute to the Blobinator invocation by fighting other blob or by directly giving ERGs that will be collected to create it.</div>
+                                        <div>You can contribute to the Blobinator invocation by fighting other blob.</div>
+                                        <div>Or by directly giving ERGs that will be collected to create it.</div>
                                     </div>
                                 </div>
                             </div>
