@@ -98,26 +98,28 @@ export default class FightsPage extends React.Component {
             const userFightList1 = await searchBoxes(GAME_SCRIPT_ADDRESS, [GAME_TOKEN_ID], { R4: addressSigmaPropHex });
             const userFightList2 = await searchBoxes(GAME_SCRIPT_ADDRESS, [GAME_TOKEN_ID], { R7: addressSigmaPropHex });
             const userBlobinatorFightList = await searchBoxes(BLOB_SCRIPT_ADDRESS, [GAME_TOKEN_ID], { R6: addressSigmaPropHex, R7: "5" });
-            console.log("userBlobinatorFightList", userBlobinatorFightList);
+            //console.log("userBlobinatorFightList", userBlobinatorFightList);
             var userFightList = userFightList1.concat(userFightList2).concat(userBlobinatorFightList);
 
             userFightList = userFightList.filter((box, index) => userFightList.findIndex(obj => obj.boxId === box.boxId) === index)
                 .sort((a, b) => a.settlementHeight < b.settlementHeight);
             //console.log("userFightList", userFightList);
-            const userTransactionIDList = userFightList.map(box => box.spentTransactionId).slice(30);
+            
+            const userTransactionIDList = userFightList.map(box => box.spentTransactionId).slice(0, 30);
+            //console.log("userTransactionIDList", userTransactionIDList);
             var fightTransactions = await Promise.all(userTransactionIDList.map(async (txId) => {
                 const tx = await getTransactionByID(txId);
                 return tx;
             }));
             fightTransactions = fightTransactions.sort((a, b) => (a.numConfirmations > b.numConfirmations) ? 1 : -1);
-            console.log("fightTransactions", fightTransactions);
+            //console.log("fightTransactions", fightTransactions);
             //const fightTransactions = await getTransactionsByAddress(GAME_SCRIPT_ADDRESS);
             var blobFights = [];
             for (const tx of fightTransactions) {
                 try {
-                    var blob1 = {};
+                    const blob1 = tx.inputs[0];
+                    //console.log("blob1", tx)
                     if (tx.inputs.length === 3) {
-                        blob1 = tx.inputs[0];
                         var blob2 = tx.inputs[1];
                         var gameBox = tx.inputs[2];
                         if (blob1.additionalRegisters.R7.renderedValue === '3') {
@@ -133,7 +135,6 @@ export default class FightsPage extends React.Component {
                             }
                         }
                     } else {
-                        blob1 = tx.inputs[0];
                         var blobinator = tx.inputs[1];
                         if (blob1.additionalRegisters.R7.renderedValue === '5') {
                             if (blob1 && blobinator) {
@@ -152,7 +153,7 @@ export default class FightsPage extends React.Component {
                 }
 
             }
-            console.log("blobFights ", blobFights)
+            //console.log("blobFights ", blobFights)
             this.setState({
                 previousFights: blobFights,
             })
@@ -160,7 +161,7 @@ export default class FightsPage extends React.Component {
     }
 
     render() {
-        console.log("FightsPage", this.state.currentFights)
+        //console.log("FightsPage", this.state.currentFights, this.state.previousFights)
         return (
             <Fragment >
                 <div className="w-100 d-flex flex-column m-2 p-2 align-items-center" >
@@ -191,7 +192,7 @@ export default class FightsPage extends React.Component {
                     <br />
                     <h4>My fights history</h4>
                     {
-                        this.state.currentFights.length > 0 ?
+                        this.state.previousFights.length > 0 ?
                             <div className="w-75 d-flex flex-wrap m-2">
                                 {
                                     this.state.previousFights.map(fight =>

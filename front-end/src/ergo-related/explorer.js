@@ -22,7 +22,7 @@ async function getRequestV1(url) {
 }
 
 async function postTx(url, body = {}, apiKey = '') {
-    console.log("post0", JSONBigInt.stringify(body));
+    //console.log("post0", JSONBigInt.stringify(body));
     const response = await fetch(url, {
         method: 'POST',
         headers: {
@@ -36,7 +36,7 @@ async function postTx(url, body = {}, apiKey = '') {
     });
 
     const [responseOk, body2] = await Promise.all([response.ok, response.json()]);
-    console.log("post1", body2, responseOk)
+    //console.log("post1", body2, responseOk)
     if (responseOk) {
         if (typeof body2 === 'object') {
             //console.log("post2", body2.id)
@@ -55,7 +55,7 @@ async function postTx(url, body = {}, apiKey = '') {
 }
 
 async function post(url, body = {}, apiKey = '') {
-    console.log("post0", JSONBigInt.stringify(body));
+    //console.log("post0", JSONBigInt.stringify(body));
     const response = await fetch(url, {
         method: 'POST',
         headers: {
@@ -69,7 +69,7 @@ async function post(url, body = {}, apiKey = '') {
     });
 
     const [responseOk, body2] = await Promise.all([response.ok, response.json()]);
-    console.log("post1", body2, responseOk)
+    //console.log("post1", body2, responseOk)
     if (responseOk) {
         return { result: true, data: body2 };
     } else {
