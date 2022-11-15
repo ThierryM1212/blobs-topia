@@ -153,7 +153,7 @@
         false
     }
 
-    // ENGAGE FIGTH
+    // ENGAGE fight
     val validEngageFigth = if (validBlob0 && validBlob1 && (blobStateIn == 1)) {
         if (OUTPUTS.size >= 4) {
             if (blake2b256(OUTPUTS(2).propositionBytes) == gameScriptHash) {
@@ -185,7 +185,7 @@
         false
     }
     
-    // FIGTH RESULT
+    // fight RESULT
     val validFightResult = if (validBlob0 && validBlob1 && (blobStateIn == 3)) {
         (
             ( // blob replicated 0

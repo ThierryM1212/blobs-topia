@@ -100,10 +100,10 @@ export default class FightsPage extends React.Component {
             const userBlobinatorFightList = await searchBoxes(BLOB_SCRIPT_ADDRESS, [GAME_TOKEN_ID], { R6: addressSigmaPropHex, R7: "5" });
             //console.log("userBlobinatorFightList", userBlobinatorFightList);
             var userFightList = userFightList1.concat(userFightList2).concat(userBlobinatorFightList);
-
-            userFightList = userFightList.filter((box, index) => userFightList.findIndex(obj => obj.boxId === box.boxId) === index)
-                .sort((a, b) => a.settlementHeight < b.settlementHeight);
             //console.log("userFightList", userFightList);
+            userFightList = userFightList.filter((box, index) => userFightList.findIndex(obj => obj.boxId === box.boxId) === index)
+                .sort((a, b) => (a.settlementHeight < b.settlementHeight) ? 1 : -1);
+            //console.log("userFightList2", userFightList);
             
             const userTransactionIDList = userFightList.map(box => box.spentTransactionId).slice(0, 30);
             //console.log("userTransactionIDList", userTransactionIDList);
@@ -187,7 +187,7 @@ export default class FightsPage extends React.Component {
                                 )
                             }
                         </div>
-                        : <div>No figth found</div>
+                        : <div>No fight found</div>
                     }
                     <br />
                     <h4>My fights history</h4>
@@ -215,7 +215,7 @@ export default class FightsPage extends React.Component {
                                     )
                                 }
                             </div>
-                            : <div>No figth found</div>
+                            : <div>No fight found</div>
                     }
                 </div>
             </Fragment>

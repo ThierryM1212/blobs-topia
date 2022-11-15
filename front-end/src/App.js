@@ -16,6 +16,7 @@ import AboutPage from './pages/about';
 import OatmealShopPage from './pages/oatmeal-shop';
 import { EditorPage } from './pages/editor-page';
 import BlobinatorPage from './pages/blobinators';
+import OneBlobWrapper from './components/OneBlobWrapper';
 
 
 export default class App extends React.Component {
@@ -38,6 +39,7 @@ export default class App extends React.Component {
             <Route path={ "/halloffame"} element={<HallOfFamePage />} />
             <Route path={ "/about"} element={<AboutPage />} />
             <Route path={ "/admin"} element={<Admin />} />
+            <Route path={ "/blob/:id"} element={<OneBlobWrapper />} />
           </Routes>
           <Footer />
         </BrowserRouter>

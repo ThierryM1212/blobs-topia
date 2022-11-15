@@ -10,6 +10,7 @@ import { formatERGAmount, formatLongString, getBlobPowers } from '../utils/utils
 import CopyIcon from '../images/outline_content_copy_black_24dp.png';
 import OpenAction from '../images/outline_keyboard_double_arrow_right_black_24dp.png';
 import CloseAction from '../images/outline_keyboard_double_arrow_left_black_24dp.png';
+import OpenNew from '../images/outline_open_in_new_black_24dp.png';
 import PhotoIcon from '../images/outline_photo_camera_black_24dp.png';
 import UpgradeIcon from '../images/outline_upgrade_white_24dp.png';
 import SwordsIcon from '../images/swords.png';
@@ -187,6 +188,10 @@ export default class BlobItem extends React.Component {
                     <div className="d-flex flex-row justify-content-between w-100">
                         <BlobRating averagePower={(this.state.power + this.state.defense) / 2} />
                         <div className="d-flex flex-row align-items-end">
+                            <ImageButton action={() => {window.open("/blob/"+this.state.blobBoxJSON.additionalRegisters.R9.renderedValue, '_self').focus()}}
+                                alt="photo"
+                                tips={"View the blob"}
+                                image={OpenNew} />
                             <ImageButton action={() => exportAsImage(this.blobRef.current, this.state.name + "_" + (new Date().toISOString()).slice(0, -5))}
                                 alt="photo"
                                 tips={"Get a selfie"}

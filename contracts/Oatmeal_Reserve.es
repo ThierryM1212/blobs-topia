@@ -61,12 +61,12 @@
                                 OUTPUTS(2).tokens(2)._1 == SpicyOatmealNFTId                             &&
                                 OUTPUTS(2).tokens(2)._2 == 2                                             &&
                                 OUTPUTS(0).R8[Long].get == OUTPUTS(1).R8[Long].get                       &&
-                                // blob in first position for the figth                                  
+                                // blob in first position for the fight                                  
                                 OUTPUTS(2).value >= 2 * OUTPUTS(0).R8[Long].get - txFee                  &&
                                 OUTPUTS(2).R4[SigmaProp].get == OUTPUTS(0).R6[SigmaProp].get             &&
                                 OUTPUTS(2).R5[Long].get == OUTPUTS(0).R9[Long].get                       &&
                                 OUTPUTS(2).R6[Coll[Int]].get == OUTPUTS(0).R5[Coll[Int]].get             &&
-                                // blob in second position for the figth                                  
+                                // blob in second position for the fight                                  
                                 OUTPUTS(2).value >= 2 * OUTPUTS(1).R8[Long].get - txFee                  &&
                                 OUTPUTS(2).R7[SigmaProp].get == OUTPUTS(1).R6[SigmaProp].get             &&
                                 OUTPUTS(2).R8[Long].get == OUTPUTS(1).R9[Long].get                       &&

@@ -14,7 +14,7 @@ export default class Home extends React.Component {
                     <div className='zonecard d-flex flex-column m-2 p-2 align-items-start'>
                         <p>Get a Blob fighter smart contract to confront other Blobs and earn ERGs.</p>
                         <p>Improve your statistics and equipment to lead the hall of fame.</p>
-                        <p>Figth against the terrible Blobinator to get the reward.</p>
+                        <p>fight against the terrible Blobinator to get the reward.</p>
                         <p>More info in the <a href="/about" >About</a>.</p>
                     </div>
                     <div className='d-flex flex-column w-75 m-2 p-2 align-items-center'>

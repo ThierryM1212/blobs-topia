@@ -68,7 +68,7 @@ export async function setBlobStatus(mode, blobBoxJSON, amountFloat, mnemonic, ad
         const maxFightValueNano = parseInt(blobIniValueNano) - BLOB_ERG_MIN_VALUE;
         //console.log("maxFightValueNano", maxFightValueNano, amountNano);
         if (amountNano > maxFightValueNano) {
-            console.error("Not enough ERG in the blob to figth, maximum figth value: " + (maxFightValueNano / NANOERG_TO_ERG).toFixed(4) + " ERG");
+            console.error("Not enough ERG in the blob to fight, maximum fight value: " + (maxFightValueNano / NANOERG_TO_ERG).toFixed(4) + " ERG");
             return;
         }
     } else if (mode === 'sell') {

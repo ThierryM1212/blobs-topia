@@ -15,7 +15,7 @@ function NavigationBar(props) {
                     <Nav.Link href={"/"}>Home</Nav.Link>
                     <Nav.Link href={"/myblobs"}>My Blobs</Nav.Link>
                     <Nav.Link href={"/matchmaking"}>Match making</Nav.Link>
-                    <Nav.Link href={"/fights"}>Figths</Nav.Link>
+                    <Nav.Link href={"/fights"}>Fights</Nav.Link>
                     <Nav.Link href={"/blobsshop"}>Blobs shop</Nav.Link>
                     <Nav.Link href={"/oatmealshop"}>Oatmeal shop</Nav.Link>
                     <Nav.Link href={"/blobinator"}>Blobinators</Nav.Link>
