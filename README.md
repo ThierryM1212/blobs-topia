@@ -57,4 +57,5 @@ Ergo contracts used by the game to be compiled off line and integrated in the sc
 
 ## blobs-bot
 Off-chain bot that can process the dApp requests, not mandatory as the buttons exists in the front end
+Fight bot allowing to automatically re-engage the fight for a configured amount
 

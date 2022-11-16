@@ -2,7 +2,7 @@
   "name": "blobs-topia",
   "version": "0.1.0",
   "private": true,
-  "homepage": ".",
+  "homepage": "https://www.blobs-topia.fun/",
   "dependencies": {
     "@coinbarn/ergo-ts": "^0.3.0",
     "@sweetalert2/theme-dark": "^5.0.8",
