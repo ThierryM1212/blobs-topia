@@ -1,5 +1,5 @@
 import React from 'react';
-import { computeP1WinningChance } from '../utils/utils';
+import { computeP1WinningChance, formatERGAmount } from '../utils/utils';
 import BlobItem from './BlobItem';
 import { WinPercent } from './WinPercent';
 import { processFightResult } from '../ergo-related/bot_wasm';
@@ -79,7 +79,11 @@ export default class FightItem extends React.Component {
                             <TransactionId txId={this.state.p1WinTxId} />
                     }
                 </div>
-                <div className='h-100 d-flex align-items-end'>
+                <div className='h-100 d-flex flex-column justify-content-between'>
+                    <div className='fightPrize m-2 p-2'>
+                        <div>Prize</div>
+                        <div>{formatERGAmount(this.state.gameBox.value)} ERG</div>
+                    </div>
                     {
                         this.state.winningTx ?
                             this.state.p1WinTxId !== '' ?
@@ -87,7 +91,8 @@ export default class FightItem extends React.Component {
                                 :
                                 <div><h3>P2 Won !</h3><TransactionId txId={this.state.p2WinTxId} /></div>
                             :
-                            <div>
+                            <div >
+
                                 {
                                     this.state.p1Winindex !== -1 || this.state.p2Winindex !== -1 ?
                                         this.state.p1Winindex < this.state.p2Winindex ?
@@ -98,7 +103,7 @@ export default class FightItem extends React.Component {
                                                     colors={["#339CFF", "#FF3F33"]}
                                                     hideText={true}
                                                 />
-                                                </div>
+                                            </div>
                                             :
                                             <div className='w-75 transparent-image'>
                                                 <GaugeChart id="gauge-chart1"

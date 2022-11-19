@@ -161,6 +161,12 @@ textarea {
   max-width: 70rem;
 }
 
+.fightPrize {
+  border: 3px solid yellow;
+  border-radius: 5px;
+  color: yellow;
+}
+
 .zoneprice {
   background-size: 100% 100%;
   background-image: url('images/price_background.png');

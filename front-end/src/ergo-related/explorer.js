@@ -255,7 +255,13 @@ export async function searchBoxes(address, tokens, registers = {}, limit = 50) {
     if (Object.keys(registers).length > 0) {
         searchParam['registers'] = registers;
     }
-    const res = await post(explorerApiV1 + `/boxes/search?limit=${limit}`, searchParam);
+    var res = await post(explorerApiV1 + `/boxes/search?limit=${limit}`, searchParam);
+    //console.log("searchBoxes res", res);
+    if (res.data.total > limit) {
+        const offset = res.data.total - limit;
+        res = await post(explorerApiV1 + `/boxes/search?limit=${limit}&offset=${offset}`, searchParam);
+        //console.log("searchBoxes res offset", offset, res);
+    }
     return res.data.items;
 }
 

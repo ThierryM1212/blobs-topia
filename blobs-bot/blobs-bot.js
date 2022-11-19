@@ -30,7 +30,7 @@ async function fetchMempoolUnspentBoxes() {
                 BLOBINATOR_SCRIPT_ADDRESS,
                 BLOBINATOR_FEE_SCRIPT_ADDRESS,
             ]);
-        mempoolBoxes = newMempoolBoxes;
+        mempoolBoxes = {...newMempoolBoxes};
     } catch (e) {
         console.log("fetchMempoolUnspentBoxes error: " + e.toString())
     }
@@ -399,6 +399,6 @@ setInterval(processBlobRequests, 24000);
 setInterval(processFigth, 30000);
 setInterval(processFightsResult, 20000);
 setInterval(processOatmealBuyRequests, 26000);
-setInterval(processBlobinatorFees, 10000);
+setInterval(processBlobinatorFees, 60000);
 setInterval(processEngageBlobinatorFigth, 21000);
 setInterval(processBlobinatorFigthResults, 22000);

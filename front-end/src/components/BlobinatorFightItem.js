@@ -41,25 +41,30 @@ export default class BlobinatorFightItem extends React.Component {
 
     async processFight() {
         var alert = waitingAlert("Preparing the fight results...")
-        const currentConfigBox = await boxByTokenId(CONFIG_TOKEN_ID);
-        //console.log("processFight", this.state, currentConfigBox);
-        const [p1WinTxId, p2WinTxId] = await blobinatorFightResults(this.state.blob1, this.state.blobinator, currentConfigBox[0]);
-        console.log("processFight", p1WinTxId, p2WinTxId)
-        if (p1WinTxId[1] === -1 && p2WinTxId[1] === -1) {
-            alert = errorAlert("Cannot process the fight yet", "The fight need at least 1 confirmation.");
-            return;
+        try {
+            const currentConfigBox = await boxByTokenId(CONFIG_TOKEN_ID);
+            //console.log("processFight", this.state, currentConfigBox);
+            const [p1WinTxId, p2WinTxId] = await blobinatorFightResults(this.state.blob1, this.state.blobinator, currentConfigBox[0]);
+            console.log("processFight", p1WinTxId, p2WinTxId)
+            if (p1WinTxId[1] === -1 && p2WinTxId[1] === -1) {
+                alert = errorAlert("Cannot process the fight yet", "The fight need at least 1 confirmation.");
+                return;
+            }
+            this.setState({
+                p1WinTxId: p1WinTxId[0],
+                p1Winindex: p1WinTxId[1],
+                p2WinTxId: p2WinTxId[0],
+                p2Winindex: p2WinTxId[1],
+            })
+        } catch (e) {
+            console.log(e);
         }
-        this.setState({
-            p1WinTxId: p1WinTxId[0],
-            p1Winindex: p1WinTxId[1],
-            p2WinTxId: p2WinTxId[0],
-            p2Winindex: p2WinTxId[1],
-        })
         alert.close();
     }
 
     render() {
-        var p1WinChance = 1 / BLOBINATOR_DEFI_MODULO_WIN;
+        // 17.84 average of [36, 66, 17, 17, 17, 37, 12, 5, 10, 1, 0, 14, 0]
+        var p1WinChance = 1 / (17.84);
         const p2WinChance = 1 - p1WinChance;
         //console.log("render FightItem", this.state)
         return (

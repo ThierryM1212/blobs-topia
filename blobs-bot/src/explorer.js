@@ -67,6 +67,10 @@ async function getRequestV1(url) {
     const res = await get(DEFAULT_EXPLORER_API_ADDRESS + 'api/v1' + url, '')
     return res.items;
 }
+async function getRequestV1Bal(url) {
+    const res = await get(DEFAULT_EXPLORER_API_ADDRESS + 'api/v1' + url, '')
+    return res;
+}
 async function getRequestV0(url) {
     const res = await get(DEFAULT_EXPLORER_API_ADDRESS + 'api/v0' + url, '')
     return res.items;
@@ -215,4 +219,32 @@ export async function getUnspentBoxesForAddressUpdated(address) {
         console.log(e);
         return [];
     }
+}
+
+export async function getBalanceForAddress(addr) {
+    const res = await getRequestV1Bal(`/addresses/${addr}/balance/total`);
+    //console.log("getBalanceUnconfirmedForAddress", res)
+    return res;
+}
+
+export async function getBalance(address, tokenId = 'ERG') {
+    //console.log('getBalance', tokenId);
+    if (address !== '') {
+        const balance = await getBalanceForAddress(address);
+        //console.log("getBalance ergopay", balance)
+        if (balance.confirmed) {
+            if (tokenId === 'ERG') {
+                return balance.confirmed.nanoErgs;
+            } else {
+                var tokenAmount = 0;
+                for (const tok of balance.confirmed.tokens) {
+                    if (tok.tokenId === tokenId) {
+                        tokenAmount = tok.amount;
+                    }
+                }
+                return tokenAmount;
+            }
+        }
+    }
+    return 0;
 }

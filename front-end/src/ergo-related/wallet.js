@@ -110,19 +110,15 @@ export async function getBalance(tokenId = 'ERG') {
         const address = localStorage.getItem('address') ?? '';
         if (address !== '') {
             const balance = await getBalanceForAddress(address);
+            //console.log("getBalance ergopay", balance)
             if (balance.confirmed) {
                 if (tokenId === 'ERG') {
-                    return balance.confirmed.nanoErgs + balance.unconfirmed.nanoErgs;
+                    return balance.confirmed.nanoErgs;
                 } else {
                     var tokenAmount = 0;
                     for (const tok of balance.confirmed.tokens) {
                         if (tok.tokenId === tokenId) {
                             tokenAmount = tok.amount;
-                        }
-                    }
-                    for (const tok of balance.unconfirmed.tokens) {
-                        if (tok.tokenId === tokenId) {
-                            tokenAmount = tokenAmount + tok.amount;
                         }
                     }
                     return tokenAmount;

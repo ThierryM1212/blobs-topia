@@ -52,8 +52,10 @@ export default class OneBlobPage extends React.Component {
     }
 
     async fetchBlob() {
-        const blobs = await searchUnspentBoxesUpdated(BLOB_SCRIPT_ADDRESS, [GAME_TOKEN_ID], { R9: this.state.blobId });
-        if (blobs && blobs.length === 1) {
+        const blobs = (await searchUnspentBoxesUpdated(BLOB_SCRIPT_ADDRESS, [GAME_TOKEN_ID], { R9: this.state.blobId }))
+        .sort((a, b) => (a.creationHeight< b.creationHeight) ? 1 : -1)
+        //console.log("Oneblob fetchBlob",blobs);
+        if (blobs && blobs.length >= 1) {
             return blobs[0];
         }
     }

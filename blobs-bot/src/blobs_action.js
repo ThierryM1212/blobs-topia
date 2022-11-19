@@ -1,8 +1,8 @@
 import JSONBigInt from 'json-bigint';
-import { BLOBINATOR_DEFI_TOK_NUM, BLOB_ERG_MIN_VALUE, CONFIG_TOKEN_ID, GAME_TOKEN_ID, MIN_NANOERG_BOX_VALUE, NANOERG_TO_ERG, SPICY_OATMEAL_TOKEN_ID, TX_FEE } from "./constants.js";
+import { BLOBINATOR_DEFI_TOK_NUM, BLOBINATOR_TOKEN_ID, BLOB_ERG_MIN_VALUE, CONFIG_TOKEN_ID, GAME_TOKEN_ID, MIN_NANOERG_BOX_VALUE, NANOERG_TO_ERG, SPICY_OATMEAL_TOKEN_ID, TX_FEE } from "./constants.js";
 import { BLOB_SCRIPT_ADDRESS, CONFIG_SCRIPT_ADDRESS } from './script_constants.js';
 import { boxByTokenId, currentHeight, getSpentAndUnspentBoxesFromMempool, getUnspentBoxesForAddressUpdated, sendTx } from "./explorer.js";
-import { createTransaction, encodeLong, getUtxosListValue, getWalletForAddress, parseUtxo, signTransaction } from "./wasm.js";
+import { createTransaction, encodeLong, getTokenListFromUtxos, getUtxosListValue, getWalletForAddress, parseUtxo, signTransaction } from "./wasm.js";
 let ergolib = import('ergo-lib-wasm-nodejs');
 
 
@@ -28,11 +28,10 @@ export async function getCurrentConfigBox2() {
     return updatedConfigBoxes[0];
 }
 
-export async function setBlobStatus(mode, blobBoxJSON, amountFloat, mnemonic, address) {
+export async function setBlobStatus(mode, blobBoxJSON, amountNano, mnemonic, address) {
     console.log("setBlobStatus mode", mode);
     const creationHeight = await currentHeight();
     const wallet = await getWalletForAddress(mnemonic, address);
-    var amountNano = Math.round(amountFloat * NANOERG_TO_ERG);
 
     const blobIniValueNano = blobBoxJSON.value;
     //console.log("blobIniValueNano",blobBoxJSON)
@@ -41,8 +40,21 @@ export async function setBlobStatus(mode, blobBoxJSON, amountFloat, mnemonic, ad
     const availableBoxes = await getUnspentBoxesForAddressUpdated(address);
     if (getUtxosListValue(availableBoxes) < BigInt(MIN_NANOERG_BOX_VALUE + TX_FEE)) {
         console.error('Not enough coins')
+        return;
     }
+    if (mode === 'blobinator' && getTokenListFromUtxos(availableBoxes)[SPICY_OATMEAL_TOKEN_ID] < BigInt(2)) {
+        console.error('Not enough spicy oatmeal')
+        return;
+    }
+
     for (const box of availableBoxes) {
+        if (mode === 'blobinator') {
+            if (getTokenListFromUtxos(utxos)[SPICY_OATMEAL_TOKEN_ID] < BigInt(2) &&
+                getTokenListFromUtxos([box])[SPICY_OATMEAL_TOKEN_ID] > BigInt(0)) {
+                utxos.push(box);
+                continue;
+            }
+        }
         if (getUtxosListValue(utxos) < BigInt(amountNano)) {
             utxos.push(box)
         }
@@ -68,7 +80,7 @@ export async function setBlobStatus(mode, blobBoxJSON, amountFloat, mnemonic, ad
         const maxFightValueNano = parseInt(blobIniValueNano) - BLOB_ERG_MIN_VALUE;
         //console.log("maxFightValueNano", maxFightValueNano, amountNano);
         if (amountNano > maxFightValueNano) {
-            console.error("Not enough ERG in the blob to fight, maximum fight value: " + (maxFightValueNano / NANOERG_TO_ERG).toFixed(4) + " ERG");
+            console.error("Not enough ERG in the blob to figth, maximum figth value: " + (maxFightValueNano / NANOERG_TO_ERG).toFixed(4) + " ERG");
             return;
         }
     } else if (mode === 'sell') {
