@@ -156,32 +156,42 @@ export async function getMempoolUnspentBoxesByAddresses(addresses) {
 }
 
 export async function searchUnspentBoxes(address, tokens, registers = {}) {
-    const ergoT = await addressToErgotree(address);
-    var searchParam = { "ergoTreeTemplateHash": await ergoTreeToTemplateHash(ergoT) }
-    if (tokens.length > 0) {
-        searchParam["assets"] = tokens;
+    try {
+        const ergoT = await addressToErgotree(address);
+        var searchParam = { "ergoTreeTemplateHash": await ergoTreeToTemplateHash(ergoT) }
+        if (tokens.length > 0) {
+            searchParam["assets"] = tokens;
+        }
+        if (Object.keys(registers).length > 0) {
+            searchParam['registers'] = registers;
+        }
+        const res = await post(DEFAULT_EXPLORER_API_ADDRESS + 'api/v1' + '/boxes/unspent/search', searchParam);
+        //console.log("res", res)
+        return res.data.items;
+    } catch (e) {
+        console.log("searchUnspentBoxes", e);
+        return [];
     }
-    if (Object.keys(registers).length > 0) {
-        searchParam['registers'] = registers;
-    }
-    const res = await post(DEFAULT_EXPLORER_API_ADDRESS + 'api/v1' + '/boxes/unspent/search', searchParam);
-    //console.log("res", res)
-    return res.data.items;
 }
 
 export async function searchUnspentBoxesUpdated(address, tokens, registers = {}) {
-    const currentBlobBoxes = await searchUnspentBoxes(address, tokens, registers);
-    const [spentBlobs, newBlobs] = await getSpentAndUnspentBoxesFromMempool(address);
-    const spentBlobBoxIds = spentBlobs.map(box => box.boxId);
-    var updatedBlobBoxes = newBlobs
-        .concat(currentBlobBoxes)
-        .filter(box => box.address === address)
-        .filter(box => !spentBlobBoxIds.includes(box.boxId));
+    try {
+        const currentBlobBoxes = await searchUnspentBoxes(address, tokens, registers);
+        const [spentBlobs, newBlobs] = await getSpentAndUnspentBoxesFromMempool(address);
+        const spentBlobBoxIds = spentBlobs.map(box => box.boxId);
+        var updatedBlobBoxes = newBlobs
+            .concat(currentBlobBoxes)
+            .filter(box => box.address === address)
+            .filter(box => !spentBlobBoxIds.includes(box.boxId));
 
-    for (const register of Object.keys(registers)) {
-        updatedBlobBoxes = updatedBlobBoxes.filter(box => box.additionalRegisters[register].renderedValue === registers[register])
+        for (const register of Object.keys(registers)) {
+            updatedBlobBoxes = updatedBlobBoxes.filter(box => box.additionalRegisters[register].renderedValue === registers[register])
+        }
+        return updatedBlobBoxes;
+    } catch (e) {
+        console.log("searchUnspentBoxesUpdated", e);
+        return [];
     }
-    return updatedBlobBoxes;
 }
 
 

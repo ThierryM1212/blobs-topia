@@ -186,9 +186,9 @@ export async function getMempoolUnspentBoxesByAddresses(addresses) {
     return res;
 }
 
-export async function getUnspentBoxesForAddressUpdated(address) {
+export async function getUnspentBoxesForAddressUpdated(address, limit = 50) {
     try {
-        const boxesTmp = await getUnspentBoxesByAddress(address);
+        const boxesTmp = await getUnspentBoxesByAddress(address, limit);
         const [spentBlobs, newBlobs] = await getSpentAndUnspentBoxesFromMempool(address);
         const spentBlobBoxIds = spentBlobs.map(box => box.boxId);
         const boxes = newBlobs.concat(boxesTmp).filter(box => !spentBlobBoxIds.includes(box.boxId));

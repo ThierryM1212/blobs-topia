@@ -83,7 +83,7 @@ export default class Admin extends React.Component {
         const oatmealReserveSellList = await getUnspentBoxesByAddress(OATMEAL_SELL_RESERVE_SCRIPT_ADDRESS);
         const blobinatorReserveList = await getUnspentBoxesByAddress(BLOBINATOR_RESERVE_SCRIPT_ADDRESS);
         const blobinatorList = await getUnspentBoxesByAddress(BLOBINATOR_SCRIPT_ADDRESS);
-        const burnFeeList = await getUnspentBoxesByAddress(BURN_ALL_SCRIPT_ADDRESS);
+        const burnFeeList = await getUnspentBoxesByAddress(BURN_ALL_SCRIPT_ADDRESS, 500);
         this.setState({
             reserveList: reserveList,
             oatmealReserveList: oatmealReserveList,

@@ -39,9 +39,9 @@ export async function signTransactionMultiContext(unsignedTx, inputs, dataInputs
         try {
             const ctx = await getErgoStateContext2(i);
             const signedTx = wallet.sign_transaction(ctx, unsignedTransaction, inputBoxes, dataInputsBoxes);
-            console.log("try "+i.toString())
+            console.log("try " + i.toString())
             return signedTx.to_json();
-        } catch(e) {
+        } catch (e) {
             null;
         }
     }
@@ -83,18 +83,18 @@ export async function createTransaction(boxSelection, outputCandidates, dataInpu
     var outputJs = await boxCandidatesToJsonMin(outputCandidates);
     const missingErgs = getMissingErg(utxos, outputJs) - BigInt(TX_FEE);
     const tokens = getMissingTokens(utxos, outputJs);
-    
+
     if (missingErgs > 0 || Object.keys(tokens) > 0) {
         const changeBoxValue = (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str(missingErgs.toString()));
         const changeBoxBuilder = new (await ergolib).ErgoBoxCandidateBuilder(
             changeBoxValue,
             (await ergolib).Contract.pay_to_address((await ergolib).Address.from_base58(changeAddress)),
             creationHeight);
-            for (const tokId of Object.keys(tokens)) {
-                const tokenId = (await ergolib).TokenId.from_str(tokId);
-                const tokenAmount = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str(tokens[tokId].toString()));
-                changeBoxBuilder.add_token(tokenId, tokenAmount);
-            }
+        for (const tokId of Object.keys(tokens)) {
+            const tokenId = (await ergolib).TokenId.from_str(tokId);
+            const tokenAmount = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str(tokens[tokId].toString()));
+            changeBoxBuilder.add_token(tokenId, tokenAmount);
+        }
         try {
             outputCandidates.add(changeBoxBuilder.build());
         } catch (e) {
@@ -211,12 +211,12 @@ function parseAdditionalRegisters(json) {
         } else {
             registterOut[key] = value;
         }
-      });
-      //console.log("registterOut",registterOut);
+    });
+    //console.log("registterOut",registterOut);
     return registterOut;
 }
 
-export async function getWalletForAddress (mnemonic, address) {
+export async function getWalletForAddress(mnemonic, address) {
     const dlogSecret = await getSecretForAddress(mnemonic, address);
     var secretKeys = new (await ergolib).SecretKeys();
     secretKeys.add(dlogSecret);
@@ -235,12 +235,12 @@ async function getSecretForAddress(mnemonic, address) {
 async function getDerivationPathForAddress(rootSecret, address) {
     let path = (await ergolib).DerivationPath.new(0, new Uint32Array([0]));
     var subsequentsMaxes = [10, 100, 1000];
-    
+
     for (const max of subsequentsMaxes) {
         var i = 0, j = 0, found = false;
-        while (i<max && !found) {
+        while (i < max && !found) {
             j = 0;
-            while (j<max && !found) {
+            while (j < max && !found) {
                 let path = (await ergolib).DerivationPath.new(i, new Uint32Array([j]));
                 //console.log("getDerivationPathForAddress", i, j, path.toString());
                 const changeSecretKey = deriveSecretKey(rootSecret, path);
@@ -259,10 +259,10 @@ async function getDerivationPathForAddress(rootSecret, address) {
 }
 
 const deriveSecretKey = (rootSecret, path) =>
-    rootSecret.derive(path); 
+    rootSecret.derive(path);
 
 function isDict(v) {
-    return typeof v==='object' && v!==null && !(v instanceof Array) && !(v instanceof Date);
+    return typeof v === 'object' && v !== null && !(v instanceof Array) && !(v instanceof Date);
 }
 
 export async function encodeLongArray(longArray) {
@@ -295,13 +295,18 @@ export async function ergoTreeToTemplate(ergoTree) {
 }
 
 export async function ergoTreeToTemplateHash(ergoTree) {
-    const ergoTreeTemplateHex = await ergoTreeToTemplate(ergoTree);
-    //return toHexString(ergoTreeWASM.template_bytes());
-    return crypto.SHA256(crypto.enc.Hex.parse(ergoTreeTemplateHex)).toString(crypto.enc.Hex);
+    try {
+        const ergoTreeTemplateHex = await ergoTreeToTemplate(ergoTree);
+        //return toHexString(ergoTreeWASM.template_bytes());
+        return crypto.SHA256(crypto.enc.Hex.parse(ergoTreeTemplateHex)).toString(crypto.enc.Hex);
+    } catch (e) {
+        console.log("ergoTreeToTemplateHash", e);
+        return "";
+    }
 }
 
 export function toHexString(byteArray) {
-    return Array.from(byteArray, function(byte) {
+    return Array.from(byteArray, function (byte) {
         return ('0' + (byte & 0xFF).toString(16)).slice(-2);
     }).join('')
 }
@@ -316,10 +321,11 @@ export function getTokenListFromUtxos(utxos) {
     var tokenList = {};
     for (const i in utxos) {
         for (const j in utxos[i].assets) {
+            const tokenId = utxos[i].assets[j].tokenId.toString() ;
             if (utxos[i].assets[j].tokenId in tokenList) {
-                tokenList[utxos[i].assets[j].tokenId] = BigInt(tokenList[utxos[i].assets[j].tokenId]) + BigInt(utxos[i].assets[j].amount);
+                tokenList[tokenId] = BigInt(tokenList[tokenId]) + BigInt(utxos[i].assets[j].amount);
             } else {
-                tokenList[utxos[i].assets[j].tokenId] = BigInt(utxos[i].assets[j].amount);
+                tokenList[tokenId] = BigInt(utxos[i].assets[j].amount);
             }
         }
     }

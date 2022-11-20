@@ -46,11 +46,11 @@ export async function setBlobStatus(mode, blobBoxJSON, amountNano, mnemonic, add
         console.error('Not enough spicy oatmeal')
         return;
     }
-
+    //console.log("availableBoxes", availableBoxes)
     for (const box of availableBoxes) {
         if (mode === 'blobinator') {
-            if (getTokenListFromUtxos(utxos)[SPICY_OATMEAL_TOKEN_ID] < BigInt(2) &&
-                getTokenListFromUtxos([box])[SPICY_OATMEAL_TOKEN_ID] > BigInt(0)) {
+            if ((getTokenListFromUtxos(utxos)[SPICY_OATMEAL_TOKEN_ID] ??  BigInt(0)) < BigInt(2) &&
+                getTokenListFromUtxos([box])[SPICY_OATMEAL_TOKEN_ID ??  BigInt(0)] > BigInt(0)) {
                 utxos.push(box);
                 continue;
             }
