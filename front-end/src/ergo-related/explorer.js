@@ -1,6 +1,6 @@
 import { get, getStream } from './rest';
 import JSONBigInt from 'json-bigint';
-import { DEFAULT_EXPLORER_API_ADDRESS, GAME_TOKEN_ID } from '../utils/constants';
+import { DEFAULT_EXPLORER_API_ADDRESS, GAME_TOKEN_ID, IGNORED_MEMPOOL_TRANSACTIONS } from '../utils/constants';
 import { BLOB_SCRIPT, BLOB_SCRIPT_ADDRESS } from "../utils/script_constants";
 import { addressToErgoTree, ergoTreeToTemplateHash } from './serializer';
 
@@ -134,7 +134,7 @@ export async function getTransactionsByAddress(addr) {
 export async function getUnconfirmedTxsFor(addr) {
     const res = await getRequestV1(`/mempool/transactions/byAddress/${addr}`);
     //console.log("getUnconfirmedTxsFor", res);
-    return res.data.items;
+    return res.data.items.filter(tx => !IGNORED_MEMPOOL_TRANSACTIONS.includes(tx.id));
 }
 
 export async function getSpentAndUnspentBoxesFromMempool(address) {

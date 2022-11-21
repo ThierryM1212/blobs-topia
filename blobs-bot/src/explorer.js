@@ -1,7 +1,7 @@
 import { fetch } from 'undici';
 import { TextDecoderStream } from 'node:stream/web';
 import JSONBigInt from 'json-bigint';
-import { DEFAULT_EXPLORER_API_ADDRESS, GAME_TOKEN_ID } from './constants.js';
+import { DEFAULT_EXPLORER_API_ADDRESS, GAME_TOKEN_ID, IGNORED_MEMPOOL_TRANSACTIONS } from './constants.js';
 import { addressToErgotree, ergoTreeToTemplateHash } from './wasm.js';
 import { BLOB_SCRIPT, BLOB_SCRIPT_ADDRESS } from './script_constants.js';
 
@@ -115,7 +115,7 @@ export async function postTx(url, body = {}, apiKey = '') {
             return bodyRes;
         }
     } else {
-        //console.log("fetch2", bodyRes);
+        console.log("Error", bodyRes);
         return;
     }
 }
@@ -198,7 +198,7 @@ export async function searchUnspentBoxesUpdated(address, tokens, registers = {})
 export async function getUnconfirmedTxsFor(addr) {
     const res = await getRequestV1(`/mempool/transactions/byAddress/${addr}`);
     //console.log("getUnconfirmedTxsFor",addr, res);
-    return res;
+    return res.filter(tx => !IGNORED_MEMPOOL_TRANSACTIONS.includes(tx.id));
 }
 
 export async function getSpentAndUnspentBoxesFromMempool(address) {

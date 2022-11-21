@@ -32,7 +32,7 @@ export const OATMEAL_PRICE = 100000000;
 export const BLOBINATOR_FEE = 30; // per mille
 export const BLOBINATOR_MIN_VALUE = 1000000000; 
 export const BLOBINATOR_DEFI_TOK_NUM = 2;
-export const BLOBINATOR_DEFI_MODULO_WIN = 30; 
+export const BLOBINATOR_DEFI_MODULO_WIN = 6; 
 
 export const RATING_RANGES = [250, 1000, 3000, 6000, 9000];
 
@@ -41,4 +41,6 @@ export const UPGRADEABLE_BLOB_SCRIPT_ADDRESSES = [
 
 ]
 
-
+export const IGNORED_MEMPOOL_TRANSACTIONS = [
+    '2b3034171f119304ed7468ecfd426f70756abe2dbbc6b2082f6f206c16495015'
+]
