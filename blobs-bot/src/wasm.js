@@ -6,9 +6,6 @@ import crypto from "crypto-js";
 
 
 export async function getErgoStateContext() {
-    const explorerContext = (await getExplorerBlockHeaders());
-    const block_headers = (await ergolib).BlockHeaders.from_json(explorerContext);
-    const pre_header = (await ergolib).PreHeader.from_block_header(block_headers.get(0));
     return await getErgoStateContext2(0);
 }
 
@@ -16,7 +13,8 @@ export async function getErgoStateContext2(contextId) {
     const explorerContext = (await getExplorerBlockHeadersFull()).splice(contextId, 10);
     const block_headers = (await ergolib).BlockHeaders.from_json(explorerContext);
     const pre_header = (await ergolib).PreHeader.from_block_header(block_headers.get(0));
-    return new (await ergolib).ErgoStateContext(pre_header, block_headers);
+    const context = new (await ergolib).ErgoStateContext(pre_header, block_headers);
+    return context;
 }
 
 export async function signTransaction(unsignedTx, inputs, dataInputs, wallet) {
@@ -27,7 +25,12 @@ export async function signTransaction(unsignedTx, inputs, dataInputs, wallet) {
     const ctx = await getErgoStateContext();
     //console.log("signTransaction2", unsignedTx, inputs, dataInputs);
     const signedTx = wallet.sign_transaction(ctx, unsignedTransaction, inputBoxes, dataInputsBoxes);
-    return signedTx.to_json();
+    const res = signedTx.to_json();
+    unsignedTransaction.free();
+    inputBoxes.free();
+    dataInputsBoxes.free();
+
+    return res;
 }
 
 export async function signTransactionMultiContext(unsignedTx, inputs, dataInputs, wallet) {
@@ -39,12 +42,18 @@ export async function signTransactionMultiContext(unsignedTx, inputs, dataInputs
         try {
             const ctx = await getErgoStateContext2(i);
             const signedTx = wallet.sign_transaction(ctx, unsignedTransaction, inputBoxes, dataInputsBoxes);
+            const txJSON = signedTx.to_json();
+            unsignedTransaction.free();
+            inputBoxes.free();
+            dataInputsBoxes.free();
+            signedTx.free();
             console.log("try " + i.toString())
-            return signedTx.to_json();
+            return txJSON;
         } catch (e) {
             null;
         }
     }
+
 }
 
 export async function setBoxRegisterByteArray(box, register, str_value) {
@@ -83,17 +92,20 @@ export async function createTransaction(boxSelection, outputCandidates, dataInpu
     var outputJs = await boxCandidatesToJsonMin(outputCandidates);
     const missingErgs = getMissingErg(utxos, outputJs) - BigInt(TX_FEE);
     const tokens = getMissingTokens(utxos, outputJs);
+    var changeBoxValue = undefined;
+    var changeBoxBuilder = undefined;
 
     if (missingErgs > 0 || Object.keys(tokens) > 0) {
-        const changeBoxValue = (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str(missingErgs.toString()));
-        const changeBoxBuilder = new (await ergolib).ErgoBoxCandidateBuilder(
+        changeBoxValue = (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str(missingErgs.toString()));
+        changeBoxBuilder = new (await ergolib).ErgoBoxCandidateBuilder(
             changeBoxValue,
             (await ergolib).Contract.pay_to_address((await ergolib).Address.from_base58(changeAddress)),
             creationHeight);
         for (const tokId of Object.keys(tokens)) {
-            const tokenId = (await ergolib).TokenId.from_str(tokId);
-            const tokenAmount = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str(tokens[tokId].toString()));
-            changeBoxBuilder.add_token(tokenId, tokenAmount);
+            changeBoxBuilder.add_token(
+                (await ergolib).TokenId.from_str(tokId),
+                (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str(tokens[tokId].toString()))
+            );
         }
         try {
             outputCandidates.add(changeBoxBuilder.build());
@@ -109,11 +121,9 @@ export async function createTransaction(boxSelection, outputCandidates, dataInpu
         creationHeight,
         (await ergolib).BoxValue.from_i64((await ergolib).I64.from_str(TX_FEE.toString())),
         (await ergolib).Address.from_base58(changeAddress));
-    var dataInputsWASM = new (await ergolib).DataInputs();
+    const dataInputsWASM = new (await ergolib).DataInputs();
     for (const box of dataInputs) {
-        const boxIdWASM = (await ergolib).BoxId.from_str(box.boxId);
-        const dataInputWASM = new (await ergolib).DataInput(boxIdWASM);
-        dataInputsWASM.add(dataInputWASM);
+        dataInputsWASM.add(new (await ergolib).DataInput((await ergolib).BoxId.from_str(box.boxId)));
     }
     txBuilder.set_data_inputs(dataInputsWASM);
     const tx = parseUnsignedTx(txBuilder.build().to_json());
@@ -138,6 +148,18 @@ export async function createTransaction(boxSelection, outputCandidates, dataInpu
         };
     });
 
+    try {
+        unsignedTx.free();
+        txBuilder.free();
+        dataInputsWASM.free();
+        if (changeBoxBuilder) {
+            changeBoxBuilder.free();
+            changeBoxValue.free();
+        }
+    } catch (e) {
+        console.log("createTransaction free error ", e )
+    }
+    
     return correctTx;
 }
 
@@ -250,6 +272,7 @@ async function getDerivationPathForAddress(rootSecret, address) {
                     found = true;
                     return (await ergolib).DerivationPath.new(i, new Uint32Array([j]));
                 }
+                freeList([changeAddress, changePubKey, changeSecretKey, path])
                 j++;
             }
             i++;
@@ -273,13 +296,15 @@ export async function ergoTreeToAddress(ergoTree) {
     //console.log("ergoTreeToAddress",ergoTree);
     const ergoT = (await ergolib).ErgoTree.from_base16_bytes(ergoTree);
     const address = (await ergolib).Address.recreate_from_ergo_tree(ergoT);
-    return address.to_base58();
+    const addrStr = address.to_base58();
+    freeList([ergoT, address])
+    return addrStr;
 }
 
 export async function addressToErgotree(address) {
     const addressWASM = (await ergolib).Address.from_base58(address);
     const ergoTree = addressWASM.to_ergo_tree().to_base16_bytes();
-    addressWASM.free();
+    freeList([addressWASM])
     return ergoTree;
 }
 
@@ -293,7 +318,9 @@ export async function decodeIntArray(encodedArray) {
 
 export async function ergoTreeToTemplate(ergoTree) {
     const ergoTreeWASM = (await ergolib).ErgoTree.from_base16_bytes(ergoTree);
-    return toHexString(ergoTreeWASM.template_bytes());
+    const ergoTreeStr = toHexString(ergoTreeWASM.template_bytes())
+    freeList([ergoTreeWASM])
+    return ergoTreeStr;
 }
 
 export async function ergoTreeToTemplateHash(ergoTree) {
@@ -323,7 +350,7 @@ export function getTokenListFromUtxos(utxos) {
     var tokenList = {};
     for (const i in utxos) {
         for (const j in utxos[i].assets) {
-            const tokenId = utxos[i].assets[j].tokenId.toString() ;
+            const tokenId = utxos[i].assets[j].tokenId.toString();
             if (utxos[i].assets[j].tokenId in tokenList) {
                 tokenList[tokenId] = BigInt(tokenList[tokenId]) + BigInt(utxos[i].assets[j].amount);
             } else {
@@ -388,4 +415,16 @@ export function buildTokenList(tokens) {
         }
     };
     return res;
+}
+
+export function freeList(WASMObjectList) {
+    var i = 0;
+    for (const o of WASMObjectList) {
+        try {
+            o.free();
+        } catch (e) {
+            console.log("freelist", i, e.toString())
+        }
+        i = i + 1;
+    }
 }

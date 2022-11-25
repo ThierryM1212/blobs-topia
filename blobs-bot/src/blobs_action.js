@@ -2,8 +2,7 @@ import JSONBigInt from 'json-bigint';
 import { BLOBINATOR_DEFI_TOK_NUM, BLOBINATOR_TOKEN_ID, BLOB_ERG_MIN_VALUE, CONFIG_TOKEN_ID, GAME_TOKEN_ID, MIN_NANOERG_BOX_VALUE, NANOERG_TO_ERG, SPICY_OATMEAL_TOKEN_ID, TX_FEE } from "./constants.js";
 import { BLOB_SCRIPT_ADDRESS, CONFIG_SCRIPT_ADDRESS } from './script_constants.js';
 import { boxByTokenId, currentHeight, getSpentAndUnspentBoxesFromMempool, getUnspentBoxesForAddressUpdated, sendTx } from "./explorer.js";
-import { createTransaction, encodeLong, getTokenListFromUtxos, getUtxosListValue, getWalletForAddress, parseUtxo, signTransaction } from "./wasm.js";
-let ergolib = import('ergo-lib-wasm-nodejs');
+import { createTransaction, encodeLong, freeList, getTokenListFromUtxos, getUtxosListValue, getWalletForAddress, parseUtxo, signTransaction } from "./wasm.js";
 
 
 export async function getCurrentConfigBox(mempoolBoxes) {
@@ -29,9 +28,9 @@ export async function getCurrentConfigBox2() {
 }
 
 export async function setBlobStatus(mode, blobBoxJSON, amountNano, mnemonic, address) {
+    let ergolib = import('ergo-lib-wasm-nodejs');
     console.log("setBlobStatus mode", mode);
     const creationHeight = await currentHeight();
-    const wallet = await getWalletForAddress(mnemonic, address);
 
     const blobIniValueNano = blobBoxJSON.value;
     //console.log("blobIniValueNano",blobBoxJSON)
@@ -62,12 +61,10 @@ export async function setBlobStatus(mode, blobBoxJSON, amountNano, mnemonic, add
 
 
     utxos.unshift(blobBoxJSON);
+    
     const gameTokenId = (await ergolib).TokenId.from_str(GAME_TOKEN_ID);
     const blobTokenAmount = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str("2"));
     //console.log("utxos",utxos)
-    const inputsWASM = (await ergolib).ErgoBoxes.from_boxes_json(utxos);
-    const dataListWASM = new (await ergolib).ErgoBoxAssetsDataList();
-    const boxSelection = new (await ergolib).BoxSelection(inputsWASM, dataListWASM);
     const outputCandidates = (await ergolib).ErgoBoxCandidates.empty();
     const spicyOatmealTokenId = (await ergolib).TokenId.from_str(SPICY_OATMEAL_TOKEN_ID);
     const spicyOatmealTokenAmount = (await ergolib).TokenAmount.from_i64((await ergolib).I64.from_str(BLOBINATOR_DEFI_TOK_NUM.toString()));
@@ -117,20 +114,26 @@ export async function setBlobStatus(mode, blobBoxJSON, amountNano, mnemonic, add
     }
 
     const currentConfigBox = await boxByTokenId(CONFIG_TOKEN_ID);
+    const inputsWASM = (await ergolib).ErgoBoxes.from_boxes_json(utxos);
+    const dataListWASM = new (await ergolib).ErgoBoxAssetsDataList();
+    const boxSelection = new (await ergolib).BoxSelection(inputsWASM, dataListWASM);
     try {
         var correctTx = await createTransaction(boxSelection, outputCandidates, currentConfigBox, address, utxos);
     } catch (e) {
         console.error(e)
-        return;
     }
+    freeList([boxSelection, outputCandidates, blobBoxBuilder, spicyOatmealTokenId, spicyOatmealTokenAmount, blobTokenAmount,
+        blobBoxInWASM, gameTokenId, blobboxOutValue, ]);
+    
     //console.log("correctTx", correctTx)
+    var txId = undefined;
     if (correctTx) {
+        const wallet = await getWalletForAddress(mnemonic, address);
         const signedTx = JSONBigInt.parse(await signTransaction(correctTx, utxos, currentConfigBox, wallet));
+        freeList([wallet]);
         //console.log("signedTx", JSONBigInt.stringify(signedTx));
-
-        const txId = await sendTx(signedTx);
-        return txId;
-
+        txId = await sendTx(signedTx);
     }
-    return undefined;
+
+    return txId;
 }
