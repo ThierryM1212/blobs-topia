@@ -33,6 +33,7 @@ export default class Admin extends React.Component {
         this.form = React.createRef();
         this.formConf = React.createRef();
         this.handleChangeReserveTokenAmount = this.handleChangeReserveTokenAmount.bind(this);
+        this.handleChangeOatmealReserveTokenAmount = this.handleChangeOatmealReserveTokenAmount.bind(this);
         this.handleChangeReserveName = this.handleChangeReserveName.bind(this);
         this.handleChangeReserveList = this.handleChangeReserveList.bind(this);
         this.handleChangeIniIdentifier = this.handleChangeIniIdentifier.bind(this);
@@ -44,6 +45,10 @@ export default class Admin extends React.Component {
 
     handleChangeBlobinatorReserveTokenAmount(event) {
         this.setState({ blobinatorReserveTokenAmount: event.target.value });
+    }
+
+    handleChangeOatmealReserveTokenAmount (event) {
+        this.setState({ oatmealReserveTokenAmount: event.target.value });
     }
 
     handleChangeReserveTokenAmount(event) {
