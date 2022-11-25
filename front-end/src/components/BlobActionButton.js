@@ -41,8 +41,8 @@ export default class BlobActionButton extends React.Component {
                                 type="image"
                                 src={this.state.image}
                                 alt={this.state.label}
-                                width={24}
-                                height={24}
+                                width={30}
+                                height={30}
                                 className={this.state.isDisabled ? "btn blob-action-button disabled-image" : "btn blob-action-button transparent-image"}
                                 data-tip
                                 data-for={this.state.id}
