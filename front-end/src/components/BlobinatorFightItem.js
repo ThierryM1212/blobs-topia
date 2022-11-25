@@ -4,7 +4,7 @@ import { WinPercent } from './WinPercent';
 import { blobinatorFightResults } from '../ergo-related/bot_wasm';
 import { errorAlert, waitingAlert } from '../utils/Alerts';
 import { boxByTokenId } from '../ergo-related/explorer';
-import { BLOBINATOR_DEFI_MODULO_WIN, CONFIG_TOKEN_ID } from '../utils/constants';
+import { CONFIG_TOKEN_ID } from '../utils/constants';
 import { TransactionId } from './TransactionId';
 import GaugeChart from 'react-gauge-chart'
 import { BlobinatorItem } from './BlobinatorItem';

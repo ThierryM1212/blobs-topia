@@ -1,5 +1,5 @@
 import React, { Fragment } from 'react';
-import { BLOBINATOR_SCRIPT, BLOBINATOR_SCRIPT_ADDRESS, BLOB_SCRIPT_ADDRESS, GAME_SCRIPT_ADDRESS } from "../utils/script_constants";
+import { BLOBINATOR_SCRIPT_ADDRESS, BLOB_SCRIPT_ADDRESS, GAME_SCRIPT_ADDRESS } from "../utils/script_constants";
 import { getTransactionByID, getUnspentBoxesForAddressUpdated, searchBoxes, searchUnspentBoxesUpdated } from '../ergo-related/explorer';
 import FightItem from '../components/FightItem';
 import { waitingAlert } from '../utils/Alerts';
