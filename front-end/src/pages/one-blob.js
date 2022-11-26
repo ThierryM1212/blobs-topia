@@ -7,6 +7,9 @@ import BlobItem from '../components/BlobItem';
 import { toHexString } from '../ergo-related/serializer';
 import BlobinatorFightItem from '../components/BlobinatorFightItem';
 import FightItem from '../components/FightItem';
+import BlobWaitAnim from '../components/BlobWaitAnim';
+import MoreIcon from '../images/outline_more_vert_white_24dp.png';
+import BlobActionButton from '../components/BlobActionButton';
 let ergolib = import('ergo-lib-wasm-browser');
 
 
@@ -18,6 +21,8 @@ export default class OneBlobPage extends React.Component {
             currentBlobJSON: undefined,
             ownBlob: false,
             previousFights: [],
+            historyDepth: 5,
+            isLoading: true,
         };
         this.fetchBlob = this.fetchBlob.bind(this);
         this.fetchOldFights = this.fetchOldFights.bind(this);
@@ -46,24 +51,34 @@ export default class OneBlobPage extends React.Component {
                 ownBlob: ownBlob,
             })
         }
-        this.fetchOldFights();
+        this.fetchOldFights(this.state.historyDepth);
 
+        alert.close();
+    }
+
+    async loadMore() {
+        var alert = waitingAlert("Loading more fight history...");
+        const currentHistoryDepth = this.state.historyDepth;
+        this.setState({
+            historyDepth: currentHistoryDepth + 20,
+        });
+        await this.fetchOldFights(currentHistoryDepth + 20);
         alert.close();
     }
 
     async fetchBlob() {
         const blobs = (await searchUnspentBoxesUpdated(BLOB_SCRIPT_ADDRESS, [GAME_TOKEN_ID], { R9: this.state.blobId }))
-        .sort((a, b) => (a.creationHeight< b.creationHeight) ? 1 : -1)
+            .sort((a, b) => (a.creationHeight < b.creationHeight) ? 1 : -1)
         //console.log("Oneblob fetchBlob",blobs);
         if (blobs && blobs.length >= 1) {
             return blobs[0];
         }
     }
 
-    async fetchOldFights() {
-        const userFightList1 = await searchBoxes(GAME_SCRIPT_ADDRESS, [GAME_TOKEN_ID], { R5: this.state.blobId });
-        const userFightList2 = await searchBoxes(GAME_SCRIPT_ADDRESS, [GAME_TOKEN_ID], { R8: this.state.blobId });
-        const userBlobinatorFightList = await searchBoxes(BLOB_SCRIPT_ADDRESS, [GAME_TOKEN_ID], { R9: this.state.blobId, R7: "5" });
+    async fetchOldFights(historyDepth) {
+        const userFightList1 = await searchBoxes(GAME_SCRIPT_ADDRESS, [GAME_TOKEN_ID], { R5: this.state.blobId }, historyDepth);
+        const userFightList2 = await searchBoxes(GAME_SCRIPT_ADDRESS, [GAME_TOKEN_ID], { R8: this.state.blobId }, historyDepth);
+        const userBlobinatorFightList = await searchBoxes(BLOB_SCRIPT_ADDRESS, [GAME_TOKEN_ID], { R9: this.state.blobId, R7: "5" }, historyDepth);
         //console.log("userBlobinatorFightList", userBlobinatorFightList);
         var userFightList = userFightList1.concat(userFightList2).concat(userBlobinatorFightList);
         //console.log("userFightList", userFightList);
@@ -71,7 +86,7 @@ export default class OneBlobPage extends React.Component {
             .sort((a, b) => (a.settlementHeight < b.settlementHeight) ? 1 : -1);
         //console.log("userFightList2", userFightList);
 
-        const userTransactionIDList = userFightList.map(box => box.spentTransactionId).slice(0, 30);
+        const userTransactionIDList = userFightList.map(box => box.spentTransactionId).slice(0, 2 * historyDepth);
         //console.log("userTransactionIDList", userTransactionIDList);
         var fightTransactions = await Promise.all(userTransactionIDList.map(async (txId) => {
             const tx = await getTransactionByID(txId);
@@ -122,8 +137,8 @@ export default class OneBlobPage extends React.Component {
         //console.log("blobFights ", blobFights)
         this.setState({
             previousFights: blobFights,
+            isLoading: false,
         })
-
     }
 
     render() {
@@ -139,11 +154,20 @@ export default class OneBlobPage extends React.Component {
                                     <BlobItem blobBoxJSON={this.state.currentBlobJSON} disableActions={true} />
                             }
                             <div className="w-100 d-flex flex-column m-2 p-2 align-items-center" >
-                                <h4>Blob fights history</h4>
+
+                                <div className="d-flex flex-row m-2 p-2 justify-content-center" >
+                                    <h4>Blob fights history</h4>
+                                    &nbsp;
+                                    <BlobActionButton
+                                        image={MoreIcon}
+                                        action={() => this.loadMore()}
+                                        isDisabled={false}
+                                        label="Load more fights"
+                                        tips={"Load more fights"} />
+                                </div>
                                 {
                                     this.state.previousFights.length > 0 ?
                                         <div className="w-75 d-flex flex-wrap">
-
                                             {
                                                 this.state.previousFights.map(fight =>
                                                     fight.blob2 ?
@@ -151,21 +175,31 @@ export default class OneBlobPage extends React.Component {
                                                             blob1={fight.blob1}
                                                             blob2={fight.blob2}
                                                             gameBox={fight.gameBox}
-                                                            updateList={this.fetchCurrentFights}
+                                                            updateList={() => this.fetchOldFights(this.state.historyDepth)}
                                                             key={fight.gameBoxId}
                                                             winningTx={fight.winningTx}
                                                         />
                                                         : <BlobinatorFightItem
                                                             blob1={fight.blob1}
                                                             blobinator={fight.blobinator}
-                                                            updateList={this.fetchCurrentFights}
+                                                            updateList={() => this.fetchOldFights(this.state.historyDepth)}
                                                             key={fight.gameBoxId}
                                                             winningTx={fight.winningTx}
                                                         />
                                                 )
                                             }
                                         </div>
-                                        : <div>No fight found</div>
+                                        :
+                                        <div className="w-75 d-flex flex-column">
+                                            {
+                                                this.state.isLoading ?
+                                                    <Fragment>
+                                                        <div>Loading the fight history...</div>
+                                                        <BlobWaitAnim />
+                                                    </Fragment>
+                                                    : <div>No fight found</div>
+                                            }
+                                        </div>
                                 }
                             </div>
 

@@ -6,6 +6,9 @@ import { waitingAlert } from '../utils/Alerts';
 import { GAME_TOKEN_ID } from '../utils/constants';
 import { toHexString } from '../ergo-related/serializer';
 import BlobinatorFightItem from '../components/BlobinatorFightItem';
+import BlobWaitAnim from '../components/BlobWaitAnim';
+import MoreIcon from '../images/outline_more_vert_white_24dp.png';
+import BlobActionButton from '../components/BlobActionButton';
 let ergolib = import('ergo-lib-wasm-browser');
 
 
@@ -16,16 +19,29 @@ export default class FightsPage extends React.Component {
             currentFights: [],
             previousFights: [],
             gameBoxId: '',
+            historyDepth: 5,
+            isLoading: true,
         };
         this.fetchCurrentFights = this.fetchCurrentFights.bind(this);
         this.fetchOldFights = this.fetchOldFights.bind(this);
+        this.loadMore = this.loadMore.bind(this);
     }
 
     async componentDidMount() {
         var alert = waitingAlert("Loading the current fights...");
         await this.fetchCurrentFights();
         alert.close();
-        this.fetchOldFights();
+        this.fetchOldFights(this.state.historyDepth);
+    }
+
+    async loadMore() {
+        var alert = waitingAlert("Loading more fight history...");
+        const currentHistoryDepth = this.state.historyDepth;
+        this.setState({
+            historyDepth: currentHistoryDepth + 20,
+        });
+        await this.fetchOldFights(currentHistoryDepth + 20);
+        alert.close();
     }
 
     async fetchCurrentFights() {
@@ -87,19 +103,19 @@ export default class FightsPage extends React.Component {
         }
         //console.log("blobFights ", blobFights)
         this.setState({
-            currentFights: blobFights.filter((box, index) => blobFights.findIndex(obj => obj.boxId === box.boxId) === index),
+            currentFights: blobFights.filter((box, index) => blobFights.findIndex(obj => obj.boxId === box.boxId) === index)
         })
     }
 
-    async fetchOldFights() {
+    async fetchOldFights(historyDepth) {
         const address = localStorage.getItem('address') ?? "";
         if (address !== "") {
             const addressSigmaPropHex = toHexString((await ergolib).Constant.from_ecpoint_bytes(
                 (await ergolib).Address.from_base58(localStorage.getItem('address')).to_bytes(0x00).subarray(1, 34)
             ).sigma_serialize_bytes()).slice(4);
-            const userFightList1 = await searchBoxes(GAME_SCRIPT_ADDRESS, [GAME_TOKEN_ID], { R4: addressSigmaPropHex });
-            const userFightList2 = await searchBoxes(GAME_SCRIPT_ADDRESS, [GAME_TOKEN_ID], { R7: addressSigmaPropHex });
-            const userBlobinatorFightList = await searchBoxes(BLOB_SCRIPT_ADDRESS, [GAME_TOKEN_ID], { R6: addressSigmaPropHex, R7: "5" });
+            const userFightList1 = await searchBoxes(GAME_SCRIPT_ADDRESS, [GAME_TOKEN_ID], { R4: addressSigmaPropHex }, historyDepth);
+            const userFightList2 = await searchBoxes(GAME_SCRIPT_ADDRESS, [GAME_TOKEN_ID], { R7: addressSigmaPropHex }, historyDepth);
+            const userBlobinatorFightList = await searchBoxes(BLOB_SCRIPT_ADDRESS, [GAME_TOKEN_ID], { R6: addressSigmaPropHex, R7: "5" }, historyDepth);
             //const userFightList1 = [];
             //const userFightList2 = [];
             //const userBlobinatorFightList = await searchBoxes(BLOB_SCRIPT_ADDRESS, [GAME_TOKEN_ID], { R7: "5" }, 500);
@@ -112,7 +128,7 @@ export default class FightsPage extends React.Component {
 
             const userTransactionIDList = userFightList.map(box => box.spentTransactionId)
                 .filter((v, i, a) => a.indexOf(v) === i)
-                .slice(0, 50);
+                .slice(0, historyDepth * 2);
             //console.log("userTransactionIDList", userTransactionIDList);
             var fightTransactions = await Promise.all(userTransactionIDList.map(async (txId) => {
                 const tx = await getTransactionByID(txId);
@@ -165,6 +181,7 @@ export default class FightsPage extends React.Component {
             //console.log("blobFights ", blobFights)
             this.setState({
                 previousFights: blobFights,
+                isLoading: false,
             })
         }
     }
@@ -199,7 +216,16 @@ export default class FightsPage extends React.Component {
                         : <div>No fight found</div>
                     }
                     <br />
-                    <h4>My fights history</h4>
+                    <div className="d-flex flex-row m-2 p-2 justify-content-center" >
+                        <h4>My fights history</h4>
+                        &nbsp;
+                        <BlobActionButton
+                            image={MoreIcon}
+                            action={() => this.loadMore()}
+                            isDisabled={false}
+                            label="Load more fights"
+                            tips={"Load more fights"} />
+                    </div>
                     {
                         this.state.previousFights.length > 0 ?
                             <div className="w-75 d-flex flex-wrap m-2">
@@ -224,7 +250,17 @@ export default class FightsPage extends React.Component {
                                     )
                                 }
                             </div>
-                            : <div>No fight found</div>
+                            :
+                            <Fragment>
+                                {
+                                    this.state.isLoading ?
+                                        <Fragment>
+                                            <div>Loading fight history...</div>
+                                            <BlobWaitAnim />
+                                        </Fragment>
+                                        : <div>No fight found</div>
+                                }
+                            </Fragment>
                     }
                 </div>
             </Fragment>

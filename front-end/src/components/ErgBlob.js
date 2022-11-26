@@ -15,6 +15,7 @@ export class ErgBlob extends React.Component {
             mouth_type: this.props.mouth_type,
             name: this.props.name,
             rotate: this.props.rotate,
+            size: this.props.size ?? 200,
         };
     }
 
@@ -47,7 +48,8 @@ export class ErgBlob extends React.Component {
                 </strong>
                 <div className="card p-1 ergblob">
                     <div className={`shape ${this.props.rotate ? "rotate" : ""}`} >
-                        <svg viewBox="0 0 250 250" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink">
+                        <svg viewBox="0 0 250 250" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink"
+                            width={this.state.size} height={this.state.size}>
                             <defs>
                                 <linearGradient id={`gradient_${this.props.color1 + this.props.color2}`} x1="0%" y1="0%" x2="0%" y2="100%">
                                     <stop offset="0%" style={{ "stopColor": this.state.color1 }} />

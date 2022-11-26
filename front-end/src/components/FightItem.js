@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import { computeP1WinningChance, formatERGAmount } from '../utils/utils';
 import BlobItem from './BlobItem';
 import { WinPercent } from './WinPercent';
@@ -8,6 +8,7 @@ import { boxByTokenId } from '../ergo-related/explorer';
 import { CONFIG_TOKEN_ID } from '../utils/constants';
 import { TransactionId } from './TransactionId';
 import GaugeChart from 'react-gauge-chart'
+import BlobItemLight from './BlobItemLight';
 
 
 export default class FightItem extends React.Component {
@@ -23,7 +24,6 @@ export default class FightItem extends React.Component {
             p1Winindex: -1,
             p2Winindex: -1,
             winningTx: props.winningTx ?? undefined,
-
         };
     }
 
@@ -65,74 +65,75 @@ export default class FightItem extends React.Component {
         const p2WinChance = 1 - p1WinChance;
         //console.log("render FightItem", this.state)
         return (
-            <div className="w-100 zonefight d-flex flex-row justify-content-between m-2 p-2 align-items-center">
-                <BlobItem
-                    blobBoxJSON={this.state.blob1}
-                    disableActions={true}
-                    showStatus={false}
-                    showOwner={true}
-                />
-                <div>
-                    <WinPercent win_rate={p1WinChance} />
-                    {
-                        this.state.winningTx ? null :
-                            <TransactionId txId={this.state.p1WinTxId} />
-                    }
-                </div>
-                <div className='h-100 d-flex flex-column justify-content-between'>
-                    <div className='fightPrize m-2 p-2'>
-                        <div>Prize</div>
-                        <div>{formatERGAmount(this.state.gameBox.value)} ERG</div>
+            <Fragment>
+                {
+                    this.state.winningTx ?
+                        <div>{(new Date(this.state.winningTx.timestamp)).toLocaleString() + ":"}</div>
+                        : null
+                }
+                <div className="w-100 zonefight d-flex flex-row justify-content-between m-2 p-2 align-items-center">
+                    <BlobItemLight
+                        blobBoxJSON={this.state.blob1}
+                    />
+                    <div>
+                        <WinPercent win_rate={p1WinChance} />
+                        {
+                            this.state.winningTx ? null :
+                                <TransactionId txId={this.state.p1WinTxId} />
+                        }
                     </div>
-                    {
-                        this.state.winningTx ?
-                            this.state.p1WinTxId !== '' ?
-                                <div><h3>P1 Won !</h3><TransactionId txId={this.state.p1WinTxId} /></div>
+                    <div className='h-100 d-flex flex-column justify-content-between'>
+                        <div className='fightPrize m-2 p-2'>
+                            <div>Prize</div>
+                            <div>{formatERGAmount(this.state.gameBox.value)} ERG</div>
+                        </div>
+                        {
+                            this.state.winningTx ?
+                                this.state.p1WinTxId !== '' ?
+                                    <div className='zoneupgrade m-1 p-1'><h3>P1 Won !</h3><TransactionId txId={this.state.p1WinTxId} /></div>
+                                    :
+                                    <div className='zoneupgrade m-1 p-1'><h3>P2 Won !</h3><TransactionId txId={this.state.p2WinTxId} /></div>
                                 :
-                                <div><h3>P2 Won !</h3><TransactionId txId={this.state.p2WinTxId} /></div>
-                            :
-                            <div >
+                                <div >
 
-                                {
-                                    this.state.p1Winindex !== -1 || this.state.p2Winindex !== -1 ?
-                                        this.state.p1Winindex < this.state.p2Winindex ?
-                                            <div className='w-75 transparent-image' >
-                                                <GaugeChart id="gauge-chart1"
-                                                    nrOfLevels={2}
-                                                    percent={0.25}
-                                                    colors={["#339CFF", "#FF3F33"]}
-                                                    hideText={true}
-                                                />
-                                            </div>
-                                            :
-                                            <div className='w-75 transparent-image'>
-                                                <GaugeChart id="gauge-chart1"
-                                                    nrOfLevels={2}
-                                                    percent={0.75}
-                                                    colors={["#339CFF", "#FF3F33"]}
-                                                    hideText={true} />
-                                            </div>
-                                        : null
-                                }
-                                <button className="btn btn-ultra-yellow"
-                                    onClick={() => this.processFight()}>Process fight</button>
-                            </div>
-                    }
+                                    {
+                                        this.state.p1Winindex !== -1 || this.state.p2Winindex !== -1 ?
+                                            this.state.p1Winindex < this.state.p2Winindex ?
+                                                <div className='w-75 transparent-image' >
+                                                    <GaugeChart id="gauge-chart1"
+                                                        nrOfLevels={2}
+                                                        percent={0.25}
+                                                        colors={["#339CFF", "#FF3F33"]}
+                                                        hideText={true}
+                                                    />
+                                                </div>
+                                                :
+                                                <div className='w-75 transparent-image'>
+                                                    <GaugeChart id="gauge-chart1"
+                                                        nrOfLevels={2}
+                                                        percent={0.75}
+                                                        colors={["#339CFF", "#FF3F33"]}
+                                                        hideText={true} />
+                                                </div>
+                                            : null
+                                    }
+                                    <button className="btn btn-ultra-yellow"
+                                        onClick={() => this.processFight()}>Process fight</button>
+                                </div>
+                        }
+                    </div>
+                    <div>
+                        <WinPercent win_rate={p2WinChance} />
+                        {
+                            this.state.winningTx ? null :
+                                <TransactionId txId={this.state.p2WinTxId} />
+                        }
+                    </div>
+                    <BlobItemLight
+                        blobBoxJSON={this.state.blob2}
+                    />
                 </div>
-                <div>
-                    <WinPercent win_rate={p2WinChance} />
-                    {
-                        this.state.winningTx ? null :
-                            <TransactionId txId={this.state.p2WinTxId} />
-                    }
-                </div>
-                <BlobItem
-                    blobBoxJSON={this.state.blob2}
-                    disableActions={true}
-                    showStatus={false}
-                    showOwner={true}
-                />
-            </div>
+            </Fragment>
         )
     }
 }

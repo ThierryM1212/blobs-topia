@@ -54,6 +54,7 @@ export default class BlobItem extends React.Component {
             upgradeable: props.upgradeable ?? false,
         };
         this.toggleActions = this.toggleActions.bind(this);
+        this.updateBlob = this.updateBlob.bind(this);
         this.blobRef = React.createRef();
     }
 
@@ -84,7 +85,6 @@ export default class BlobItem extends React.Component {
             blobId: box.additionalRegisters.R9.renderedValue,
             state: [box.additionalRegisters.R7.renderedValue, box.additionalRegisters.R8.renderedValue],
             ownerAddress: ownerAddress,
-            showActions: this.state.showActions,
         })
     }
 
@@ -188,7 +188,7 @@ export default class BlobItem extends React.Component {
                     <div className="d-flex flex-row justify-content-between w-100">
                         <BlobRating averagePower={(this.state.power + this.state.defense) / 2} />
                         <div className="d-flex flex-row align-items-end">
-                            <ImageButton action={() => {window.open("/blob/"+this.state.blobBoxJSON.additionalRegisters.R9.renderedValue, '_self').focus()}}
+                            <ImageButton action={() => {window.open("/blob/"+this.state.blobBoxJSON.additionalRegisters.R9.renderedValue, '_blank').focus()}}
                                 alt="photo"
                                 tips={"View the blob"}
                                 image={OpenNew} />

@@ -4,7 +4,7 @@ import OneBlobPage from '../pages/one-blob';
 
 const OneBlobWrapper = () => {
     const { id } = useParams();
-    return <div>
+    return <div className='w-100'>
         {id ? <OneBlobPage blobId={id} /> : null}
     </div>
 }
