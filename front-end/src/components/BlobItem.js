@@ -188,7 +188,7 @@ export default class BlobItem extends React.Component {
                     <div className="d-flex flex-row justify-content-between w-100">
                         <BlobRating averagePower={(this.state.power + this.state.defense) / 2} />
                         <div className="d-flex flex-row align-items-end">
-                            <ImageButton action={() => {window.open("/blob/"+this.state.blobBoxJSON.additionalRegisters.R9.renderedValue, '_blank').focus()}}
+                            <ImageButton action={() => { window.open("/blob/" + this.state.blobBoxJSON.additionalRegisters.R9.renderedValue, '_blank').focus() }}
                                 alt="photo"
                                 tips={"View the blob"}
                                 image={OpenNew} />
@@ -225,7 +225,6 @@ export default class BlobItem extends React.Component {
                                 {
                                     ownBlob ?
                                         <Fragment>
-
                                             <BlobActionButton
                                                 image={SwordsIcon}
                                                 action={() => this.setStatus('fight', this.state.blobBoxJSON)}
@@ -380,7 +379,9 @@ export default class BlobItem extends React.Component {
                             <div>{this.state.blobId}</div>
                         </div>
                         {this.state.showStatus ?
-                            <BlobState state={this.state.state[0]} stateValue={this.state.state[1]} />
+                            <div onClick={this.toggleActions}>
+                                <BlobState state={this.state.state[0]} stateValue={this.state.state[1]} />
+                            </div>
                             : null
                         }
                         {
