@@ -65,17 +65,17 @@ export default class FightItem extends React.Component {
         const p2WinChance = 1 - p1WinChance;
         //console.log("render FightItem", this.state)
         return (
-            <Fragment>
+            <span className="h-100 d-flex flex-column align-items-start">
                 {
                     this.state.winningTx ?
                         <div>{(new Date(this.state.winningTx.timestamp)).toLocaleString() + ":"}</div>
                         : null
                 }
-                <div className="w-100 zonefight d-flex flex-row justify-content-between m-2 p-2 align-items-center">
+                <div className="h-100 zonefight d-flex flex-row justify-content-between m-2 p-2 align-items-center">
                     <BlobItemLight
                         blobBoxJSON={this.state.blob1}
                     />
-                    <div>
+                    <div className='h-100'>
                         <WinPercent win_rate={p1WinChance} />
                         {
                             this.state.winningTx ? null :
@@ -87,12 +87,19 @@ export default class FightItem extends React.Component {
                             <div>Prize</div>
                             <div>{formatERGAmount(this.state.gameBox.value)} ERG</div>
                         </div>
+                        <div><br/><br/><br/><br/> </div>
                         {
                             this.state.winningTx ?
                                 this.state.p1WinTxId !== '' ?
-                                    <div className='zoneupgrade m-1 p-1'><h3>P1 Won !</h3><TransactionId txId={this.state.p1WinTxId} /></div>
+                                    <div className='zoneupgrade m-1 p-1 d-flex flex-column align-items-center'>
+                                        <h5>P1 Won !</h5>
+                                        <TransactionId txId={this.state.p1WinTxId} />
+                                    </div>
                                     :
-                                    <div className='zoneupgrade m-1 p-1'><h3>P2 Won !</h3><TransactionId txId={this.state.p2WinTxId} /></div>
+                                    <div className='zoneupgrade m-1 p-1 d-flex flex-column align-items-center'>
+                                        <h5>P2 Won !</h5>
+                                        <TransactionId txId={this.state.p2WinTxId} />
+                                    </div>
                                 :
                                 <div >
 
@@ -133,7 +140,7 @@ export default class FightItem extends React.Component {
                         blobBoxJSON={this.state.blob2}
                     />
                 </div>
-            </Fragment>
+            </span>
         )
     }
 }

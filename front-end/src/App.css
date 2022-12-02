@@ -15,6 +15,10 @@
   min-height: 100vh;
 }
 
+body, html {
+  min-height: 100vh;
+}
+
 @import '@sweetalert2/theme-dark/dark.css';
 
 @media (max-width: 600px) {
@@ -175,6 +179,7 @@ textarea {
   border: 3px solid yellow;
   border-radius: 5px;
   color: yellow;
+  font-size: smaller;
 }
 
 .zoneprice {
@@ -206,6 +211,7 @@ textarea {
   position: relative;
   text-align: center;
   color: yellow;
+  font-size: smaller;
 }
 
 .centered {

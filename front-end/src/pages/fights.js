@@ -194,7 +194,7 @@ export default class FightsPage extends React.Component {
                     <h4>Current Fights</h4>
 
                     {this.state.currentFights.length > 0 ?
-                        <div className="w-75 d-flex flex-wrap m-2">
+                        <div className="w-75 d-flex flex-column m-2 align-items-center">
                             {
                                 this.state.currentFights.map(fight =>
                                     fight.blob2 ?
@@ -228,7 +228,7 @@ export default class FightsPage extends React.Component {
                     </div>
                     {
                         this.state.previousFights.length > 0 ?
-                            <div className="w-75 d-flex flex-wrap m-2">
+                            <div className="w-75 h-100 d-flex flex-column m-2 align-items-center">
                                 {
                                     this.state.previousFights.map(fight =>
                                         fight.blob2 ?

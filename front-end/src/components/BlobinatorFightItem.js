@@ -68,13 +68,13 @@ export default class BlobinatorFightItem extends React.Component {
         const p2WinChance = 1 - p1WinChance;
         //console.log("render FightItem", this.state)
         return (
-            <Fragment>
+            <span className="h-100 d-flex flex-column align-items-start">
                 {
                     this.state.winningTx ?
                         <div>{(new Date(this.state.winningTx.timestamp)).toLocaleString() + ":"}</div>
                         : null
                 }
-                <div className="w-100 zonefight d-flex flex-row justify-content-between m-2 p-2 align-items-center">
+                <div className="h-100 zonefight d-flex flex-row justify-content-between m-2 p-2 align-items-center">
                     <BlobItemLight
                         blobBoxJSON={this.state.blob1}
                     />
@@ -86,12 +86,19 @@ export default class BlobinatorFightItem extends React.Component {
                         }
                     </div>
                     <div className='h-100 d-flex align-items-end'>
+                        <div><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /> </div>
                         {
                             this.state.winningTx ?
                                 this.state.p1WinTxId !== '' ?
-                                    <div className='zoneupgrade m-1 p-1'><h3>P1 Won !</h3><TransactionId txId={this.state.p1WinTxId} /></div>
+                                    <div className='zoneupgrade m-1 p-1 d-flex flex-column align-items-center'>
+                                        <h6>P1 Won !</h6>
+                                        <TransactionId txId={this.state.p1WinTxId} />
+                                    </div>
                                     :
-                                    <div className='zoneupgrade m-1 p-1'><h3>P2 Won !</h3><TransactionId txId={this.state.p2WinTxId} /></div>
+                                    <div className='zoneupgrade m-1 p-1 d-flex flex-column align-items-center'>
+                                        <h6>P2 Won !</h6>
+                                        <TransactionId txId={this.state.p2WinTxId} />
+                                    </div>
                                 :
                                 <div>
                                     {
@@ -130,7 +137,7 @@ export default class BlobinatorFightItem extends React.Component {
 
                     <BlobinatorItem blobinatorBox={this.state.blobinator} size={120} />
                 </div>
-            </Fragment>
+            </span>
         )
     }
 }
