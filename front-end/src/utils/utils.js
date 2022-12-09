@@ -91,6 +91,9 @@ export function computeP1WinningChance(blob1, blob2) {
     const p1DefAdj = Math.min(p2Def + maxPowerDiff, p1Def);
     const p2DefAdj = Math.min(p1Def + maxPowerDiff, p2Def);
     var p1Win = 0;
+    var p2Win = 0;
+    var previousP1Win = false;
+    var previousP2Win = false;
 
     for (let i = 0; i < numberOfRound; i++) {
         const p1Rand = getRandomInt(32767);
@@ -98,10 +101,20 @@ export function computeP1WinningChance(blob1, blob2) {
         const p2Rand = getRandomInt(32767);
         const p2Score = Math.max(p2Rand, p2DefAdj) + p2PowerAdj;
         if (p1Score > p2Score) {
-            p1Win = p1Win + 1;
+            if (previousP1Win) {
+                p1Win = p1Win + 1;
+            } 
+            previousP1Win = true;
+            previousP2Win = false;
+        } else {
+            if (previousP2Win) {
+                p2Win = p2Win + 1;
+            } 
+            previousP2Win = true;
+            previousP1Win = false;
         }
     }
-    return p1Win / numberOfRound;
+    return p1Win / (p1Win + p2Win);
 }
 
 export function filterBlobList(blobList) {

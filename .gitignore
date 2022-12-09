@@ -1,3 +1,6 @@
 contracts/.$BlobsTopia.drawio.bkp
 *.xcf
 blobs-bot/.env
+blobs-bot/fight-bot.exe
+blobs-bot/package/*
+release/*

@@ -63,8 +63,8 @@ export default class BlobinatorFightItem extends React.Component {
     }
 
     render() {
-        // 17.84 average of [36, 66, 17, 17, 17, 37, 12, 5, 10, 1, 0, 14, 0]
-        var p1WinChance = 1 / (17.84);
+        // 20.96 average of [36, 66, 17, 17, 17, 37, 12, 5, 10, 1, 0, 14, 0, 45, 33, 30, 29, 17, 17, 12, 51, 8, 3, 1, 3, 58, 27]
+        var p1WinChance = 1 / (20.96);
         const p2WinChance = 1 - p1WinChance;
         //console.log("render FightItem", this.state)
         return (
