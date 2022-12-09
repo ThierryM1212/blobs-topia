@@ -37,7 +37,7 @@ export default class BlobActionButton extends React.Component {
                 {
                     this.state.image ?
                         <div className="zoneupgrade d-flex flex-column justify-content-center" >
-                            <input
+                            <img
                                 type="image"
                                 src={this.state.image}
                                 alt={this.state.label}

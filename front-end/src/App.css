@@ -274,10 +274,10 @@ input {
 .blob-action-button {
   transition: 0s !important;
 }
-.blob-action-button:hover:enabled {
+.blob-action-button.transparent-image:hover {
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8) !important;
 }
-.blob-action-button:active:enabled {
+.blob-action-button.transparent-image:active {
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8) !important;
 }
 
