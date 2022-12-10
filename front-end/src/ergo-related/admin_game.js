@@ -443,7 +443,7 @@ export async function adminInvokeBlobinator(amount) {
 export async function adminCollectBurnFee() {
     const alert = waitingAlert("Preparing the transaction...");
     if (await isValidWalletAddress(GAME_ADDRESS)) {
-        var utxos = await getUnspentBoxesForAddressUpdated(BURN_ALL_SCRIPT_ADDRESS, 500);
+        var utxos = await getUnspentBoxesForAddressUpdated(BURN_ALL_SCRIPT_ADDRESS, 100);
 
         const inputsWASM = (await ergolib).ErgoBoxes.from_boxes_json(utxos);
         const dataListWASM = new (await ergolib).ErgoBoxAssetsDataList();
