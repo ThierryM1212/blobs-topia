@@ -114,6 +114,11 @@ export async function getBoxesByAddress(address, limit = 500) {
     return res.data.items;
 }
 
+export async function getNumBoxesByAddress(address) {
+    const res = await getRequestV1(`/boxes/byAddress/${address}?limit=1`);
+    return res.data.total;
+}
+
 export async function boxById(id) {
     const res = await getRequest(`/transactions/boxes/${id}`);
     return res.data;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { getBoxesByAddress, getUnspentBoxesByAddress } from '../ergo-related/explorer';
+import { getBoxesByAddress, getNumBoxesByAddress, getUnspentBoxesByAddress } from '../ergo-related/explorer';
 import { getUtxosListValue } from '../ergo-related/wasm';
 import { BLOBINATOR_SCRIPT_ADDRESS, BLOB_SCRIPT_ADDRESS, GAME_SCRIPT_ADDRESS } from "../utils/script_constants";
 import { formatERGAmount } from '../utils/utils';
@@ -14,20 +14,18 @@ export default class AppStatistics extends React.Component {
             numberOfBlobinators: 0,
             blobinatorAmount: 0,
             numberofFights: 0,
-            fightAmount: 0,
         };
     }
 
 
     async componentDidMount() {
         const blobList = await getUnspentBoxesByAddress(BLOB_SCRIPT_ADDRESS);
-        const fightList = await getBoxesByAddress(GAME_SCRIPT_ADDRESS);
+        const numFights = await getNumBoxesByAddress(GAME_SCRIPT_ADDRESS);
         const blobinatorList = await getUnspentBoxesByAddress(BLOBINATOR_SCRIPT_ADDRESS);
         this.setState({
             ergAmount: getUtxosListValue(blobList),
             numberOfBlobs: blobList.length,
-            numberofFights: fightList.length,
-            fightAmount: getUtxosListValue(fightList),
+            numberofFights: numFights,
             numberOfBlobinators: blobinatorList.length,
             blobinatorAmount: getUtxosListValue(blobinatorList),
         });
@@ -45,9 +43,6 @@ export default class AppStatistics extends React.Component {
                 </div>
                 <div className="w-100 d-flex flex-row justify-content-between ">
                     <h6>Number of fights:&nbsp;</h6> <strong>{this.state.numberofFights}</strong>
-                </div>
-                <div className="w-100 d-flex flex-row justify-content-between ">
-                    <h6>Amount played:&nbsp;</h6> <strong>{formatERGAmount(this.state.fightAmount)} ERG</strong>
                 </div>
                 <div className="w-100 d-flex flex-row justify-content-between ">
                     <h6>Living Blobinators:&nbsp;</h6> <strong>{this.state.numberOfBlobinators}</strong>
