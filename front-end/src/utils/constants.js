@@ -26,7 +26,7 @@ export const INI_BLOB_WEAPON_TYPE = 0;
 export const INI_BLOB_WEAPON_LVL = 0;
 export const NUM_OATMEAL_TOKEN_LOSER = 1;
 export const NUM_OATMEAL_TOKEN_WINNER = 3;
-export const MAX_POWER_DIFF = 3300;
+export const MAX_POWER_DIFF = 1700;
 export const OATMEAL_PRICE = 100000000; 
 
 export const BLOBINATOR_FEE = 30; // per mille
